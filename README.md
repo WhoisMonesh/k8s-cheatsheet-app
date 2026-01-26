@@ -3,59 +3,104 @@
 ![Version](https://img.shields.io/github/v/release/WhoisMonesh/k8s-cheatsheet-app?style=flat-square)
 ![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey?style=flat-square)
+![Build Status](https://img.shields.io/github/actions/workflow/status/WhoisMonesh/k8s-cheatsheet-app/release.yml?style=flat-square)
 
 A powerful, offline-first desktop application designed to be the ultimate companion for Kubernetes administrators, developers, and CKA/CKAD exam aspirants. Built with **Electron**, **React**, and **TypeScript**.
 
 ---
 
-## 🚀 Features
+## 🚀 Key Features
 
-### 📚 Comprehensive Command Library
-*   **Searchable Database**: Instant access to thousands of `kubectl` commands.
-*   **Categorized Views**: Organized by Pods, Deployments, Networking, Security, RBAC, and more.
-*   **Ecosystem Integration**: Includes commands for **Helm**, **Kustomize**, **jq**, **yq**, and **openssl**.
+### 1. Comprehensive Command Library
+Search through thousands of curated commands. No internet needed.
+*   **Categories**:
+    *   **Core Workloads**: Pods, Deployments, ReplicaSets, StatefulSets, DaemonSets, Jobs, CronJobs.
+    *   **Networking**: Services, Ingress, NetworkPolicies, Endpoints.
+    *   **Configuration**: ConfigMaps, Secrets, ResourceQuotas, Limits.
+    *   **Storage**: PV, PVC, StorageClasses.
+    *   **Security**: RBAC, ServiceAccounts, Roles, ClusterRoles.
+    *   **Cluster Management**: Nodes, Namespaces, Events, API Resources.
+    *   **Advanced**: JSONPath, Custom Columns, Sorting, Filtering.
+*   **Ecosystem Integration**:
+    *   **Helm**: Chart management, releases, repositories.
+    *   **Kustomize**: Template building, overlays.
+    *   **Tools**: `jq` (JSON processor), `yq` (YAML processor), `openssl` (Certificates).
 
-### 🛠️ Interactive Tools
-*   **YAML Builder**: Generate production-ready YAML manifests for Pods, Deployments, Services, and more with a GUI form.
-*   **Command Builder**: Interactively toggle flags (e.g., `--dry-run`, `--namespace`) and see the command update in real-time.
-*   **Terminal Simulator**: A safe "Try It" environment to practice command syntax without needing a live cluster.
+### 2. Interactive Tools
+Tools designed to speed up your workflow and learning.
+*   **YAML Builder**:
+    *   GUI-based manifest generator.
+    *   Supports: Pods, Deployments, Services, ConfigMaps, Secrets, Ingress, PVCs, NetworkPolicies.
+    *   Features: Add ports, env vars, labels, annotations dynamically.
+*   **Command Builder**:
+    *   Construct complex `kubectl` commands visually.
+    *   Toggle common flags (`--dry-run=client`, `-o yaml`, `--all-namespaces`).
+*   **Terminal Simulator**:
+    *   A safe, sandboxed environment to type and "run" commands.
+    *   See expected outputs without needing a live cluster.
 
-### 🧠 Learning & Practice
-*   **Quiz Mode**: Test your knowledge with flashcards and multiple-choice questions (CKA/CKAD style).
-*   **Scenarios & Recipes**: Step-by-step guides for common tasks like "Debugging CrashLoopBackOff" or "Rolling Updates".
-*   **Exam Mode**: Timed practice sessions to simulate the certification exam environment.
+### 3. Learning & Certification Prep
+Perfect for CKA, CKAD, and CKS study.
+*   **Quiz Mode**:
+    *   Flashcards for quick recall.
+    *   Multiple-choice questions covering all domains.
+*   **Scenarios ("Recipes")**:
+    *   Step-by-step guides for real-world tasks.
+    *   Examples: "Fixing CrashLoopBackOff", "Rolling Updates", "Canary Deployments", "Backup & Restore".
+*   **Exam Mode**:
+    *   Timed sessions to simulate exam pressure.
+    *   Randomized question sets.
 
-### ⚡ Productivity
-*   **Offline First**: Works completely offline. No internet connection required.
-*   **Favorites**: Star frequently used commands and export/import them as JSON.
-*   **Quick Reference**: Handy cards for common aliases and shortcuts.
-*   **Cross-Platform**: Native apps for Windows, macOS, and Linux.
+### 4. Productivity Boosters
+*   **Smart Search**: Instantly find commands using keywords (e.g., "cpu usage", "force delete").
+*   **Favorites**: Star your most-used commands for one-click access.
+*   **Export/Import**: Backup your favorite commands to JSON.
+*   **Quick Reference**: Cheat sheet for aliases (`k`, `kgp`, `kgn`) and shortcuts.
 
 ---
 
-## 📥 Download
+## 📸 Application Structure
 
-Go to the [Releases Page](https://github.com/WhoisMonesh/k8s-cheatsheet-app/releases) to download the latest version for your operating system.
+The application is organized into the following intuitive sections:
 
-| OS | File Type |
-|----|-----------|
-| **Windows** | `.exe` (Installer) |
-| **macOS** | `.dmg` |
-| **Linux** | `.AppImage` |
+### **Sidebar Navigation**
+*   **Quick Ref**: Dashboard with stats and quick links.
+*   **Commands**: The main searchable database.
+*   **Favorites**: Your personal collection of saved commands.
+*   **YAML Builder**: The visual manifest generator.
+*   **Templates**: Ready-to-use YAML snippets.
+*   **Troubleshooting**: Diagnosis flowcharts and guides.
+*   **Best Practices**: Security and performance tips.
+*   **Scenarios**: Real-world operational recipes.
+*   **Quiz / Exam**: Testing and practice areas.
+*   **About**: App info and developer details.
 
 ---
 
-## 🏗️ Development
+## 📥 Download & Install
 
-To build the application locally, follow these steps:
+Go to the [**Releases Page**](https://github.com/WhoisMonesh/k8s-cheatsheet-app/releases) to download the latest version.
+
+| Platform | File | Instructions |
+|----------|------|--------------|
+| **Windows** | `K8s Cheatsheet Setup 1.0.1.exe` | Download and run the installer. |
+| **macOS** | `K8s Cheatsheet-1.0.1.dmg` | Open the DMG and drag to Applications. |
+| **Linux** | `K8s Cheatsheet-1.0.1.AppImage` | Make executable (`chmod +x`) and run. |
+
+---
+
+## 🏗️ Development Guide
+
+Want to contribute or build it yourself?
 
 ### Prerequisites
-*   Node.js (v18 or higher)
+*   Node.js (v18+)
 *   npm or yarn
+*   Git
 
-### Installation
+### Setup
 
-1.  **Clone the repository**
+1.  **Clone the repo**
     ```bash
     git clone https://github.com/WhoisMonesh/k8s-cheatsheet-app.git
     cd k8s-cheatsheet-app
@@ -66,32 +111,37 @@ To build the application locally, follow these steps:
     npm install
     ```
 
-3.  **Run in Development Mode**
+3.  **Start Development Server**
     ```bash
     npm run electron:dev
     ```
+    *This will launch the Vite dev server and the Electron window.*
 
-### Building for Production
+### Build
 
-To create the executable files for your current OS:
+To build the executable for your current OS:
 
 ```bash
-npm run electron:build
-```
+# Windows
+npm run electron:build -- --win
 
-The output files will be in the `dist_electron` directory.
+# macOS (Run on Mac)
+npm run electron:build -- --mac
+
+# Linux (Run on Linux)
+npm run electron:build -- --linux
+```
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1.  Fork the project
-2.  Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4.  Push to the branch (`git push origin feature/AmazingFeature`)
-5.  Open a Pull Request
+We love contributions!
+1.  **Fork** the repo.
+2.  **Create** a branch (`git checkout -b feature/new-command-category`).
+3.  **Commit** your changes (`git commit -m 'Add Istio commands'`).
+4.  **Push** to the branch (`git push origin feature/new-command-category`).
+5.  **Open** a Pull Request.
 
 ---
 
@@ -99,11 +149,11 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 **Monesh Ram**
 
-*   Github: [@WhoisMonesh](https://github.com/WhoisMonesh)
-*   Email: moneshram7@gmail.com
+*   **GitHub**: [@WhoisMonesh](https://github.com/WhoisMonesh)
+*   **Email**: moneshram7@gmail.com
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the **MIT License**.
