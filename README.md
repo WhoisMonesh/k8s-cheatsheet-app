@@ -84,9 +84,9 @@ https://github.com/WhoisMonesh/k8s-cheatsheet-app/releases
 
 | Platform | File | Direct Download |
 |----------|------|-----------------|
-| **Windows** | `K8s Cheatsheet Setup 1.0.0.exe` | [Download](https://github.com/WhoisMonesh/k8s-cheatsheet-app/releases/download/v1.0.0/K8s%20Cheatsheet%20Setup%201.0.0.exe) |
-| **macOS** | `K8s Cheatsheet-1.0.0.dmg` | [Download](https://github.com/WhoisMonesh/k8s-cheatsheet-app/releases/download/v1.0.0/K8s%20Cheatsheet-1.0.0.dmg) |
-| **Linux** | `K8s Cheatsheet-1.0.0.AppImage` | [Download](https://github.com/WhoisMonesh/k8s-cheatsheet-app/releases/download/v1.0.0/K8s%20Cheatsheet-1.0.0.AppImage) |
+| **Windows** | `K8s-Cheatsheet-Setup-1.0.0.exe` | [Download](https://github.com/WhoisMonesh/k8s-cheatsheet-app/releases/download/v1.0.0/K8s-Cheatsheet-Setup-1.0.0.exe) |
+| **macOS** | `K8s-Cheatsheet-1.0.0.dmg` | [Download](https://github.com/WhoisMonesh/k8s-cheatsheet-app/releases/download/v1.0.0/K8s-Cheatsheet-1.0.0.dmg) |
+| **Linux** | `K8s-Cheatsheet-1.0.0.AppImage` | [Download](https://github.com/WhoisMonesh/k8s-cheatsheet-app/releases/download/v1.0.0/K8s-Cheatsheet-1.0.0.AppImage) |
 
 ---
 
