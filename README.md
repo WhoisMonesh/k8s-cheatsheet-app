@@ -79,7 +79,8 @@ The application is organized into the following intuitive sections:
 
 ## 📥 Download & Install
 
-Go to the [**Releases Page**](https://github.com/WhoisMonesh/k8s-cheatsheet-app/releases) to download the latest version.
+Download the latest version from the Releases page:
+https://github.com/WhoisMonesh/k8s-cheatsheet-app/releases
 
 | Platform | File | Instructions |
 |----------|------|--------------|
