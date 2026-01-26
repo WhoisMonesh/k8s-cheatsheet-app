@@ -1,4 +1,4 @@
-import { Github, Linkedin, Twitter, ExternalLink, Code, Server, Cloud, Terminal, Heart, Coffee, Shield, Zap, Database, Globe } from 'lucide-react';
+import { Github, Linkedin, Code, Server, Cloud, Terminal, Heart, Coffee, Shield, Zap, Database, Globe } from 'lucide-react';
 
 export function About() {
   return (
