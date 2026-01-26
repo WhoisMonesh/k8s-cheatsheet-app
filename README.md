@@ -82,11 +82,11 @@ The application is organized into the following intuitive sections:
 Download the latest version from the Releases page:
 https://github.com/WhoisMonesh/k8s-cheatsheet-app/releases
 
-| Platform | File | Instructions |
-|----------|------|--------------|
-| **Windows** | `K8s Cheatsheet Setup 1.0.1.exe` | Download and run the installer. |
-| **macOS** | `K8s Cheatsheet-1.0.1.dmg` | Open the DMG and drag to Applications. |
-| **Linux** | `K8s Cheatsheet-1.0.1.AppImage` | Make executable (`chmod +x`) and run. |
+| Platform | File | Direct Download |
+|----------|------|-----------------|
+| **Windows** | `K8s Cheatsheet Setup 1.0.0.exe` | [Download](https://github.com/WhoisMonesh/k8s-cheatsheet-app/releases/download/v1.0.0/K8s%20Cheatsheet%20Setup%201.0.0.exe) |
+| **macOS** | `K8s Cheatsheet-1.0.0.dmg` | [Download](https://github.com/WhoisMonesh/k8s-cheatsheet-app/releases/download/v1.0.0/K8s%20Cheatsheet-1.0.0.dmg) |
+| **Linux** | `K8s Cheatsheet-1.0.0.AppImage` | [Download](https://github.com/WhoisMonesh/k8s-cheatsheet-app/releases/download/v1.0.0/K8s%20Cheatsheet-1.0.0.AppImage) |
 
 ---
 
