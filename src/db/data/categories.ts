@@ -1,0 +1,74 @@
+export const categoriesData = [
+  {
+    name: 'Cluster Management',
+    icon: 'Server',
+    description: 'Cluster information, contexts, and configuration',
+    order: 1,
+  },
+  {
+    name: 'Pods',
+    icon: 'Box',
+    description: 'Pod creation, management, and debugging',
+    order: 2,
+  },
+  {
+    name: 'Deployments',
+    icon: 'Layers',
+    description: 'Deployment management, scaling, and rollouts',
+    order: 3,
+  },
+  {
+    name: 'Services & Networking',
+    icon: 'Network',
+    description: 'Services, ingress, and network policies',
+    order: 4,
+  },
+  {
+    name: 'Configuration',
+    icon: 'Settings',
+    description: 'ConfigMaps, Secrets, and resource management',
+    order: 5,
+  },
+  {
+    name: 'Storage',
+    icon: 'Database',
+    description: 'Persistent volumes, claims, and storage classes',
+    order: 6,
+  },
+  {
+    name: 'Security & RBAC',
+    icon: 'Shield',
+    description: 'Role-based access control and security policies',
+    order: 7,
+  },
+  {
+    name: 'Observability',
+    icon: 'Activity',
+    description: 'Monitoring, logging, and debugging',
+    order: 8,
+  },
+  {
+    name: 'Advanced Workloads',
+    icon: 'Zap',
+    description: 'StatefulSets, DaemonSets, Jobs, and CronJobs',
+    order: 9,
+  },
+  {
+    name: 'Troubleshooting',
+    icon: 'AlertCircle',
+    description: 'Debugging and problem resolution',
+    order: 10,
+  },
+  {
+    name: 'Text Processing',
+    icon: 'FileText',
+    description: 'AWK commands for parsing and filtering kubectl output',
+    order: 11,
+  },
+  {
+    name: 'JSON Processing',
+    icon: 'Code',
+    description: 'JQ commands for processing JSON output from kubectl',
+    order: 12,
+  },
+];
