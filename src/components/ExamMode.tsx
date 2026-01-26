@@ -13,6 +13,7 @@ interface ExamQuestion {
   question: string;
   options: string[];
   correctAnswer: string;
+  explanation?: string;
   userAnswer?: string;
 }
 
@@ -31,6 +32,14 @@ export function ExamMode({ commands, guides }: ExamModeProps) {
   const [timeLeft, setTimeLeft] = useState(3600); // 1 hour
   const [isFinished, setIsFinished] = useState(false);
   const [score, setScore] = useState(0);
+  const [highScore, setHighScore] = useState(0);
+
+  useEffect(() => {
+    const savedScore = localStorage.getItem('k8s-exam-high-score');
+    if (savedScore) {
+      setHighScore(parseInt(savedScore, 10));
+    }
+  }, []);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -95,11 +104,13 @@ export function ExamMode({ commands, guides }: ExamModeProps) {
     const options: string[] = [];
     let questionText = '';
     let correctAnswer = '';
+    let explanation = '';
 
     if (type === 'guide') {
       const guide = target as TroubleshootingGuide;
       questionText = `Scenario: ${guide.issue}\n\nSymptoms: ${guide.symptoms.substring(0, 100)}...\n\nWhat is the most likely diagnosis?`;
       correctAnswer = guide.diagnosis;
+      explanation = `Diagnosis: ${guide.diagnosis}\n\nSolution:\n${guide.solutions}`;
       options.push(correctAnswer);
       while (options.length < 4) {
         const d = getRand(guides).diagnosis;
@@ -110,6 +121,7 @@ export function ExamMode({ commands, guides }: ExamModeProps) {
       if (Math.random() > 0.5) {
         questionText = `Which command would you use to: ${cmd.description}?`;
         correctAnswer = cmd.command;
+        explanation = `${cmd.command}: ${cmd.description}`;
         options.push(correctAnswer);
         while (options.length < 4) {
           const d = getRand(commands).command;
@@ -118,6 +130,7 @@ export function ExamMode({ commands, guides }: ExamModeProps) {
       } else {
         questionText = `What is the primary function of: ${cmd.command}?`;
         correctAnswer = cmd.description;
+        explanation = `${cmd.command}: ${cmd.description}`;
         options.push(correctAnswer);
         while (options.length < 4) {
           const d = getRand(commands).description;
@@ -131,7 +144,8 @@ export function ExamMode({ commands, guides }: ExamModeProps) {
       domain: domain as any,
       question: questionText,
       options: options.sort(() => Math.random() - 0.5),
-      correctAnswer
+      correctAnswer,
+      explanation
     };
   };
 
@@ -153,7 +167,13 @@ export function ExamMode({ commands, guides }: ExamModeProps) {
     setIsActive(false);
     setIsFinished(true);
     const correctCount = questions.filter(q => q.userAnswer === q.correctAnswer).length;
-    setScore((correctCount / questions.length) * 100);
+    const finalScore = (correctCount / questions.length) * 100;
+    setScore(finalScore);
+
+    if (finalScore > highScore) {
+      setHighScore(finalScore);
+      localStorage.setItem('k8s-exam-high-score', finalScore.toString());
+    }
   };
 
   const formatTime = (seconds: number) => {
@@ -172,6 +192,15 @@ export function ExamMode({ commands, guides }: ExamModeProps) {
           You will face 20 timed questions across 5 domains with weighted scoring.
         </p>
         
+        {highScore > 0 && (
+          <div className="mb-8 px-6 py-3 bg-brand-50 dark:bg-brand-900/20 rounded-full border border-brand-200 dark:border-brand-800 flex items-center gap-3">
+            <Award className="w-6 h-6 text-brand-500" />
+            <span className="font-bold text-brand-700 dark:text-brand-300">
+              Personal Best: {highScore.toFixed(0)}%
+            </span>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 w-full max-w-4xl">
           {Object.entries(DOMAINS).map(([domain, weight]) => (
             <div key={domain} className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
@@ -238,6 +267,64 @@ export function ExamMode({ commands, guides }: ExamModeProps) {
           </div>
         </div>
 
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden mb-8">
+          <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Detailed Review</h3>
+          </div>
+          <div className="divide-y divide-slate-200 dark:divide-slate-700">
+            {questions.map((q, idx) => {
+              const isCorrect = q.userAnswer === q.correctAnswer;
+              return (
+                <div key={idx} className="p-6">
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                      isCorrect ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
+                    }`}>
+                      {isCorrect ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-sm font-bold text-slate-500 dark:text-slate-400">Question {idx + 1}</span>
+                        <span className="text-xs px-2 py-1 bg-slate-100 dark:bg-slate-700 rounded text-slate-600 dark:text-slate-300">{q.domain}</span>
+                      </div>
+                      <p className="text-slate-900 dark:text-white font-medium mb-4 whitespace-pre-wrap">{q.question}</p>
+                      
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div className={`p-4 rounded-lg border ${
+                          isCorrect 
+                            ? 'bg-emerald-50 border-emerald-200 dark:bg-emerald-900/10 dark:border-emerald-800' 
+                            : 'bg-red-50 border-red-200 dark:bg-red-900/10 dark:border-red-800'
+                        }`}>
+                          <div className="text-xs font-bold uppercase mb-1 opacity-70">Your Answer</div>
+                          <div className={isCorrect ? 'text-emerald-700 dark:text-emerald-300' : 'text-red-700 dark:text-red-300'}>
+                            {q.userAnswer}
+                          </div>
+                        </div>
+                        
+                        {!isCorrect && (
+                          <div className="p-4 rounded-lg border bg-emerald-50 border-emerald-200 dark:bg-emerald-900/10 dark:border-emerald-800">
+                            <div className="text-xs font-bold uppercase text-emerald-600 dark:text-emerald-400 mb-1 opacity-70">Correct Answer</div>
+                            <div className="text-emerald-700 dark:text-emerald-300">
+                              {q.correctAnswer}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {q.explanation && (
+                        <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                          <div className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Explanation</div>
+                          <p className="text-sm text-slate-600 dark:text-slate-400 whitespace-pre-wrap">{q.explanation}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         <div className="flex justify-center">
           <button
             onClick={startExam}
@@ -254,7 +341,7 @@ export function ExamMode({ commands, guides }: ExamModeProps) {
   const currentQ = questions[currentQuestionIndex];
 
   return (
-    <div className="max-w-4xl mx-auto h-[calc(100vh-100px)] flex flex-col py-6">
+    <div className="max-w-4xl mx-auto min-h-[calc(100vh-180px)] flex flex-col py-6">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -276,7 +363,7 @@ export function ExamMode({ commands, guides }: ExamModeProps) {
           </p>
         </div>
 
-        <div className="grid gap-4">
+        <div className="grid gap-4 mb-12">
           {currentQ.options.map((option, idx) => (
             <button
               key={idx}
@@ -302,11 +389,11 @@ export function ExamMode({ commands, guides }: ExamModeProps) {
         </div>
       </div>
 
-      <div className="mt-8 flex justify-end">
+      <div className="fixed bottom-0 left-64 right-0 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 p-4 pb-16 flex justify-end z-50">
         <button
           onClick={nextQuestion}
           disabled={!currentQ.userAnswer}
-          className="px-8 py-3 bg-brand-600 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white rounded-xl font-bold transition-colors"
+          className="px-8 py-3 bg-brand-600 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white rounded-xl font-bold transition-colors shadow-lg hover:shadow-brand-500/25"
         >
           {currentQuestionIndex === questions.length - 1 ? 'Finish Exam' : 'Next Question'}
         </button>

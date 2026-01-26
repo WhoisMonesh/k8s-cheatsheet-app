@@ -1,7 +1,7 @@
 {
   "name": "k8s-cheatsheet-app",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.2.0",
   "description": "Kubernetes Cheatsheet Application",
   "author": "Monesh Ram",
   "repository": {

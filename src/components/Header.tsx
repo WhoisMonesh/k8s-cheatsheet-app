@@ -1,4 +1,4 @@
-import { Search, Moon, Sun, Star, Command, Zap, Terminal } from 'lucide-react';
+import { Search, Moon, Sun, Star, Command, Zap, Terminal, Settings } from 'lucide-react';
 import { AnimatedLogo } from './AnimatedLogo';
 import { ViewMode } from '../types';
 
@@ -26,7 +26,7 @@ export function Header({
   favoriteCount,
 }: HeaderProps) {
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-slate-900 border-b border-slate-800 shadow-lg shadow-slate-900/20">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-slate-900 border-b border-slate-800 shadow-lg shadow-slate-900/20 drag-region">
       <div className="px-6 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -43,7 +43,7 @@ export function Header({
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 no-drag">
             <div className="relative group">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-brand-400 transition-colors" />
               <input
@@ -51,7 +51,7 @@ export function Header({
                 placeholder="Search commands..."
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
-                className="pl-10 pr-4 py-2 w-96 border border-slate-700 rounded-lg bg-slate-800 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
+                className="pl-10 pr-4 py-2 w-64 lg:w-96 border border-slate-700 rounded-lg bg-slate-800 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
               />
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
                 <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-bold text-slate-400 bg-slate-700 rounded border border-slate-600">Ctrl K</kbd>
@@ -116,6 +116,18 @@ export function Header({
                 <span className="bg-slate-900/30 px-1.5 rounded-full text-[10px]">{favoriteCount}</span>
               </button>
             </div>
+            
+            <button
+              onClick={() => onViewModeChange('settings')}
+              className={`p-2 transition-colors rounded-lg ${
+                viewMode === 'settings'
+                  ? 'text-brand-400 bg-slate-800'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              }`}
+              title="Settings"
+            >
+              <Settings className="w-5 h-5" />
+            </button>
             
             <button
               onClick={onDarkModeToggle}

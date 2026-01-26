@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { initDatabase, getDatabase, saveDatabase, resetDatabase } from './db/database';
+import { initDatabase, getDatabase, resetDatabase } from './db/database';
 import { K8sCommand, K8sVersion, Category, YamlTemplate, TroubleshootingGuide, BestPractice, ViewMode } from './types';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
@@ -20,8 +20,11 @@ import { ConsolePractice } from './components/ConsolePractice';
 import { YamlBuilder } from './components/YamlBuilder';
 import { ExamMode } from './components/ExamMode';
 import { About } from './components/About';
+import { Favorites } from './components/Favorites';
+import { Settings } from './components/Settings';
+import { useFavorites } from './context/FavoritesContext';
 import { scenariosData } from './db/data/scenarios';
-import { Loader2, AlertTriangle, Download, Upload } from 'lucide-react';
+import { Loader2, AlertTriangle } from 'lucide-react';
 import { k8sCommandsData } from './db/data/k8sCommands';
 import { additionalK8sCommands } from './db/data/k8sCommandsExpanded';
 import { comprehensiveK8sCommands } from './db/data/comprehensiveCommands';
@@ -69,7 +72,7 @@ function App() {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [difficultyFilter, setDifficultyFilter] = useState<string>('all');
-  const [favorites, setFavorites] = useState<number[]>([]);
+  const { favorites, toggleFavorite } = useFavorites();
   const [viewMode, setViewMode] = useState<ViewMode>('quick-ref');
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [showStats, setShowStats] = useState(true);
@@ -112,7 +115,6 @@ function App() {
       try {
         await initDatabase();
         loadData();
-        loadFavorites();
       } catch (error) {
         console.error('Failed to initialize database:', error);
         loadDataFallback();
@@ -333,17 +335,6 @@ function App() {
     }
   }
 
-  function loadFavorites() {
-    const db = getDatabase();
-    if (!db) return;
-
-    const result = db.exec('SELECT commandId FROM user_favorites');
-    if (result.length > 0) {
-      const favIds = result[0].values.map((row) => row[0] as number);
-      setFavorites(favIds);
-    }
-  }
-
   function filterCommands() {
     let filtered = commands;
 
@@ -451,74 +442,6 @@ function App() {
 
     setFilteredCommands(filtered);
   }
-
-  function toggleFavorite(commandId: number) {
-    const db = getDatabase();
-    if (!db) return;
-
-    const isFavorite = favorites.includes(commandId);
-
-    if (isFavorite) {
-      db.run('DELETE FROM user_favorites WHERE commandId = ?', [commandId]);
-      setFavorites(favorites.filter((id) => id !== commandId));
-    } else {
-      db.run('INSERT INTO user_favorites (commandId, addedAt) VALUES (?, ?)', [
-        commandId,
-        new Date().toISOString(),
-      ]);
-      setFavorites([...favorites, commandId]);
-    }
-
-    saveDatabase(db);
-  }
-
-  const exportFavorites = () => {
-    const data = JSON.stringify(favorites);
-    const blob = new Blob([data], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'k8s-cheat-sheet-favorites.json';
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const importFavorites = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const ids = JSON.parse(e.target?.result as string);
-        if (Array.isArray(ids)) {
-          const db = getDatabase();
-          if (!db) return;
-          
-          const newFavs = new Set(favorites);
-          
-          ids.forEach((id: number) => {
-            if (!newFavs.has(id)) {
-              newFavs.add(id);
-              try {
-                const res = db.exec(`SELECT 1 FROM user_favorites WHERE commandId = ${id}`);
-                if (!res.length) {
-                   db.run('INSERT INTO user_favorites (commandId, addedAt) VALUES (?, ?)', [id, new Date().toISOString()]);
-                }
-              } catch (err) { console.error(err); }
-            }
-          });
-          
-          setFavorites(Array.from(newFavs));
-          saveDatabase(db);
-        }
-      } catch (err) {
-        console.error('Failed to import favorites', err);
-        alert('Failed to import favorites: Invalid file format');
-      }
-    };
-    reader.readAsText(file);
-  };
 
   function loadDataFallback() {
     setCategories(categoriesData.map((cat, idx) => ({
@@ -673,7 +596,7 @@ function App() {
             onViewChange={setViewMode}
           />
 
-          <main className="flex-1 ml-64 mt-16 p-8">
+          <main className="flex-1 ml-64 mt-16 p-8 pb-32">
             {viewMode === 'quick-ref' && (
               <>
                 {isDataEmpty && (
@@ -786,28 +709,16 @@ function App() {
               </>
             )}
             {viewMode === 'favorites' && (
-              <>
-                <div className="flex justify-end gap-2 mb-6">
-                  <button onClick={exportFavorites} className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-slate-700 dark:text-slate-300 shadow-sm">
-                    <Download className="w-4 h-4" /> Export Favorites
-                  </button>
-                  <label className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer text-slate-700 dark:text-slate-300 shadow-sm">
-                    <Upload className="w-4 h-4" /> Import Favorites
-                    <input type="file" accept=".json" onChange={importFavorites} className="hidden" />
-                  </label>
-                </div>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <CommandList
-                    commands={filteredCommands}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-8rem)]">
+                <div className="overflow-hidden">
+                  <Favorites 
+                    allCommands={commands}
                     selectedCommand={selectedCommand}
                     onSelectCommand={setSelectedCommand}
-                    favorites={favorites}
-                    onToggleFavorite={toggleFavorite}
-                    loading={isSearching}
                   />
-                  <CommandDetails command={selectedCommand} />
                 </div>
-              </>
+                <CommandDetails command={selectedCommand} />
+              </div>
             )}
             {viewMode === 'versions' && <VersionHistory versions={versions} />}
             {viewMode === 'templates' && <YamlTemplates templates={templates} />}
@@ -830,6 +741,7 @@ function App() {
                 guides={troubleshootingGuides} 
               />
             )}
+            {viewMode === 'settings' && <Settings />}
             {viewMode === 'about' && <About />}
           </main>
           <Footer onShowShortcuts={() => setShowShortcuts(true)} />

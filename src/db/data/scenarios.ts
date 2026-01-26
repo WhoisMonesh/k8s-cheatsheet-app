@@ -95,5 +95,105 @@ export const scenariosData = [
         output: 'deployment.apps/myapp rolled back'
       }
     ]
+  },
+  {
+    id: 4,
+    title: 'Configure Horizontal Pod Autoscaling',
+    description: 'Automatically scale pods based on CPU utilization.',
+    difficulty: 'intermediate',
+    category: 'Scaling',
+    steps: [
+      {
+        order: 1,
+        command: 'kubectl autoscale deployment php-apache --cpu-percent=50 --min=1 --max=10',
+        description: 'Create an HPA.',
+        explanation: 'Sets up autoscaling to maintain 50% CPU usage across pods.',
+        output: 'horizontalpodautoscaler.autoscaling/php-apache autoscaled'
+      },
+      {
+        order: 2,
+        command: 'kubectl get hpa',
+        description: 'Check HPA status.',
+        explanation: 'View current replicas and target utilization.',
+        output: 'NAME         REFERENCE               TARGETS   MINPODS   MAXPODS   REPLICAS   AGE\nphp-apache   Deployment/php-apache   0%/50%    1         10        1          30s'
+      },
+      {
+        order: 3,
+        command: 'kubectl get hpa php-apache -o yaml',
+        description: 'View HPA details.',
+        explanation: 'Inspect the full configuration in YAML format.',
+        output: 'apiVersion: autoscaling/v1\nkind: HorizontalPodAutoscaler\nmetadata:\n  name: php-apache\n...'
+      }
+    ]
+  },
+  {
+    id: 5,
+    title: 'Create & Mount ConfigMap',
+    description: 'Inject configuration data into a pod using a ConfigMap.',
+    difficulty: 'beginner',
+    category: 'Configuration',
+    steps: [
+      {
+        order: 1,
+        command: 'kubectl create configmap app-config --from-literal=key1=value1 --from-literal=key2=value2',
+        description: 'Create a ConfigMap.',
+        explanation: 'Stores configuration data as key-value pairs.',
+        output: 'configmap/app-config created'
+      },
+      {
+        order: 2,
+        command: 'kubectl get configmap app-config -o yaml',
+        description: 'Verify ConfigMap content.',
+        explanation: 'Check the data stored in the ConfigMap.',
+        output: 'apiVersion: v1\ndata:\n  key1: value1\n  key2: value2\nkind: ConfigMap\nmetadata:\n  name: app-config'
+      },
+      {
+        order: 3,
+        command: 'kubectl set env deployment/nginx --from=configmap/app-config',
+        description: 'Inject as Environment Variables.',
+        explanation: 'Updates the deployment to use the ConfigMap data as env vars.',
+        output: 'deployment.apps/nginx env updated'
+      }
+    ]
+  },
+  {
+    id: 6,
+    title: 'Implement Network Policy (Deny All)',
+    description: 'Secure a namespace by denying all ingress traffic by default.',
+    difficulty: 'advanced',
+    category: 'Security',
+    steps: [
+      {
+        order: 1,
+        command: 'kubectl create namespace secure-app',
+        description: 'Create a test namespace.',
+        explanation: 'Isolate the testing environment.',
+        output: 'namespace/secure-app created'
+      },
+      {
+        order: 2,
+        command: `cat <<EOF | kubectl apply -f -
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: secure-app
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+EOF`,
+        description: 'Apply Deny-All Policy.',
+        explanation: 'Creates a NetworkPolicy that selects all pods and blocks all incoming traffic.',
+        output: 'networkpolicy.networking.k8s.io/default-deny-all created'
+      },
+      {
+        order: 3,
+        command: 'kubectl get networkpolicies -n secure-app',
+        description: 'Verify the policy.',
+        explanation: 'Ensure the policy is active in the namespace.',
+        output: 'NAME               POD-SELECTOR   AGE\ndefault-deny-all   <none>         10s'
+      }
+    ]
   }
 ];

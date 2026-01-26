@@ -27,7 +27,7 @@ export function Sidebar({
   const totalCommands = Object.values(commandCounts).reduce((sum, count) => sum + count, 0);
 
   return (
-    <aside className="fixed left-0 top-16 bottom-0 w-64 bg-slate-900 border-r border-slate-800 overflow-y-auto scrollbar-thin">
+    <aside className="fixed left-0 top-16 bottom-0 w-64 bg-slate-900 border-r border-slate-800 overflow-y-auto scrollbar-thin z-40">
       <div className="p-4 space-y-6">
         {/* Main Section */}
         <div>
@@ -39,12 +39,12 @@ export function Sidebar({
                 : 'text-slate-400 hover:bg-slate-800 hover:text-white'
             }`}
           >
-            <div className="flex items-center gap-3">
-              <Icons.Layers className={`w-5 h-5 ${selectedCategory === 'all' && currentView !== 'favorites' ? 'text-white' : 'text-slate-400 group-hover:text-white'}`} />
-              <span className="font-medium tracking-wide">All Commands</span>
+            <div className="flex items-center gap-3 min-w-0">
+              <Icons.Layers className={`w-5 h-5 flex-shrink-0 ${selectedCategory === 'all' && currentView !== 'favorites' ? 'text-white' : 'text-slate-400 group-hover:text-white'}`} />
+              <span className="font-medium tracking-wide truncate">All Commands</span>
             </div>
             <span
-              className={`px-2 py-0.5 rounded text-xs font-semibold ${
+              className={`px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 ${
                 selectedCategory === 'all' && currentView !== 'favorites'
                   ? 'bg-white/20 text-white'
                   : 'bg-slate-800 text-slate-500 group-hover:bg-slate-700 group-hover:text-slate-300'
@@ -62,9 +62,23 @@ export function Sidebar({
                 : 'text-slate-400 hover:bg-slate-800 hover:text-white'
             }`}
           >
-            <div className="flex items-center gap-3">
-              <Star className={`w-5 h-5 ${currentView === 'favorites' ? 'text-white' : 'text-slate-400 group-hover:text-white'}`} />
-              <span className="font-medium tracking-wide">Favorites</span>
+            <div className="flex items-center gap-3 min-w-0 flex-1 mr-2">
+              <Star className={`w-5 h-5 flex-shrink-0 ${currentView === 'favorites' ? 'text-white' : 'text-slate-400 group-hover:text-white'}`} />
+              <span className="font-medium tracking-wide truncate">Favorites</span>
+            </div>
+          </button>
+
+          <button
+            onClick={() => onViewChange('aliases')}
+            className={`w-full flex items-center justify-between px-4 py-3 rounded-lg mb-2 transition-all duration-200 group ${
+              currentView === 'aliases'
+                ? 'bg-brand-600 text-white shadow-lg shadow-brand-500/20'
+                : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+            }`}
+          >
+            <div className="flex items-center gap-3 min-w-0 flex-1 mr-2">
+              <Icons.Zap className={`w-5 h-5 flex-shrink-0 ${currentView === 'aliases' ? 'text-white' : 'text-slate-400 group-hover:text-white'}`} />
+              <span className="font-medium tracking-wide truncate">Aliases</span>
             </div>
           </button>
         </div>
@@ -82,9 +96,9 @@ export function Sidebar({
                 : 'text-slate-400 hover:bg-slate-800 hover:text-white'
             }`}
           >
-            <div className="flex items-center gap-3">
-              <GitMerge className={`w-5 h-5 ${currentView === 'scenarios' ? 'text-white' : 'text-slate-400 group-hover:text-white'}`} />
-              <span className="font-medium tracking-wide">Scenarios</span>
+            <div className="flex items-center gap-3 min-w-0 flex-1 mr-2">
+              <GitMerge className={`w-5 h-5 flex-shrink-0 ${currentView === 'scenarios' ? 'text-white' : 'text-slate-400 group-hover:text-white'}`} />
+              <span className="font-medium tracking-wide truncate">Scenarios</span>
             </div>
           </button>
 
@@ -96,9 +110,9 @@ export function Sidebar({
                 : 'text-slate-400 hover:bg-slate-800 hover:text-white'
             }`}
           >
-            <div className="flex items-center gap-3">
-              <Brain className={`w-5 h-5 ${currentView === 'quiz' ? 'text-white' : 'text-slate-400 group-hover:text-white'}`} />
-              <span className="font-medium tracking-wide">Quiz Mode</span>
+            <div className="flex items-center gap-3 min-w-0 flex-1 mr-2">
+              <Brain className={`w-5 h-5 flex-shrink-0 ${currentView === 'quiz' ? 'text-white' : 'text-slate-400 group-hover:text-white'}`} />
+              <span className="font-medium tracking-wide truncate">Quiz Mode</span>
             </div>
           </button>
 
@@ -110,9 +124,9 @@ export function Sidebar({
                 : 'text-slate-400 hover:bg-slate-800 hover:text-white'
             }`}
           >
-            <div className="flex items-center gap-3">
-              <Terminal className={`w-5 h-5 ${currentView === 'console-practice' ? 'text-white' : 'text-slate-400 group-hover:text-white'}`} />
-              <span className="font-medium tracking-wide">Console Practice</span>
+            <div className="flex items-center gap-3 min-w-0 flex-1 mr-2">
+              <Terminal className={`w-5 h-5 flex-shrink-0 ${currentView === 'console-practice' ? 'text-white' : 'text-slate-400 group-hover:text-white'}`} />
+              <span className="font-medium tracking-wide truncate">Console Practice</span>
             </div>
           </button>
 
@@ -124,9 +138,9 @@ export function Sidebar({
                 : 'text-slate-400 hover:bg-slate-800 hover:text-white'
             }`}
           >
-            <div className="flex items-center gap-3">
-              <FileCode className={`w-5 h-5 ${currentView === 'yaml-builder' ? 'text-white' : 'text-slate-400 group-hover:text-white'}`} />
-              <span className="font-medium tracking-wide">YAML Builder</span>
+            <div className="flex items-center gap-3 min-w-0">
+              <FileCode className={`w-5 h-5 flex-shrink-0 ${currentView === 'yaml-builder' ? 'text-white' : 'text-slate-400 group-hover:text-white'}`} />
+              <span className="font-medium tracking-wide truncate">YAML Builder</span>
             </div>
           </button>
 
@@ -138,9 +152,9 @@ export function Sidebar({
                 : 'text-slate-400 hover:bg-slate-800 hover:text-white'
             }`}
           >
-            <div className="flex items-center gap-3">
-              <Award className={`w-5 h-5 ${currentView === 'exam' ? 'text-white' : 'text-slate-400 group-hover:text-white'}`} />
-              <span className="font-medium tracking-wide">Exam Simulator</span>
+            <div className="flex items-center gap-3 min-w-0 flex-1 mr-2">
+              <Award className={`w-5 h-5 flex-shrink-0 ${currentView === 'exam' ? 'text-white' : 'text-slate-400 group-hover:text-white'}`} />
+              <span className="font-medium tracking-wide truncate">Exam Simulator</span>
             </div>
           </button>
         </div>
@@ -167,15 +181,15 @@ export function Sidebar({
                   <div className="absolute left-0 top-0 bottom-0 w-1 bg-brand-500 rounded-r-full" />
                 )}
 
-                <div className="flex items-center gap-3 pl-2">
-                  <div className={`${selectedCategory === category.name ? 'text-brand-500' : 'text-slate-500 group-hover:text-slate-300'}`}>
+                <div className="flex items-center gap-3 pl-2 min-w-0 flex-1 mr-2">
+                  <div className={`flex-shrink-0 ${selectedCategory === category.name ? 'text-brand-500' : 'text-slate-500 group-hover:text-slate-300'}`}>
                     {getIcon(category.icon)}
                   </div>
-                  <span className="font-medium text-sm">{category.name}</span>
+                  <span className="font-medium text-sm truncate">{category.name}</span>
                 </div>
                 
                 <span
-                  className={`px-2 py-0.5 rounded text-xs font-semibold transition-colors ${
+                  className={`px-2 py-0.5 rounded text-xs font-semibold transition-colors flex-shrink-0 ${
                     selectedCategory === category.name
                       ? 'bg-brand-500/10 text-brand-400'
                       : 'bg-slate-800 text-slate-600 group-hover:bg-slate-700 group-hover:text-slate-400'
@@ -201,9 +215,9 @@ export function Sidebar({
                 : 'text-slate-400 hover:bg-slate-800 hover:text-white'
             }`}
           >
-            <div className="flex items-center gap-3">
-              <Info className={`w-5 h-5 ${currentView === 'about' ? 'text-white' : 'text-slate-400 group-hover:text-white'}`} />
-              <span className="font-medium tracking-wide">About</span>
+            <div className="flex items-center gap-3 min-w-0 flex-1 mr-2">
+              <Info className={`w-5 h-5 flex-shrink-0 ${currentView === 'about' ? 'text-white' : 'text-slate-400 group-hover:text-white'}`} />
+              <span className="font-medium tracking-wide truncate">About</span>
             </div>
           </button>
         </div>

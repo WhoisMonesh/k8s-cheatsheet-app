@@ -1,4 +1,4 @@
-export type ViewMode = 'commands' | 'versions' | 'favorites' | 'templates' | 'troubleshooting' | 'best-practices' | 'quick-ref' | 'aliases' | 'scenarios' | 'quiz' | 'console-practice' | 'yaml-builder' | 'exam' | 'about';
+export type ViewMode = 'commands' | 'versions' | 'favorites' | 'templates' | 'troubleshooting' | 'best-practices' | 'quick-ref' | 'aliases' | 'scenarios' | 'quiz' | 'console-practice' | 'yaml-builder' | 'exam' | 'about' | 'settings';
 
 export interface K8sCommand {
   id: number;
