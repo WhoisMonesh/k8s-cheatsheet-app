@@ -6,6 +6,7 @@
 ![Build Status](https://img.shields.io/github/actions/workflow/status/WhoisMonesh/k8s-cheatsheet-app/release.yml?style=flat-square)
 
 A powerful, offline-first desktop application designed to be the ultimate companion for Kubernetes administrators, developers, and CKA/CKAD exam aspirants. Built with **Electron**, **React**, and **TypeScript**.
+<img width="1366" height="718" alt="{F4E0904D-8D16-4184-80EA-23A5456C89E5}" src="https://github.com/user-attachments/assets/7d490f21-5b36-466b-ac1b-3691cf32f6d9" />
 
 ---
 
