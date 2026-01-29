@@ -33,10 +33,10 @@ export function About() {
           
           <div className="bg-white/10 p-2 rounded-2xl backdrop-blur-md border border-white/20 transform rotate-3 hover:rotate-0 transition-transform duration-300">
              <div className="bg-gradient-to-br from-slate-900 to-slate-800 p-6 rounded-xl w-64 text-center">
-               <Terminal className="w-16 h-16 text-brand-400 mx-auto mb-4" />
-               <div className="text-2xl font-bold font-mono text-white mb-1">v1.0.1</div>
-               <div className="text-xs text-slate-400 uppercase tracking-widest">Stable Release</div>
-             </div>
+                <Terminal className="w-16 h-16 text-brand-400 mx-auto mb-4" />
+                <div className="text-2xl font-bold font-mono text-white mb-1">v1.4.0-dev</div>
+                <div className="text-xs text-slate-400 uppercase tracking-widest">Stable Release</div>
+              </div>
           </div>
         </div>
       </div>
