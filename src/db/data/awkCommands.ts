@@ -25,6 +25,18 @@ export const awkCommandsData = [
   },
   {
     category: 'Text Processing',
+    subcategory: 'AWK Filtering',
+    command: 'awk',
+    description: 'Filter pods by Running status using AWK (All Namespaces)',
+    example: "kubectl get pods -A | awk '$4 == \"Running\" {print $1, $2}'",
+    versionIntroduced: '1.0',
+    difficultyLevel: 'Beginner',
+    tags: 'awk,filter,status,running,all-namespaces',
+    flags: '-A',
+    output: 'Namespace and Names of running pods'
+  },
+  {
+    category: 'Text Processing',
     subcategory: 'AWK Pattern Matching',
     command: 'awk',
     description: 'Find pods with restart count greater than 0',
@@ -45,6 +57,18 @@ export const awkCommandsData = [
     difficultyLevel: 'Intermediate',
     tags: 'awk,metrics,cpu,sum',
     flags: '',
+    output: 'Total CPU usage in millicores'
+  },
+  {
+    category: 'Text Processing',
+    subcategory: 'AWK Calculations',
+    command: 'awk',
+    description: 'Sum total CPU usage from top pods (All Namespaces)',
+    example: "kubectl top pods -A | awk 'NR>1 {sum+=$3} END {print \"Total CPU: \" sum \"m\"}'",
+    versionIntroduced: '1.8',
+    difficultyLevel: 'Intermediate',
+    tags: 'awk,metrics,cpu,sum,all-namespaces',
+    flags: '-A',
     output: 'Total CPU usage in millicores'
   },
   {
@@ -400,11 +424,11 @@ export const awkCommandsData = [
     subcategory: 'AWK Label Analysis',
     command: 'awk',
     description: 'Analyze label distribution',
-    example: "kubectl get pods --show-labels | awk -F ' ' '{for(i=6; i<=NF; i++) {split($i, lbl, \"=\"); labels[lbl[1]]++}} END {for(l in labels) print l, labels[l]}'",
+    example: "kubectl get pods --show-labels | awk 'NR>1 {split($NF, l, \",\"); for (i in l) {split(l[i], kv, \"=\"); count[kv[1]]++}} END {for (k in count) print k, count[k]}'",
     versionIntroduced: '1.0',
     difficultyLevel: 'Expert',
     tags: 'awk,labels,analysis,distribution',
-    flags: '-F',
+    flags: '',
     output: 'Label key frequency count'
   },
   {
@@ -430,6 +454,90 @@ export const awkCommandsData = [
     tags: 'awk,anomaly,detection,outliers',
     flags: '',
     output: 'Pods with unusually high resource usage'
+  },
+  {
+    category: 'Text Processing',
+    subcategory: 'AWK Namespace Variations',
+    command: 'awk',
+    description: 'Print specific columns from kubectl output (All Namespaces)',
+    example: "kubectl get pods -A | awk '{print $1, $2, $4}'",
+    versionIntroduced: '1.0',
+    difficultyLevel: 'Beginner',
+    tags: 'awk,text,parsing,columns,all-namespaces',
+    flags: '-A',
+    output: 'NAMESPACE NAME STATUS'
+  },
+  {
+    category: 'Text Processing',
+    subcategory: 'AWK Namespace Variations',
+    command: 'awk',
+    description: 'Print specific columns from default namespace explicitly',
+    example: "kubectl get pods -n default | awk '{print $1, $3}'",
+    versionIntroduced: '1.0',
+    difficultyLevel: 'Beginner',
+    tags: 'awk,text,parsing,columns,default,namespace',
+    flags: '-n default',
+    output: 'NAME STATUS'
+  },
+  {
+    category: 'Text Processing',
+    subcategory: 'AWK Namespace Variations',
+    command: 'awk',
+    description: 'Print specific columns from custom namespace',
+    example: "kubectl get pods -n <namespace> | awk '{print $1, $3}'",
+    versionIntroduced: '1.0',
+    difficultyLevel: 'Beginner',
+    tags: 'awk,text,parsing,columns,custom,namespace',
+    flags: '-n <namespace>',
+    output: 'NAME STATUS'
+  },
+  {
+    category: 'Text Processing',
+    subcategory: 'AWK Namespace Variations',
+    command: 'awk',
+    description: 'Filter pods by Running status in default namespace explicitly',
+    example: "kubectl get pods -n default | awk '$3 == \"Running\" {print $1}'",
+    versionIntroduced: '1.0',
+    difficultyLevel: 'Beginner',
+    tags: 'awk,filter,status,running,default,namespace',
+    flags: '-n default',
+    output: 'Names of running pods in default namespace'
+  },
+  {
+    category: 'Text Processing',
+    subcategory: 'AWK Namespace Variations',
+    command: 'awk',
+    description: 'Filter pods by Running status in custom namespace',
+    example: "kubectl get pods -n <namespace> | awk '$3 == \"Running\" {print $1}'",
+    versionIntroduced: '1.0',
+    difficultyLevel: 'Beginner',
+    tags: 'awk,filter,status,running,custom,namespace',
+    flags: '-n <namespace>',
+    output: 'Names of running pods in custom namespace'
+  },
+  {
+    category: 'Text Processing',
+    subcategory: 'AWK Namespace Variations',
+    command: 'awk',
+    description: 'Sum total CPU usage from top pods in default namespace explicitly',
+    example: "kubectl top pods -n default | awk 'NR>1 {sum+=$2} END {print \"Total CPU: \" sum \"m\"}'",
+    versionIntroduced: '1.8',
+    difficultyLevel: 'Intermediate',
+    tags: 'awk,metrics,cpu,sum,default,namespace',
+    flags: '-n default',
+    output: 'Total CPU usage in default namespace'
+  },
+  {
+    category: 'Text Processing',
+    subcategory: 'AWK Namespace Variations',
+    command: 'awk',
+    description: 'Sum total CPU usage from top pods in custom namespace',
+    example: "kubectl top pods -n <namespace> | awk 'NR>1 {sum+=$2} END {print \"Total CPU: \" sum \"m\"}'",
+    versionIntroduced: '1.8',
+    difficultyLevel: 'Intermediate',
+    tags: 'awk,metrics,cpu,sum,custom,namespace',
+    flags: '-n <namespace>',
+    output: 'Total CPU usage in custom namespace'
   },
   {
     category: 'Text Processing',
@@ -491,7 +599,7 @@ export const awkCommandsData = [
     flags: '',
     output: 'Pod to subnet mapping and connections'
   },
- {
+  {
     category: 'Text Processing',
     subcategory: 'AWK SLA Monitoring',
     command: 'awk',
@@ -515,7 +623,7 @@ export const awkCommandsData = [
     flags: '',
     output: 'Estimated cost per namespace'
   },
- {
+  {
     category: 'Text Processing',
     subcategory: 'AWK Bottleneck Detection',
     command: 'awk',
@@ -526,5 +634,101 @@ export const awkCommandsData = [
     tags: 'awk,bottleneck,detection,performance',
     flags: '',
     output: 'Potential bottleneck identification'
+  },
+  {
+    category: 'Text Processing',
+    subcategory: 'AWK Namespace Variations',
+    command: 'awk',
+    description: 'List pods with namespace from all namespaces',
+    example: "kubectl get pods --all-namespaces | awk 'NR>1 {print $1, $2}'",
+    versionIntroduced: '1.0',
+    difficultyLevel: 'Beginner',
+    tags: 'awk,namespace,all,list',
+    flags: '--all-namespaces',
+    output: 'Namespace and pod name'
+  },
+  {
+    category: 'Text Processing',
+    subcategory: 'AWK Namespace Variations',
+    command: 'awk',
+    description: 'List pods from default namespace explicitly',
+    example: "kubectl get pods -n default | awk 'NR>1 {print $1}'",
+    versionIntroduced: '1.0',
+    difficultyLevel: 'Beginner',
+    tags: 'awk,namespace,default,explicit',
+    flags: '-n default',
+    output: 'Pod names from default namespace'
+  },
+  {
+    category: 'Text Processing',
+    subcategory: 'AWK Namespace Variations',
+    command: 'awk',
+    description: 'List services from all namespaces',
+    example: "kubectl get svc -A | awk 'NR>1 {print $1, $2, $3}'",
+    versionIntroduced: '1.0',
+    difficultyLevel: 'Beginner',
+    tags: 'awk,namespace,all,services',
+    flags: '-A',
+    output: 'Namespace, service name and type'
+  },
+  {
+    category: 'Text Processing',
+    subcategory: 'AWK Namespace Variations',
+    command: 'awk',
+    description: 'List services from default namespace explicitly',
+    example: "kubectl get svc -n default | awk 'NR>1 {print $1, $3}'",
+    versionIntroduced: '1.0',
+    difficultyLevel: 'Beginner',
+    tags: 'awk,namespace,default,services',
+    flags: '-n default',
+    output: 'Service name and ClusterIP'
+  },
+  {
+    category: 'Text Processing',
+    subcategory: 'AWK Namespace Variations',
+    command: 'awk',
+    description: 'List deployments from all namespaces',
+    example: "kubectl get deploy -A | awk 'NR>1 {print $1, $2, $3 \"/\" $4}'",
+    versionIntroduced: '1.0',
+    difficultyLevel: 'Beginner',
+    tags: 'awk,namespace,all,deployments',
+    flags: '-A',
+    output: 'Namespace, name and replicas'
+  },
+  {
+    category: 'Text Processing',
+    subcategory: 'AWK Namespace Variations',
+    command: 'awk',
+    description: 'List deployments from default namespace explicitly',
+    example: "kubectl get deploy -n default | awk 'NR>1 {print $1, $4}'",
+    versionIntroduced: '1.0',
+    difficultyLevel: 'Beginner',
+    tags: 'awk,namespace,default,deployments',
+    flags: '-n default',
+    output: 'Deployment name and available replicas'
+  },
+  {
+    category: 'Text Processing',
+    subcategory: 'AWK Namespace Variations',
+    command: 'awk',
+    description: 'List nodes (cluster-wide)',
+    example: "kubectl get nodes | awk 'NR>1 {print $1, $2, $5}'",
+    versionIntroduced: '1.0',
+    difficultyLevel: 'Beginner',
+    tags: 'awk,nodes,status,version',
+    flags: '',
+    output: 'Node name, status and version'
+  },
+  {
+    category: 'Text Processing',
+    subcategory: 'AWK Namespace Variations',
+    command: 'awk',
+    description: 'List events from all namespaces',
+    example: "kubectl get events -A | awk 'NR>1 {print $1, $4, $5}'",
+    versionIntroduced: '1.0',
+    difficultyLevel: 'Intermediate',
+    tags: 'awk,namespace,all,events',
+    flags: '-A',
+    output: 'Namespace, reason and object'
   }
 ];

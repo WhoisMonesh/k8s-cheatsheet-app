@@ -49,6 +49,37 @@ monitoring  prom-storage  Bound    pv-002   10Gi       RWO            standard  
   {
     category: 'Storage',
     subcategory: 'Persistent Volume Claims',
+    command: 'kubectl get pvc -A',
+    description: 'List PVCs in all namespaces',
+    example: 'kubectl get pvc -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'pvc,storage,list,all-namespaces',
+    flags: '-A',
+    output: `NAMESPACE   NAME          STATUS   VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+default     data-pvc      Bound    pv-001   1Gi        RWO            standard       5d
+monitoring  prom-storage  Bound    pv-002   10Gi       RWO            standard       10d`
+  },
+  {
+    category: 'Storage',
+    subcategory: 'Persistent Volume Claims',
+    command: 'kubectl describe pvc -A',
+    description: 'Describe all PVCs in all namespaces',
+    example: 'kubectl describe pvc -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'pvc,describe,storage,all-namespaces',
+    flags: '-A',
+    output: `Name:          data-pvc
+Namespace:     default
+...
+Name:          prom-storage
+Namespace:     monitoring
+...`
+  },
+  {
+    category: 'Storage',
+    subcategory: 'Persistent Volume Claims',
     command: 'kubectl delete pvc --all',
     description: 'Delete all PVCs in current namespace',
     example: 'kubectl delete pvc --all',
@@ -56,6 +87,19 @@ monitoring  prom-storage  Bound    pv-002   10Gi       RWO            standard  
     difficultyLevel: 'dangerous',
     tags: 'pvc,delete,cleanup',
     flags: '--all',
+    output: `persistentvolumeclaim "data-pvc" deleted
+persistentvolumeclaim "web-content" deleted`
+  },
+  {
+    category: 'Storage',
+    subcategory: 'Persistent Volume Claims',
+    command: 'kubectl delete pvc --all -A',
+    description: 'Delete all PVCs in all namespaces (DANGEROUS)',
+    example: 'kubectl delete pvc --all -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'dangerous',
+    tags: 'pvc,delete,all,all-namespaces',
+    flags: '--all, -A',
     output: `persistentvolumeclaim "data-pvc" deleted
 persistentvolumeclaim "web-content" deleted`
   },
@@ -136,21 +180,6 @@ Events:          <none>`
     flags: '-p',
     output: 'persistentvolume/pv-volume patched'
   },
-  {
-    category: 'Storage',
-    subcategory: 'Persistent Volumes',
-    command: 'kubectl get pv --sort-by=.spec.capacity.storage',
-    description: 'List PVs sorted by capacity',
-    example: 'kubectl get pv --sort-by=.spec.capacity.storage',
-    versionIntroduced: '1.0',
-    difficultyLevel: 'intermediate',
-    tags: 'pv,list,sort,capacity',
-    flags: '--sort-by',
-    output: `NAME      CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM             STORAGECLASS   REASON   AGE
-pv-001    1Gi        RWO            Retain           Bound    default/pvc-001   standard                5d
-pv-002    10Gi       RWO            Delete           Bound    default/pvc-002   standard                5d
-pv-003    100Gi      RWX            Retain           Available                  nfs                     10d`
-  },
 
   // Persistent Volume Claim Operations
   {
@@ -197,20 +226,6 @@ persistentvolumeclaim "web-content" deleted`
   {
     category: 'Storage',
     subcategory: 'Storage Classes',
-    command: 'kubectl get sc',
-    description: 'List all Storage Classes',
-    example: 'kubectl get sc',
-    versionIntroduced: '1.4',
-    difficultyLevel: 'beginner',
-    tags: 'sc,list,storageclass',
-    flags: '',
-    output: `NAME                 PROVISIONER                RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
-standard (default)   k8s.io/minikube-hostpath   Delete          Immediate           false                  25d
-nfs-client           k8s-sigs.io/nfs-subdir     Delete          Immediate           true                   10d`
-  },
-  {
-    category: 'Storage',
-    subcategory: 'Storage Classes',
     command: 'kubectl patch storageclass standard -p \'{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}\'',
     description: 'Set a default StorageClass',
     example: 'kubectl patch storageclass gp2 -p \'{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}\'',
@@ -224,18 +239,6 @@ nfs-client           k8s-sigs.io/nfs-subdir     Delete          Immediate       
   {
     category: 'Storage',
     subcategory: 'Volume Snapshots',
-    command: 'kubectl get volumesnapshot',
-    description: 'List all volume snapshots',
-    example: 'kubectl get volumesnapshot',
-    versionIntroduced: '1.17',
-    difficultyLevel: 'intermediate',
-    tags: 'snapshot,list,storage',
-    flags: '',
-    output: 'NAME          READYTOUSE   SOURCEPVC   RESTORESIZE   SNAPSHOTCLASS    AGE\nbackup-snap   true         data-pvc    1Gi           csi-snap-class   2m'
-  },
-  {
-    category: 'Storage',
-    subcategory: 'Volume Snapshots',
     command: 'kubectl describe volumesnapshot my-snapshot',
     description: 'Describe a volume snapshot',
     example: 'kubectl describe volumesnapshot backup-snap',
@@ -244,6 +247,30 @@ nfs-client           k8s-sigs.io/nfs-subdir     Delete          Immediate       
     tags: 'snapshot,describe,storage',
     flags: '',
     output: 'Name:         backup-snap\nNamespace:    default\nLabels:       <none>\nAnnotations:  <none>\nAPI Version:  snapshot.storage.k8s.io/v1\nKind:         VolumeSnapshot\nMetadata:\n  Creation Timestamp:  2024-01-26T10:00:00Z\nSpec:\n  Source:\n    Persistent Volume Claim Name:  data-pvc\n  Volume Snapshot Class Name:      csi-snap-class\nStatus:\n  Bound Volume Snapshot Content Name:  snapcontent-abcde\n  Creation Time:                       2024-01-26T10:00:05Z\n  Ready To Use:                        true\n  Restore Size:                        1Gi'
+  },
+  {
+    category: 'Storage',
+    subcategory: 'Volume Snapshots',
+    command: 'kubectl describe volumesnapshot -n my-namespace',
+    description: 'Describe a volume snapshot in a specific namespace',
+    example: 'kubectl describe volumesnapshot backup-snap -n my-namespace',
+    versionIntroduced: '1.17',
+    difficultyLevel: 'intermediate',
+    tags: 'snapshot,describe,storage,namespace',
+    flags: '-n',
+    output: 'Name:         backup-snap\nNamespace:    my-namespace\nLabels:       <none>\nAnnotations:  <none>\nAPI Version:  snapshot.storage.k8s.io/v1\nKind:         VolumeSnapshot\n...'
+  },
+  {
+    category: 'Storage',
+    subcategory: 'Volume Snapshots',
+    command: 'kubectl describe volumesnapshot -A',
+    description: 'Describe all volume snapshots in all namespaces',
+    example: 'kubectl describe volumesnapshot -A',
+    versionIntroduced: '1.17',
+    difficultyLevel: 'intermediate',
+    tags: 'snapshot,describe,storage,all-namespaces',
+    flags: '-A',
+    output: 'Name:         backup-snap\nNamespace:    default\n...'
   },
   {
     category: 'Storage',
@@ -268,5 +295,154 @@ nfs-client           k8s-sigs.io/nfs-subdir     Delete          Immediate       
     tags: 'csi,driver,list',
     flags: '',
     output: 'NAME                 ATTACHREQUIRED   PODINFOONMOUNT   STORAGECAPACITY   TOKENREQUESTS   REQUIRESREPUBLISH   MODES        AGE\nk8s.io/minikube-hostpath   true             false            false             <unset>         false               Persistent   25d'
+  },
+  
+  // --- Missing Variations ---
+  {
+    category: 'Storage',
+    subcategory: 'Persistent Volumes',
+    command: 'kubectl get pv',
+    description: 'List all PersistentVolumes',
+    example: 'kubectl get pv',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'pv,list',
+    output: `NAME      CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM             STORAGECLASS   REASON   AGE
+pv-001    1Gi        RWO            Retain           Bound    default/pvc-001   standard                5d`
+  },
+  {
+    category: 'Storage',
+    subcategory: 'Persistent Volume Claims',
+    command: 'kubectl get pvc',
+    description: 'List PersistentVolumeClaims in current namespace',
+    example: 'kubectl get pvc',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'pvc,list',
+    output: `NAME       STATUS   VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+data-pvc   Bound    pv-001   1Gi        RWO            standard       5d`
+  },
+  {
+    category: 'Storage',
+    subcategory: 'Volume Snapshots',
+    command: 'kubectl get volumesnapshot',
+    description: 'List VolumeSnapshots in current namespace',
+    example: 'kubectl get volumesnapshot',
+    versionIntroduced: '1.17',
+    difficultyLevel: 'intermediate',
+    tags: 'snapshot,list',
+    output: `NAME          READYTOUSE   SOURCEPVC   RESTORESIZE   SNAPSHOTCLASS    AGE
+backup-snap   true         data-pvc    1Gi           csi-snap-class   2m`
+  },
+  {
+    category: 'Storage',
+    subcategory: 'Volume Snapshots',
+    command: 'kubectl get volumesnapshot -n my-namespace',
+    description: 'List VolumeSnapshots in a specific namespace',
+    example: 'kubectl get volumesnapshot -n my-namespace',
+    versionIntroduced: '1.17',
+    difficultyLevel: 'intermediate',
+    tags: 'snapshot,list,namespace',
+    flags: '-n',
+    output: `NAME          READYTOUSE   SOURCEPVC   RESTORESIZE   SNAPSHOTCLASS    AGE
+backup-snap   true         data-pvc    1Gi           csi-snap-class   2m`
+  },
+  {
+    category: 'Storage',
+    subcategory: 'Volume Snapshots',
+    command: 'kubectl get volumesnapshot --all-namespaces',
+    description: 'List VolumeSnapshots across all namespaces',
+    example: 'kubectl get volumesnapshot --all-namespaces',
+    versionIntroduced: '1.17',
+    difficultyLevel: 'intermediate',
+    tags: 'snapshot,list,all-namespaces',
+    flags: '--all-namespaces',
+    output: `NAMESPACE   NAME          READYTOUSE   SOURCEPVC   RESTORESIZE   SNAPSHOTCLASS    AGE
+default     backup-snap   true         data-pvc    1Gi           csi-snap-class   2m`
+  },
+  {
+    category: 'Storage',
+    subcategory: 'Volume Snapshots',
+    command: 'kubectl get volumesnapshot -A',
+    description: 'List VolumeSnapshots in all namespaces',
+    example: 'kubectl get volumesnapshot -A',
+    versionIntroduced: '1.17',
+    difficultyLevel: 'intermediate',
+    tags: 'snapshot,list,all-namespaces',
+    flags: '-A',
+    output: `NAMESPACE   NAME          READYTOUSE   SOURCEPVC   RESTORESIZE   SNAPSHOTCLASS    AGE
+default     backup-snap   true         data-pvc    1Gi           csi-snap-class   2m`
+  },
+  {
+    category: 'Storage',
+    subcategory: 'Volume Snapshots',
+    command: 'kubectl delete volumesnapshot --all -A',
+    description: 'Delete all volume snapshots in all namespaces (DANGEROUS)',
+    example: 'kubectl delete volumesnapshot --all -A',
+    versionIntroduced: '1.17',
+    difficultyLevel: 'dangerous',
+    tags: 'snapshot,delete,all,all-namespaces',
+    flags: '--all, -A',
+    output: `volumesnapshot.snapshot.storage.k8s.io "backup-snap" deleted`
+  },
+  {
+    category: 'Storage',
+    subcategory: 'Persistent Volume Claims',
+    command: 'kubectl get pvc -n my-namespace',
+    description: 'List PersistentVolumeClaims in a specific namespace',
+    example: 'kubectl get pvc -n my-namespace',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'pvc,list,namespace',
+    flags: '-n',
+    output: `NAME       STATUS   VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+data-pvc   Bound    pv-001   1Gi        RWO            standard       5d`
+  },
+  {
+    category: 'Storage',
+    subcategory: 'Persistent Volume Claims',
+    command: 'kubectl describe pvc',
+    description: 'Describe a PersistentVolumeClaim',
+    example: 'kubectl describe pvc data-pvc',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'pvc,describe',
+    output: `Name:          data-pvc
+Namespace:     default
+StorageClass:  standard
+Status:        Bound
+Volume:        pv-001
+Labels:        <none>
+Annotations:   pv.kubernetes.io/bind-completed=yes
+Finalizers:    [kubernetes.io/pvc-protection]
+Capacity:      1Gi
+Access Modes:  RWO
+VolumeMode:    Filesystem
+Used By:       <none>
+Events:        <none>`
+  },
+  {
+    category: 'Storage',
+    subcategory: 'Persistent Volume Claims',
+    command: 'kubectl describe pvc -n my-namespace',
+    description: 'Describe a PersistentVolumeClaim in a specific namespace',
+    example: 'kubectl describe pvc data-pvc -n my-namespace',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'pvc,describe,namespace',
+    flags: '-n',
+    output: `Name:          data-pvc
+Namespace:     my-namespace
+StorageClass:  standard
+Status:        Bound
+Volume:        pv-001
+Labels:        <none>
+Annotations:   pv.kubernetes.io/bind-completed=yes
+Finalizers:    [kubernetes.io/pvc-protection]
+Capacity:      1Gi
+Access Modes:  RWO
+VolumeMode:    Filesystem
+Used By:       <none>
+Events:        <none>`
   }
 ];

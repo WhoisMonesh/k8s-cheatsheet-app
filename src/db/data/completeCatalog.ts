@@ -297,6 +297,32 @@ default     mysql-snapshot-1   true         mysql-pvc   10Gi          csi-hostpa
   {
     category: 'Storage',
     subcategory: 'Volume Snapshots',
+    command: 'kubectl get volumesnapshots -n my-namespace',
+    description: 'List volume snapshots in a specific namespace',
+    example: 'kubectl get volumesnapshots -n my-namespace',
+    versionIntroduced: '1.17',
+    difficultyLevel: 'advanced',
+    tags: 'get,volumesnapshots,storage,namespace',
+    flags: '-n',
+    output: `NAME               READYTOUSE   SOURCEPVC   RESTORESIZE   SNAPSHOTCLASS   AGE
+mysql-snapshot-1   true         mysql-pvc   10Gi          csi-hostpath    2h`
+  },
+  {
+    category: 'Storage',
+    subcategory: 'Volume Snapshots',
+    command: 'kubectl get volumesnapshots -A',
+    description: 'List volume snapshots in all namespaces',
+    example: 'kubectl get volumesnapshots -A',
+    versionIntroduced: '1.17',
+    difficultyLevel: 'advanced',
+    tags: 'get,volumesnapshots,storage,all-namespaces',
+    flags: '-A',
+    output: `NAMESPACE   NAME               READYTOUSE   SOURCEPVC   RESTORESIZE   SNAPSHOTCLASS   AGE
+default     mysql-snapshot-1   true         mysql-pvc   10Gi          csi-hostpath    2h`
+  },
+  {
+    category: 'Storage',
+    subcategory: 'Volume Snapshots',
     command: 'kubectl get volumesnapshotclasses',
     description: 'List volume snapshot classes',
     example: 'kubectl get volumesnapshotclasses',
@@ -681,6 +707,21 @@ Pod Template:
   {
     category: 'Deployments',
     subcategory: 'Deployment Operations',
+    command: 'kubectl rollout history deployment -n my-namespace',
+    description: 'View deployment rollout history in a namespace',
+    example: 'kubectl rollout history deployment/nginx -n my-namespace',
+    versionIntroduced: '1.2',
+    difficultyLevel: 'intermediate',
+    tags: 'rollout,history,deployment,namespace',
+    flags: '-n',
+    output: `deployment.apps/nginx
+REVISION  CHANGE-CAUSE
+1         <none>
+2         kubectl set image deployment/nginx nginx=nginx:1.19.0`
+  },
+  {
+    category: 'Deployments',
+    subcategory: 'Deployment Operations',
     command: 'kubectl rollout undo deployment --to-revision',
     description: 'Rollback to specific revision',
     example: 'kubectl rollout undo deployment/nginx --to-revision=2',
@@ -726,6 +767,20 @@ partitioned roll out complete: 1 new pods have been updated...`
     output: `REVISION  CHANGE-CAUSE
 1         <none>
 2         kubectl set image statefulset/mysql mysql=mysql:8.0`
+  },
+  {
+    category: 'Advanced Workloads',
+    subcategory: 'StatefulSets',
+    command: 'kubectl rollout history statefulset -n my-namespace',
+    description: 'View stateful set rollout history in a namespace',
+    example: 'kubectl rollout history statefulset/mysql -n my-namespace',
+    versionIntroduced: '1.5',
+    difficultyLevel: 'advanced',
+    tags: 'rollout,history,statefulset,namespace',
+    flags: '-n',
+    output: `statefulset.apps/mysql
+REVISION  CHANGE-CAUSE
+1         <none>`
   },
   {
     category: 'Advanced Workloads',
@@ -850,6 +905,19 @@ kube-system   pod/coredns-565d847f94-4d8q4   1/1     Running   0          5d`
     output: `NAMESPACE   LAST SEEN   TYPE      REASON              OBJECT                  MESSAGE
 default     2m          Normal    Scheduled           pod/nginx               Successfully assigned default/nginx to worker-1
 default     1m          Normal    Pulling             pod/nginx               Pulling image "nginx"`
+  },
+  {
+    category: 'Troubleshooting',
+    subcategory: 'Advanced Debugging',
+    command: 'kubectl get events -n my-namespace',
+    description: 'View recent events in a specific namespace',
+    example: 'kubectl get events -n my-namespace --sort-by=.lastTimestamp',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'get,events,sort,debug,namespace',
+    flags: '-n, --sort-by',
+    output: `LAST SEEN   TYPE      REASON              OBJECT                  MESSAGE
+2m          Normal    Scheduled           pod/nginx               Successfully assigned default/nginx to worker-1`
   },
   {
     category: 'Troubleshooting',

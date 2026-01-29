@@ -71,4 +71,10 @@ export const categoriesData = [
     description: 'JQ commands for processing JSON output from kubectl',
     order: 12,
   },
+  {
+    name: 'Karpenter',
+    icon: 'Cloud',
+    description: 'Karpenter node provisioning and management',
+    order: 13,
+  },
 ];

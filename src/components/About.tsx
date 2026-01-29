@@ -116,13 +116,7 @@ export function About() {
                     </div>
                   </div>
 
-                  <div>
-                    <h5 className="font-bold text-slate-900 dark:text-white mb-3 text-sm uppercase tracking-wider text-opacity-80">Philosophy</h5>
-                    <blockquote className="border-l-4 border-brand-500 pl-4 italic text-slate-600 dark:text-slate-400">
-                      "Infrastructure as Poetry - Writing infrastructure code with elegance. 
-                      Automation as Art - Transforming manual processes into symphonies of efficiency."
-                    </blockquote>
-                  </div>
+
                 </div>
               </div>
             </div>

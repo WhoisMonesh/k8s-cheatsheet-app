@@ -298,6 +298,146 @@ export const rbacCommandsData = [
     flags: '--subresource',
     output: 'yes',
   },
+
+  // --- Missing Variations (RBAC Getters) ---
+  {
+    category: 'Security & RBAC',
+    subcategory: 'Roles',
+    command: 'kubectl get roles',
+    description: 'List Roles in the current namespace',
+    example: 'kubectl get roles',
+    versionIntroduced: '1.6',
+    difficultyLevel: 'beginner',
+    tags: 'rbac,role,list',
+    output: `NAME          CREATED AT
+pod-reader    2024-01-20T10:00:00Z`
+  },
+  {
+    category: 'Security & RBAC',
+    subcategory: 'Roles',
+    command: 'kubectl get roles -n my-namespace',
+    description: 'List Roles in a specific namespace',
+    example: 'kubectl get roles -n production',
+    versionIntroduced: '1.6',
+    difficultyLevel: 'beginner',
+    tags: 'rbac,role,list,namespace',
+    flags: '-n',
+    output: `NAME          CREATED AT
+pod-reader    2024-01-20T10:00:00Z`
+  },
+  {
+    category: 'Security & RBAC',
+    subcategory: 'Roles',
+    command: 'kubectl get roles --all-namespaces',
+    description: 'List Roles across all namespaces',
+    example: 'kubectl get roles --all-namespaces',
+    versionIntroduced: '1.6',
+    difficultyLevel: 'beginner',
+    tags: 'rbac,role,list,all-namespaces',
+    flags: '--all-namespaces',
+    output: `NAMESPACE   NAME          CREATED AT
+default     pod-reader    2024-01-20T10:00:00Z`
+  },
+  {
+    category: 'Security & RBAC',
+    subcategory: 'Roles',
+    command: 'kubectl get rolebindings',
+    description: 'List RoleBindings in the current namespace',
+    example: 'kubectl get rolebindings',
+    versionIntroduced: '1.6',
+    difficultyLevel: 'beginner',
+    tags: 'rbac,rolebinding,list',
+    output: `NAME          ROLE              AGE
+read-pods     Role/pod-reader   5d`
+  },
+  {
+    category: 'Security & RBAC',
+    subcategory: 'Roles',
+    command: 'kubectl get rolebindings -n my-namespace',
+    description: 'List RoleBindings in a specific namespace',
+    example: 'kubectl get rolebindings -n production',
+    versionIntroduced: '1.6',
+    difficultyLevel: 'beginner',
+    tags: 'rbac,rolebinding,list,namespace',
+    flags: '-n',
+    output: `NAME          ROLE              AGE
+read-pods     Role/pod-reader   5d`
+  },
+  {
+    category: 'Security & RBAC',
+    subcategory: 'Roles',
+    command: 'kubectl get rolebindings --all-namespaces',
+    description: 'List RoleBindings across all namespaces',
+    example: 'kubectl get rolebindings --all-namespaces',
+    versionIntroduced: '1.6',
+    difficultyLevel: 'beginner',
+    tags: 'rbac,rolebinding,list,all-namespaces',
+    flags: '--all-namespaces',
+    output: `NAMESPACE   NAME          ROLE              AGE
+default     read-pods     Role/pod-reader   5d`
+  },
+  {
+    category: 'Security & RBAC',
+    subcategory: 'Service Accounts',
+    command: 'kubectl get serviceaccounts',
+    description: 'List ServiceAccounts in the current namespace',
+    example: 'kubectl get serviceaccounts',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'rbac,serviceaccount,list',
+    output: `NAME      SECRETS   AGE
+default   1         30d`
+  },
+  {
+    category: 'Security & RBAC',
+    subcategory: 'Service Accounts',
+    command: 'kubectl get serviceaccounts -n my-namespace',
+    description: 'List ServiceAccounts in a specific namespace',
+    example: 'kubectl get serviceaccounts -n production',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'rbac,serviceaccount,list,namespace',
+    flags: '-n',
+    output: `NAME      SECRETS   AGE
+default   1         30d`
+  },
+  {
+    category: 'Security & RBAC',
+    subcategory: 'Service Accounts',
+    command: 'kubectl get serviceaccounts --all-namespaces',
+    description: 'List ServiceAccounts across all namespaces',
+    example: 'kubectl get serviceaccounts --all-namespaces',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'rbac,serviceaccount,list,all-namespaces',
+    flags: '--all-namespaces',
+    output: `NAMESPACE     NAME      SECRETS   AGE
+kube-system   coredns   1         30d`
+  },
+  {
+    category: 'Security & RBAC',
+    subcategory: 'ClusterRoles',
+    command: 'kubectl get clusterroles',
+    description: 'List all ClusterRoles (non-namespaced)',
+    example: 'kubectl get clusterroles',
+    versionIntroduced: '1.6',
+    difficultyLevel: 'beginner',
+    tags: 'rbac,clusterrole,list',
+    output: `NAME            CREATED AT
+cluster-admin   2024-01-01T00:00:00Z`
+  },
+  {
+    category: 'Security & RBAC',
+    subcategory: 'ClusterRoles',
+    command: 'kubectl get clusterrolebindings',
+    description: 'List all ClusterRoleBindings (non-namespaced)',
+    example: 'kubectl get clusterrolebindings',
+    versionIntroduced: '1.6',
+    difficultyLevel: 'beginner',
+    tags: 'rbac,clusterrolebinding,list',
+    output: `NAME            ROLE                        AGE
+cluster-admin   ClusterRole/cluster-admin   30d`
+  },
   {
     category: 'Security & RBAC',
     subcategory: 'Authorization',
