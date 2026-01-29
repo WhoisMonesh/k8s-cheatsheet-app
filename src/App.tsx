@@ -51,6 +51,7 @@ import { clusterManagementCommandsData } from './db/data/clusterManagementComman
 import { configurationCommandsData } from './db/data/configurationCommands';
 import { helmCommandsData } from './db/data/helmCommands';
 import { ecosystemCommandsData } from './db/data/ecosystemCommands';
+import { allKarpenterCommands } from './db/data/karpenterCommands';
 import { k8sVersionsData } from './db/data/k8sVersions';
 import { categoriesData } from './db/data/categories';
 import { yamlTemplatesData } from './db/data/yamlTemplates';
@@ -479,6 +480,7 @@ function App() {
       ...configurationCommandsData,
       ...helmCommandsData,
       ...ecosystemCommandsData,
+      ...allKarpenterCommands,
     ];
 
     const seen = new Set<string>();

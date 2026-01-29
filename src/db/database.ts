@@ -29,9 +29,10 @@ import { categoriesData } from './data/categories';
 import { yamlTemplatesData } from './data/yamlTemplates';
 import { troubleshootingGuidesData } from './data/troubleshootingGuides';
 import { bestPracticesData } from './data/bestPractices';
+import { allKarpenterCommands } from './data/karpenterCommands';
 
 let db: Database | null = null;
-const CURRENT_DB_VERSION = 'k8s-cheatsheet-db-v14-version-history-updated';
+const CURRENT_DB_VERSION = 'k8s-cheatsheet-db-v21-networking-modern';
 
 function clearOldDatabases() {
   const oldVersions = [
@@ -261,7 +262,8 @@ function populateDatabase(database: Database) {
     ...networkingCommandsData,
     ...clusterManagementCommandsData,
     ...configurationCommandsData,
-    ...helmCommandsData
+    ...helmCommandsData,
+    ...allKarpenterCommands
   ];
 
   const seenCommands = new Set<string>();

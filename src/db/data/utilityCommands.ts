@@ -15,6 +15,17 @@ export const utilityCommandsData = [
   {
     category: 'Advanced Workloads',
     subcategory: 'Custom Resources',
+    command: 'kubectl get crds',
+    description: 'List custom resource definitions (plural)',
+    example: 'kubectl get crds',
+    versionIntroduced: '1.7',
+    difficultyLevel: 'expert',
+    tags: 'get,crd,custom-resources,list',
+    output: 'NAME                                    CREATED AT\nmycustomresources.example.com           2024-01-26T10:00:00Z\notherresources.example.org              2024-01-26T10:05:00Z',
+  },
+  {
+    category: 'Advanced Workloads',
+    subcategory: 'Custom Resources',
     command: 'kubectl describe crd',
     description: 'Describe custom resource definition',
     example: 'kubectl describe crd mycustomresource.example.com',

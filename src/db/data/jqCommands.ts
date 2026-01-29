@@ -13,6 +13,18 @@ export const jqCommandsData = [
   },
   {
     category: 'JSON Processing',
+    subcategory: 'JQ Basics',
+    command: 'jq',
+    description: 'Extract pod names from JSON output (All Namespaces)',
+    example: "kubectl get pods -A -o json | jq '.items[].metadata.name'",
+    versionIntroduced: '1.0',
+    difficultyLevel: 'Beginner',
+    tags: 'jq,json,pods,names,all-namespaces',
+    flags: '-A',
+    output: 'List of pod names from all namespaces'
+  },
+  {
+    category: 'JSON Processing',
     subcategory: 'JQ Filtering',
     command: 'jq',
     description: 'Filter running pods using jq',
@@ -22,6 +34,18 @@ export const jqCommandsData = [
     tags: 'jq,filter,status,running',
     flags: '',
     output: 'Names of running pods'
+  },
+  {
+    category: 'JSON Processing',
+    subcategory: 'JQ Filtering',
+    command: 'jq',
+    description: 'Filter running pods using jq (All Namespaces)',
+    example: "kubectl get pods -A -o json | jq '.items[] | select(.status.phase==\"Running\") | .metadata.name'",
+    versionIntroduced: '1.0',
+    difficultyLevel: 'Intermediate',
+    tags: 'jq,filter,status,running,all-namespaces',
+    flags: '-A',
+    output: 'Names of running pods from all namespaces'
   },
   {
     category: 'JSON Processing',
@@ -58,6 +82,18 @@ export const jqCommandsData = [
     tags: 'jq,map,namespace,transformation',
     flags: '',
     output: 'Array of name/namespace pairs'
+  },
+  {
+    category: 'JSON Processing',
+    subcategory: 'JQ Map',
+    command: 'jq map',
+    description: 'Map pod names in default namespace',
+    example: "kubectl get pods -o json | jq '.items | map({name: .metadata.name})'",
+    versionIntroduced: '1.0',
+    difficultyLevel: 'Intermediate',
+    tags: 'jq,map,transformation',
+    flags: '',
+    output: 'Array of names'
   },
   {
     category: 'JSON Processing',
@@ -117,6 +153,18 @@ export const jqCommandsData = [
     difficultyLevel: 'Intermediate',
     tags: 'jq,sort,timestamp,age',
     flags: '',
+    output: 'Pods sorted by age'
+  },
+  {
+    category: 'JSON Processing',
+    subcategory: 'JQ Sorting',
+    command: 'jq',
+    description: 'Sort pods by creation timestamp (All Namespaces)',
+    example: "kubectl get pods -A -o json | jq '.items | sort_by(.metadata.creationTimestamp) | .[].metadata.name'",
+    versionIntroduced: '1.0',
+    difficultyLevel: 'Intermediate',
+    tags: 'jq,sort,timestamp,age,all-namespaces',
+    flags: '-A',
     output: 'Pods sorted by age'
   },
   {
@@ -515,7 +563,79 @@ export const jqCommandsData = [
     flags: '',
     output: 'Security context configuration keys'
   },
- {
+  {
+    category: 'JSON Processing',
+    subcategory: 'JQ Namespace Variations',
+    command: 'jq',
+    description: 'Extract pod names from default namespace explicitly',
+    example: "kubectl get pods -n default -o json | jq '.items[].metadata.name'",
+    versionIntroduced: '1.0',
+    difficultyLevel: 'Beginner',
+    tags: 'jq,json,pods,names,default,namespace',
+    flags: '-n default',
+    output: 'List of pod names from default namespace'
+  },
+  {
+    category: 'JSON Processing',
+    subcategory: 'JQ Namespace Variations',
+    command: 'jq',
+    description: 'Extract pod names from custom namespace',
+    example: "kubectl get pods -n <namespace> -o json | jq '.items[].metadata.name'",
+    versionIntroduced: '1.0',
+    difficultyLevel: 'Beginner',
+    tags: 'jq,json,pods,names,custom,namespace',
+    flags: '-n <namespace>',
+    output: 'List of pod names from custom namespace'
+  },
+  {
+    category: 'JSON Processing',
+    subcategory: 'JQ Namespace Variations',
+    command: 'jq',
+    description: 'Filter running pods in default namespace explicitly',
+    example: "kubectl get pods -n default -o json | jq '.items[] | select(.status.phase==\"Running\") | .metadata.name'",
+    versionIntroduced: '1.0',
+    difficultyLevel: 'Intermediate',
+    tags: 'jq,filter,status,running,default,namespace',
+    flags: '-n default',
+    output: 'Names of running pods in default namespace'
+  },
+  {
+    category: 'JSON Processing',
+    subcategory: 'JQ Namespace Variations',
+    command: 'jq',
+    description: 'Filter running pods in custom namespace',
+    example: "kubectl get pods -n <namespace> -o json | jq '.items[] | select(.status.phase==\"Running\") | .metadata.name'",
+    versionIntroduced: '1.0',
+    difficultyLevel: 'Intermediate',
+    tags: 'jq,filter,status,running,custom,namespace',
+    flags: '-n <namespace>',
+    output: 'Names of running pods in custom namespace'
+  },
+  {
+    category: 'JSON Processing',
+    subcategory: 'JQ Namespace Variations',
+    command: 'jq',
+    description: 'Sort pods by creation timestamp in default namespace explicitly',
+    example: "kubectl get pods -n default -o json | jq '.items | sort_by(.metadata.creationTimestamp) | .[].metadata.name'",
+    versionIntroduced: '1.0',
+    difficultyLevel: 'Intermediate',
+    tags: 'jq,sort,timestamp,age,default,namespace',
+    flags: '-n default',
+    output: 'Pods sorted by age in default namespace'
+  },
+  {
+    category: 'JSON Processing',
+    subcategory: 'JQ Namespace Variations',
+    command: 'jq',
+    description: 'Sort pods by creation timestamp in custom namespace',
+    example: "kubectl get pods -n <namespace> -o json | jq '.items | sort_by(.metadata.creationTimestamp) | .[].metadata.name'",
+    versionIntroduced: '1.0',
+    difficultyLevel: 'Intermediate',
+    tags: 'jq,sort,timestamp,age,custom,namespace',
+    flags: '-n <namespace>',
+    output: 'Pods sorted by age in custom namespace'
+  },
+  {
     category: 'JSON Processing',
     subcategory: 'JQ Resource Quotas',
     command: 'jq',
@@ -683,7 +803,7 @@ export const jqCommandsData = [
     flags: '',
     output: 'Topology spread constraint settings'
   },
- {
+  {
     category: 'JSON Processing',
     subcategory: 'JQ Runtime Classes',
     command: 'jq',
@@ -766,5 +886,101 @@ export const jqCommandsData = [
     tags: 'jq,cost,management,billing',
     flags: '',
     output: 'Estimated resource cost calculation'
+  },
+  {
+    category: 'JSON Processing',
+    subcategory: 'JQ Namespace Variations',
+    command: 'jq',
+    description: 'Get pod names from all namespaces',
+    example: "kubectl get pods --all-namespaces -o json | jq '.items[] | {namespace: .metadata.namespace, name: .metadata.name}'",
+    versionIntroduced: '1.0',
+    difficultyLevel: 'Beginner',
+    tags: 'jq,namespace,all,list',
+    flags: '--all-namespaces',
+    output: 'Namespace and pod name pairs'
+  },
+  {
+    category: 'JSON Processing',
+    subcategory: 'JQ Namespace Variations',
+    command: 'jq',
+    description: 'Get pod names from default namespace explicitly',
+    example: "kubectl get pods -n default -o json | jq '.items[].metadata.name'",
+    versionIntroduced: '1.0',
+    difficultyLevel: 'Beginner',
+    tags: 'jq,namespace,default,explicit',
+    flags: '-n default',
+    output: 'Pod names from default namespace'
+  },
+  {
+    category: 'JSON Processing',
+    subcategory: 'JQ Namespace Variations',
+    command: 'jq',
+    description: 'Get services from all namespaces',
+    example: "kubectl get svc -A -o json | jq '.items[] | {namespace: .metadata.namespace, name: .metadata.name, type: .spec.type}'",
+    versionIntroduced: '1.0',
+    difficultyLevel: 'Beginner',
+    tags: 'jq,namespace,all,services',
+    flags: '-A',
+    output: 'Namespace, service name and type'
+  },
+  {
+    category: 'JSON Processing',
+    subcategory: 'JQ Namespace Variations',
+    command: 'jq',
+    description: 'Get services from default namespace explicitly',
+    example: "kubectl get svc -n default -o json | jq '.items[] | {name: .metadata.name, clusterIP: .spec.clusterIP}'",
+    versionIntroduced: '1.0',
+    difficultyLevel: 'Beginner',
+    tags: 'jq,namespace,default,services',
+    flags: '-n default',
+    output: 'Service name and ClusterIP'
+  },
+  {
+    category: 'JSON Processing',
+    subcategory: 'JQ Namespace Variations',
+    command: 'jq',
+    description: 'Get deployments from all namespaces',
+    example: "kubectl get deploy -A -o json | jq '.items[] | {namespace: .metadata.namespace, name: .metadata.name, replicas: .spec.replicas}'",
+    versionIntroduced: '1.0',
+    difficultyLevel: 'Beginner',
+    tags: 'jq,namespace,all,deployments',
+    flags: '-A',
+    output: 'Namespace, deployment name and replicas'
+  },
+  {
+    category: 'JSON Processing',
+    subcategory: 'JQ Namespace Variations',
+    command: 'jq',
+    description: 'Get deployments from default namespace explicitly',
+    example: "kubectl get deploy -n default -o json | jq '.items[] | {name: .metadata.name, available: .status.availableReplicas}'",
+    versionIntroduced: '1.0',
+    difficultyLevel: 'Beginner',
+    tags: 'jq,namespace,default,deployments',
+    flags: '-n default',
+    output: 'Deployment name and available replicas'
+  },
+  {
+    category: 'JSON Processing',
+    subcategory: 'JQ Namespace Variations',
+    command: 'jq',
+    description: 'Get configmaps from all namespaces',
+    example: "kubectl get cm -A -o json | jq '.items[] | {namespace: .metadata.namespace, name: .metadata.name}'",
+    versionIntroduced: '1.0',
+    difficultyLevel: 'Beginner',
+    tags: 'jq,namespace,all,configmaps',
+    flags: '-A',
+    output: 'Namespace and configmap name'
+  },
+  {
+    category: 'JSON Processing',
+    subcategory: 'JQ Namespace Variations',
+    command: 'jq',
+    description: 'Get events from all namespaces',
+    example: "kubectl get events -A -o json | jq '.items[] | {namespace: .metadata.namespace, message: .message, reason: .reason}'",
+    versionIntroduced: '1.0',
+    difficultyLevel: 'Intermediate',
+    tags: 'jq,namespace,all,events',
+    flags: '-A',
+    output: 'Namespace, event message and reason'
   }
 ];

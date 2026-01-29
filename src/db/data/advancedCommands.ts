@@ -482,9 +482,9 @@ export const advancedK8sCommands = [
   {
     category: 'Advanced kubectl',
     subcategory: 'Advanced Networking',
-    command: 'kubectl get endpointslices -o json | jq \'.items[] | select(.metadata.labels.endpointslice\\.kubernetes\\.io/managed-by | contains(\"nginx-ingress-controller\"))\'',
+    command: 'kubectl get endpointslices -o json | jq \'.items[] | select(.metadata.labels.\"endpointslice.kubernetes.io/managed-by\" | contains(\"nginx-ingress-controller\"))\'',
     description: 'Find endpoint slices managed by specific controller',
-    example: 'kubectl get endpointslices -o json | jq \'.items[] | select(.metadata.labels.endpointslice\\.kubernetes\\.io/managed-by | contains(\"nginx-ingress-controller\"))\'',
+    example: 'kubectl get endpointslices -o json | jq \'.items[] | select(.metadata.labels.\"endpointslice.kubernetes.io/managed-by\" | contains(\"nginx-ingress-controller\"))\'',
     versionIntroduced: '1.17',
     difficultyLevel: 'Expert',
     tags: 'endpointslices,networking,jq',

@@ -179,6 +179,33 @@ kube-system   coredns-787d4945fb-12345           1/1     Running   0          32
   {
     category: 'Pods',
     subcategory: 'Pod Management',
+    command: 'kubectl get pods -A',
+    description: 'List all pods in all namespaces',
+    example: 'kubectl get pods -A -o wide',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'pods,list,all-namespaces',
+    flags: '-A, -o wide, --show-labels',
+    output: `NAMESPACE     NAME                               READY   STATUS    RESTARTS   AGE
+default       nginx-deployment-86dcfb45d-45678   1/1     Running   0          5m
+kube-system   coredns-787d4945fb-12345           1/1     Running   0          32d`,
+  },
+  {
+    category: 'Pods',
+    subcategory: 'Pod Management',
+    command: 'kubectl get pods -n my-namespace',
+    description: 'List pods in a specific namespace',
+    example: 'kubectl get pods -n my-namespace',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'pods,list,namespace',
+    flags: '-n',
+    output: `NAME                               READY   STATUS    RESTARTS   AGE
+nginx-deployment-86dcfb45d-45678   1/1     Running   0          5m`,
+  },
+  {
+    category: 'Pods',
+    subcategory: 'Pod Management',
     command: 'kubectl describe pod',
     description: 'Show detailed information about a pod',
     example: 'kubectl describe pod nginx-pod',
@@ -215,6 +242,39 @@ Events:
   {
     category: 'Pods',
     subcategory: 'Pod Management',
+    command: 'kubectl describe pods -A',
+    description: 'Describe all pods in all namespaces',
+    example: 'kubectl describe pods -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'pods,describe,all-namespaces',
+    flags: '-A',
+    output: `Name:             nginx-pod
+Namespace:        default
+...
+Name:             coredns-787d4945fb-12345
+Namespace:        kube-system
+...`,
+  },
+  {
+    category: 'Pods',
+    subcategory: 'Pod Management',
+    command: 'kubectl describe pod -n my-namespace',
+    description: 'Describe a pod in a specific namespace',
+    example: 'kubectl describe pod nginx-pod -n my-namespace',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'pods,describe,namespace',
+    flags: '-n',
+    output: `Name:             nginx-pod
+Namespace:        my-namespace
+Priority:         0
+Service Account:  default
+...`,
+  },
+  {
+    category: 'Pods',
+    subcategory: 'Pod Management',
     command: 'kubectl run',
     description: 'Create and run a particular image in a pod',
     example: 'kubectl run nginx --image=nginx:latest --port=80',
@@ -235,6 +295,19 @@ Events:
     tags: 'pods,delete,remove',
     flags: '--force, --grace-period, --now',
     output: `pod "nginx-pod" deleted`,
+  },
+  {
+    category: 'Pods',
+    subcategory: 'Pod Management',
+    command: 'kubectl delete pods by label -A',
+    description: 'Delete pods matching a label in all namespaces',
+    example: 'kubectl delete pods -l app=nginx -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'pods,delete,remove,all-namespaces,label',
+    flags: '-l, -A, --force, --grace-period',
+    output: `pod "nginx-pod-1" deleted
+pod "nginx-pod-2" deleted`,
   },
   {
     category: 'Pods',
@@ -443,6 +516,33 @@ backend-api        2/2     2            2           4h    api          api:v1.2 
   {
     category: 'Deployments',
     subcategory: 'Deployment Management',
+    command: 'kubectl get deployments -A',
+    description: 'List all deployments in all namespaces',
+    example: 'kubectl get deployments -A -o wide',
+    versionIntroduced: '1.2',
+    difficultyLevel: 'beginner',
+    tags: 'deployment,list,all-namespaces',
+    flags: '-A, -o wide',
+    output: `NAMESPACE   NAME               READY   UP-TO-DATE   AVAILABLE   AGE
+default     nginx-deployment   3/3     3            3           25m
+prod        backend-api        2/2     2            2           4h`,
+  },
+  {
+    category: 'Deployments',
+    subcategory: 'Deployment Management',
+    command: 'kubectl get deployments -n my-namespace',
+    description: 'List deployments in a specific namespace',
+    example: 'kubectl get deployments -n my-namespace',
+    versionIntroduced: '1.2',
+    difficultyLevel: 'beginner',
+    tags: 'deployment,list,namespace',
+    flags: '-n',
+    output: `NAME               READY   UP-TO-DATE   AVAILABLE   AGE
+nginx-deployment   3/3     3            3           25m`,
+  },
+  {
+    category: 'Deployments',
+    subcategory: 'Deployment Management',
     command: 'kubectl create deployment',
     description: 'Create a new deployment',
     example: 'kubectl create deployment nginx --image=nginx:latest --replicas=3',
@@ -492,6 +592,36 @@ NewReplicaSet:   nginx-5d59d67564 (3/3 replicas created)`,
   {
     category: 'Deployments',
     subcategory: 'Deployment Management',
+    command: 'kubectl describe deployments -A',
+    description: 'Describe all deployments in all namespaces',
+    example: 'kubectl describe deployments -A',
+    versionIntroduced: '1.2',
+    difficultyLevel: 'intermediate',
+    tags: 'deployment,describe,all-namespaces',
+    flags: '-A',
+    output: `Name:                   nginx
+Namespace:              default
+...
+Name:                   backend-api
+Namespace:              prod
+...`,
+  },
+  {
+    category: 'Deployments',
+    subcategory: 'Deployment Management',
+    command: 'kubectl describe deployment -n my-namespace',
+    description: 'Describe a deployment in a specific namespace',
+    example: 'kubectl describe deployment nginx -n my-namespace',
+    versionIntroduced: '1.2',
+    difficultyLevel: 'beginner',
+    tags: 'deployment,describe,namespace',
+    flags: '-n',
+    output: `Name:                   nginx
+Namespace:              my-namespace`,
+  },
+  {
+    category: 'Deployments',
+    subcategory: 'Deployment Management',
     command: 'kubectl delete deployment',
     description: 'Delete a deployment',
     example: 'kubectl delete deployment nginx',
@@ -510,6 +640,18 @@ NewReplicaSet:   nginx-5d59d67564 (3/3 replicas created)`,
     difficultyLevel: 'beginner',
     tags: 'scale,replicas,deployment',
     flags: '--replicas, --current-replicas, --resource-version',
+    output: `deployment.apps/nginx scaled`,
+  },
+  {
+    category: 'Deployments',
+    subcategory: 'Scaling',
+    command: 'kubectl scale deployment -l app=nginx --replicas=5 -A',
+    description: 'Scale deployments matching label in all namespaces',
+    example: 'kubectl scale deployment -l app=nginx --replicas=5 -A',
+    versionIntroduced: '1.2',
+    difficultyLevel: 'intermediate',
+    tags: 'scale,replicas,deployment,all-namespaces',
+    flags: '--replicas, -l, -A',
     output: `deployment.apps/nginx scaled`,
   },
   {
@@ -567,6 +709,19 @@ REVISION  CHANGE-CAUSE
   {
     category: 'Deployments',
     subcategory: 'Rollouts',
+    command: 'kubectl rollout undo deployment -A',
+    description: 'Rollback all deployments in all namespaces',
+    example: 'kubectl rollout undo deployment -A',
+    versionIntroduced: '1.2',
+    difficultyLevel: 'advanced',
+    tags: 'rollout,undo,rollback,deployment,all-namespaces',
+    flags: '-A',
+    output: `deployment.apps/nginx rolled back
+deployment.apps/backend rolled back`,
+  },
+  {
+    category: 'Deployments',
+    subcategory: 'Rollouts',
     command: 'kubectl rollout restart',
     description: 'Restart a deployment',
     example: 'kubectl rollout restart deployment/nginx',
@@ -574,6 +729,19 @@ REVISION  CHANGE-CAUSE
     difficultyLevel: 'intermediate',
     tags: 'rollout,restart,deployment',
     output: `deployment.apps/nginx restarted`,
+  },
+  {
+    category: 'Deployments',
+    subcategory: 'Rollouts',
+    command: 'kubectl rollout restart deployment -A',
+    description: 'Restart all deployments in all namespaces',
+    example: 'kubectl rollout restart deployment -A',
+    versionIntroduced: '1.15',
+    difficultyLevel: 'advanced',
+    tags: 'rollout,restart,deployment,all-namespaces',
+    flags: '-A',
+    output: `deployment.apps/nginx restarted
+deployment.apps/backend restarted`,
   },
   {
     category: 'Deployments',
@@ -589,6 +757,19 @@ REVISION  CHANGE-CAUSE
   {
     category: 'Deployments',
     subcategory: 'Rollouts',
+    command: 'kubectl rollout pause deployment -A',
+    description: 'Pause all deployments in all namespaces',
+    example: 'kubectl rollout pause deployment -A',
+    versionIntroduced: '1.2',
+    difficultyLevel: 'advanced',
+    tags: 'rollout,pause,deployment,all-namespaces',
+    flags: '-A',
+    output: `deployment.apps/nginx paused
+deployment.apps/backend paused`,
+  },
+  {
+    category: 'Deployments',
+    subcategory: 'Rollouts',
     command: 'kubectl rollout resume',
     description: 'Resume a paused deployment',
     example: 'kubectl rollout resume deployment/nginx',
@@ -596,6 +777,19 @@ REVISION  CHANGE-CAUSE
     difficultyLevel: 'advanced',
     tags: 'rollout,resume,deployment',
     output: `deployment.apps/nginx resumed`,
+  },
+  {
+    category: 'Deployments',
+    subcategory: 'Rollouts',
+    command: 'kubectl rollout resume deployment -A',
+    description: 'Resume all deployments in all namespaces',
+    example: 'kubectl rollout resume deployment -A',
+    versionIntroduced: '1.2',
+    difficultyLevel: 'advanced',
+    tags: 'rollout,resume,deployment,all-namespaces',
+    flags: '-A',
+    output: `deployment.apps/nginx resumed
+deployment.apps/backend resumed`,
   },
   {
     category: 'Deployments',
@@ -638,6 +832,34 @@ web-app      NodePort    10.96.234.12    <none>        80:30080/TCP   1h`,
   {
     category: 'Services & Networking',
     subcategory: 'Services',
+    command: 'kubectl get services -A',
+    description: 'List all services in all namespaces',
+    example: 'kubectl get services -A -o wide',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'service,list,all-namespaces',
+    flags: '-A, -o wide',
+    output: `NAMESPACE     NAME         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+default       kubernetes   ClusterIP   10.96.0.1       <none>        443/TCP        2d4h
+default       nginx        ClusterIP   10.96.124.218   <none>        80/TCP         4h
+kube-system   kube-dns     ClusterIP   10.96.0.10      <none>        53/UDP,53/TCP  2d4h`,
+  },
+  {
+    category: 'Services & Networking',
+    subcategory: 'Services',
+    command: 'kubectl get services -n my-namespace',
+    description: 'List services in a specific namespace',
+    example: 'kubectl get services -n my-namespace',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'service,list,namespace',
+    flags: '-n',
+    output: `NAME         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+nginx        ClusterIP   10.96.124.218   <none>        80/TCP         4h`,
+  },
+  {
+    category: 'Services & Networking',
+    subcategory: 'Services',
     command: 'kubectl describe service',
     description: 'Show detailed information about a service',
     example: 'kubectl describe service nginx',
@@ -663,6 +885,37 @@ Events:            <none>`,
   {
     category: 'Services & Networking',
     subcategory: 'Services',
+    command: 'kubectl describe services -A',
+    description: 'Describe all services in all namespaces',
+    example: 'kubectl describe services -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'service,describe,all-namespaces',
+    flags: '-A',
+    output: `Name:              nginx
+Namespace:         default
+...
+Name:              kube-dns
+Namespace:         kube-system
+...`,
+  },
+  {
+    category: 'Services & Networking',
+    subcategory: 'Services',
+    command: 'kubectl describe service -n my-namespace',
+    description: 'Describe a service in a specific namespace',
+    example: 'kubectl describe service nginx -n my-namespace',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'service,describe,namespace',
+    flags: '-n',
+    output: `Name:              nginx
+Namespace:         my-namespace
+...`,
+  },
+  {
+    category: 'Services & Networking',
+    subcategory: 'Services',
     command: 'kubectl expose deployment',
     description: 'Create a service for a deployment',
     example: 'kubectl expose deployment nginx --port=80 --target-port=8080 --type=LoadBalancer',
@@ -682,6 +935,19 @@ Events:            <none>`,
     difficultyLevel: 'beginner',
     tags: 'service,delete,remove',
     output: `service "nginx" deleted`,
+  },
+  {
+    category: 'Services & Networking',
+    subcategory: 'Services',
+    command: 'kubectl delete service by label -A',
+    description: 'Delete services matching a label in all namespaces',
+    example: 'kubectl delete service -l app=nginx -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'service,delete,remove,all-namespaces,label',
+    flags: '-l, -A',
+    output: `service "nginx" deleted
+service "nginx-prod" deleted`,
   },
   {
     category: 'Services & Networking',
@@ -712,6 +978,33 @@ web-ingress    nginx    web.example.com    192.168.100.11   80, 443 2d`,
   {
     category: 'Services & Networking',
     subcategory: 'Ingress',
+    command: 'kubectl get ingress -A',
+    description: 'List all ingress resources in all namespaces',
+    example: 'kubectl get ingress -A -o wide',
+    versionIntroduced: '1.1',
+    difficultyLevel: 'intermediate',
+    tags: 'ingress,list,all-namespaces',
+    flags: '-A, -o wide',
+    output: `NAMESPACE   NAME           CLASS    HOSTS              ADDRESS          PORTS   AGE
+default     nginx-ingress  nginx    nginx.example.com  192.168.100.10   80      5m
+prod        web-ingress    nginx    web.example.com    192.168.100.11   80, 443 2d`,
+  },
+  {
+    category: 'Services & Networking',
+    subcategory: 'Ingress',
+    command: 'kubectl get ingress -n my-namespace',
+    description: 'List ingress resources in a specific namespace',
+    example: 'kubectl get ingress -n my-namespace',
+    versionIntroduced: '1.1',
+    difficultyLevel: 'intermediate',
+    tags: 'ingress,list,namespace',
+    flags: '-n',
+    output: `NAME           CLASS    HOSTS              ADDRESS          PORTS   AGE
+nginx-ingress  nginx    nginx.example.com  192.168.100.10   80      5m`,
+  },
+  {
+    category: 'Services & Networking',
+    subcategory: 'Ingress',
     command: 'kubectl describe ingress',
     description: 'Show detailed information about an ingress',
     example: 'kubectl describe ingress nginx-ingress',
@@ -735,6 +1028,37 @@ Events:
   },
   {
     category: 'Services & Networking',
+    subcategory: 'Ingress',
+    command: 'kubectl describe ingress -A',
+    description: 'Describe all ingress resources in all namespaces',
+    example: 'kubectl describe ingress -A',
+    versionIntroduced: '1.1',
+    difficultyLevel: 'intermediate',
+    tags: 'ingress,describe,all-namespaces',
+    flags: '-A',
+    output: `Name:             nginx-ingress
+Namespace:        default
+...
+Name:             web-ingress
+Namespace:        prod
+...`,
+  },
+  {
+    category: 'Services & Networking',
+    subcategory: 'Ingress',
+    command: 'kubectl describe ingress -n my-namespace',
+    description: 'Describe an ingress in a specific namespace',
+    example: 'kubectl describe ingress nginx-ingress -n my-namespace',
+    versionIntroduced: '1.1',
+    difficultyLevel: 'intermediate',
+    tags: 'ingress,describe,namespace',
+    flags: '-n',
+    output: `Name:             nginx-ingress
+Namespace:        my-namespace
+...`,
+  },
+  {
+    category: 'Services & Networking',
     subcategory: 'Network Policies',
     command: 'kubectl get networkpolicies',
     description: 'List all network policies',
@@ -745,6 +1069,33 @@ Events:
     output: `NAME             POD-SELECTOR   AGE
 allow-frontend   app=frontend   10d
 deny-all         <none>         10d`,
+  },
+  {
+    category: 'Services & Networking',
+    subcategory: 'Network Policies',
+    command: 'kubectl get networkpolicies -A',
+    description: 'List all network policies in all namespaces',
+    example: 'kubectl get networkpolicies -A',
+    versionIntroduced: '1.3',
+    difficultyLevel: 'advanced',
+    tags: 'networkpolicy,list,all-namespaces',
+    flags: '-A',
+    output: `NAMESPACE   NAME             POD-SELECTOR   AGE
+default     allow-frontend   app=frontend   10d
+default     deny-all         <none>         10d`,
+  },
+  {
+    category: 'Services & Networking',
+    subcategory: 'Network Policies',
+    command: 'kubectl get networkpolicies -n my-namespace',
+    description: 'List network policies in a specific namespace',
+    example: 'kubectl get networkpolicies -n my-namespace',
+    versionIntroduced: '1.3',
+    difficultyLevel: 'advanced',
+    tags: 'networkpolicy,list,namespace',
+    flags: '-n',
+    output: `NAME             POD-SELECTOR   AGE
+allow-frontend   app=frontend   10d`,
   },
   {
     category: 'Services & Networking',
@@ -771,6 +1122,23 @@ Spec:
   },
   {
     category: 'Services & Networking',
+    subcategory: 'Network Policies',
+    command: 'kubectl describe networkpolicies -A',
+    description: 'Describe all network policies in all namespaces',
+    example: 'kubectl describe networkpolicies -A',
+    versionIntroduced: '1.3',
+    difficultyLevel: 'advanced',
+    tags: 'networkpolicy,describe,all-namespaces',
+    flags: '-A',
+    output: `Name:         allow-frontend
+Namespace:    default
+...
+Name:         deny-all
+Namespace:    default
+...`,
+  },
+  {
+    category: 'Services & Networking',
     subcategory: 'Endpoints',
     command: 'kubectl get endpoints',
     description: 'List all endpoints',
@@ -781,6 +1149,34 @@ Spec:
     output: `NAME         ENDPOINTS                               AGE
 kubernetes   192.168.49.2:8443                       2d4h
 nginx        10.244.1.4:80,10.244.2.3:80             4h`,
+  },
+  {
+    category: 'Services & Networking',
+    subcategory: 'Endpoints',
+    command: 'kubectl get endpoints -n my-namespace',
+    description: 'List all endpoints in a specific namespace',
+    example: 'kubectl get endpoints -n my-namespace',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'endpoints,networking,service,namespace',
+    flags: '-n',
+    output: `NAME         ENDPOINTS                               AGE
+nginx        10.244.1.4:80,10.244.2.3:80             4h`,
+  },
+  {
+    category: 'Services & Networking',
+    subcategory: 'Endpoints',
+    command: 'kubectl get endpoints -A',
+    description: 'List all endpoints in all namespaces',
+    example: 'kubectl get endpoints -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'endpoints,networking,service,all-namespaces',
+    flags: '-A',
+    output: `NAMESPACE     NAME         ENDPOINTS                               AGE
+default       kubernetes   192.168.49.2:8443                       2d4h
+default       nginx        10.244.1.4:80,10.244.2.3:80             4h
+kube-system   kube-dns     10.96.0.10:53                           2d4h`,
   },
   {
     category: 'Configuration',
@@ -794,6 +1190,33 @@ nginx        10.244.1.4:80,10.244.2.3:80             4h`,
     output: `NAME               DATA   AGE
 app-config         2      5d
 kube-root-ca.crt   1      30d`,
+  },
+  {
+    category: 'Configuration',
+    subcategory: 'ConfigMaps',
+    command: 'kubectl get configmaps -A',
+    description: 'List all ConfigMaps in all namespaces',
+    example: 'kubectl get configmaps -A',
+    versionIntroduced: '1.2',
+    difficultyLevel: 'beginner',
+    tags: 'configmap,list,all-namespaces',
+    flags: '-A',
+    output: `NAMESPACE     NAME               DATA   AGE
+default       app-config         2      5d
+kube-system   coredns            1      30d`,
+  },
+  {
+    category: 'Configuration',
+    subcategory: 'ConfigMaps',
+    command: 'kubectl get configmaps -n my-namespace',
+    description: 'List ConfigMaps in a specific namespace',
+    example: 'kubectl get configmaps -n my-namespace',
+    versionIntroduced: '1.2',
+    difficultyLevel: 'beginner',
+    tags: 'configmap,list,namespace',
+    flags: '-n',
+    output: `NAME               DATA   AGE
+app-config         2      5d`,
   },
   {
     category: 'Configuration',
@@ -839,6 +1262,44 @@ Events:  <none>`,
   {
     category: 'Configuration',
     subcategory: 'ConfigMaps',
+    command: 'kubectl describe configmap -n my-namespace',
+    description: 'Describe a ConfigMap in a specific namespace',
+    example: 'kubectl describe configmap app-config -n my-namespace',
+    versionIntroduced: '1.2',
+    difficultyLevel: 'beginner',
+    tags: 'configmap,describe,namespace',
+    flags: '-n',
+    output: `Name:         app-config
+Namespace:    my-namespace
+Labels:       <none>
+Annotations:  <none>
+
+Data
+====
+key1:
+----
+value1`,
+  },
+  {
+    category: 'Configuration',
+    subcategory: 'ConfigMaps',
+    command: 'kubectl describe configmaps -A',
+    description: 'Describe all ConfigMaps in all namespaces',
+    example: 'kubectl describe configmaps -A',
+    versionIntroduced: '1.2',
+    difficultyLevel: 'intermediate',
+    tags: 'configmap,describe,all-namespaces',
+    flags: '-A',
+    output: `Name:         app-config
+Namespace:    default
+...
+Name:         coredns
+Namespace:    kube-system
+...`,
+  },
+  {
+    category: 'Configuration',
+    subcategory: 'ConfigMaps',
     command: 'kubectl delete configmap',
     description: 'Delete a ConfigMap',
     example: 'kubectl delete configmap app-config',
@@ -846,6 +1307,31 @@ Events:  <none>`,
     difficultyLevel: 'beginner',
     tags: 'configmap,delete,remove',
     output: `configmap "app-config" deleted`,
+  },
+  {
+    category: 'Configuration',
+    subcategory: 'ConfigMaps',
+    command: 'kubectl delete configmap -l app=myapp -A',
+    description: 'Delete ConfigMaps matching label in all namespaces',
+    example: 'kubectl delete configmap -l app=myapp -A',
+    versionIntroduced: '1.2',
+    difficultyLevel: 'intermediate',
+    tags: 'configmap,delete,remove,all-namespaces',
+    flags: '-l, -A',
+    output: `configmap "app-config" deleted`,
+  },
+  {
+    category: 'Configuration',
+    subcategory: 'ConfigMaps',
+    command: 'kubectl delete configmap by label -A',
+    description: 'Delete ConfigMaps matching a label in all namespaces',
+    example: 'kubectl delete configmap -l app=nginx -A',
+    versionIntroduced: '1.2',
+    difficultyLevel: 'intermediate',
+    tags: 'configmap,delete,remove,all-namespaces,label',
+    flags: '-l, -A',
+    output: `configmap "app-config" deleted
+configmap "app-config-prod" deleted`,
   },
   {
     category: 'Configuration',
@@ -859,6 +1345,20 @@ Events:  <none>`,
     output: `NAME                  TYPE                                  DATA   AGE
 default-token-abc12   kubernetes.io/service-account-token   3      30d
 db-secret             Opaque                                2      10d`,
+  },
+  {
+    category: 'Configuration',
+    subcategory: 'Secrets',
+    command: 'kubectl get secrets -A',
+    description: 'List all secrets in all namespaces',
+    example: 'kubectl get secrets -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'secrets,list,all-namespaces',
+    flags: '-A',
+    output: `NAMESPACE     NAME                  TYPE                                  DATA   AGE
+default       db-secret             Opaque                                2      10d
+kube-system   default-token-abc12   kubernetes.io/service-account-token   3      30d`,
   },
   {
     category: 'Configuration',
@@ -919,6 +1419,44 @@ username:  5 bytes`,
   },
   {
     category: 'Configuration',
+    subcategory: 'Secrets',
+    command: 'kubectl describe secret -n my-namespace',
+    description: 'Describe a secret in a specific namespace',
+    example: 'kubectl describe secret db-secret -n my-namespace',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'secrets,describe,namespace',
+    flags: '-n',
+    output: `Name:         db-secret
+Namespace:    my-namespace
+Labels:       <none>
+Annotations:  <none>
+
+Type:  Opaque
+
+Data
+====
+password:  10 bytes`,
+  },
+  {
+    category: 'Configuration',
+    subcategory: 'Secrets',
+    command: 'kubectl describe secrets -A',
+    description: 'Describe all secrets in all namespaces',
+    example: 'kubectl describe secrets -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'secrets,describe,all-namespaces',
+    flags: '-A',
+    output: `Name:         db-secret
+Namespace:    default
+...
+Name:         default-token-abc12
+Namespace:    kube-system
+...`,
+  },
+  {
+    category: 'Configuration',
     subcategory: 'Resource Management',
     command: 'kubectl get resourcequotas',
     description: 'List all resource quotas',
@@ -932,6 +1470,19 @@ compute-quota  10d   requests.cpu: 4/10, requests.memory: 2Gi/10Gi   limits.cpu:
   {
     category: 'Configuration',
     subcategory: 'Resource Management',
+    command: 'kubectl get resourcequotas -A',
+    description: 'List all resource quotas in all namespaces',
+    example: 'kubectl get resourcequotas -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'quota,list,all-namespaces',
+    flags: '-A',
+    output: `NAMESPACE   NAME           AGE   REQUEST                                     LIMIT
+default     compute-quota  10d   requests.cpu: 4/10, requests.memory: 2Gi/10Gi   limits.cpu: 8/20, limits.memory: 4Gi/20Gi`,
+  },
+  {
+    category: 'Configuration',
+    subcategory: 'Resource Management',
     command: 'kubectl get limitranges',
     description: 'List all limit ranges',
     example: 'kubectl get limitranges',
@@ -940,6 +1491,20 @@ compute-quota  10d   requests.cpu: 4/10, requests.memory: 2Gi/10Gi   limits.cpu:
     tags: 'limitrange,resources,limits',
     output: `NAME         CREATED AT
 mem-limit-range   2024-01-26T10:00:00Z`,
+  },
+  {
+    category: 'Configuration',
+    subcategory: 'Resource Management',
+    command: 'kubectl get limitranges -A',
+    description: 'List all limit ranges in all namespaces',
+    example: 'kubectl get limitranges -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'limitrange,resources,limits,all-namespaces',
+    flags: '-A',
+    output: `NAMESPACE   NAME             CREATED AT
+default     mem-limit-range  2024-01-26T10:00:00Z
+prod        cpu-limit-range  2024-01-26T10:00:00Z`,
   },
   {
     category: 'Storage',
@@ -995,6 +1560,32 @@ my-pvc    Bound    pv-volume   10Gi       RWO            standard       10d`,
   {
     category: 'Storage',
     subcategory: 'Persistent Volume Claims',
+    command: 'kubectl get pvc -n my-namespace',
+    description: 'List PVCs in a specific namespace',
+    example: 'kubectl get pvc -n my-namespace',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'pvc,storage,list,namespace',
+    flags: '-n',
+    output: `NAME      STATUS   VOLUME      CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+data-pvc  Bound    pv-data     20Gi       RWO            standard       5d`,
+  },
+  {
+    category: 'Storage',
+    subcategory: 'Persistent Volume Claims',
+    command: 'kubectl get pvc -A',
+    description: 'List all persistent volume claims in all namespaces',
+    example: 'kubectl get pvc -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'pvc,list,all-namespaces',
+    flags: '-A',
+    output: `NAMESPACE   NAME      STATUS   VOLUME      CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+default     my-pvc    Bound    pv-volume   10Gi       RWO            standard       10d`,
+  },
+  {
+    category: 'Storage',
+    subcategory: 'Persistent Volume Claims',
     command: 'kubectl describe pvc',
     description: 'Show detailed information about a PVC',
     example: 'kubectl describe pvc my-pvc',
@@ -1015,6 +1606,44 @@ Access Modes:  RWO
 VolumeMode:    Filesystem
 Used By:       <none>
 Events:        <none>`,
+  },
+  {
+    category: 'Storage',
+    subcategory: 'Persistent Volume Claims',
+    command: 'kubectl describe pvc -n my-namespace',
+    description: 'Describe a PVC in a specific namespace',
+    example: 'kubectl describe pvc my-pvc -n my-namespace',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'pvc,storage,describe,namespace',
+    flags: '-n',
+    output: `Name:          my-pvc
+Namespace:     my-namespace
+StorageClass:  standard
+Status:        Bound
+Volume:        pv-volume
+Labels:        <none>
+Annotations:   <none>
+Finalizers:    [kubernetes.io/pvc-protection]
+Capacity:      10Gi
+Access Modes:  RWO
+VolumeMode:    Filesystem
+Used By:       <none>
+Events:        <none>`,
+  },
+  {
+    category: 'Storage',
+    subcategory: 'Persistent Volume Claims',
+    command: 'kubectl describe pvc -A',
+    description: 'Describe all PVCs in all namespaces',
+    example: 'kubectl describe pvc -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'pvc,describe,all-namespaces',
+    flags: '-A',
+    output: `Name:          my-pvc
+Namespace:     default
+...`,
   },
   {
     category: 'Storage',
@@ -1064,6 +1693,34 @@ my-sa     1         5d`,
   {
     category: 'Security & RBAC',
     subcategory: 'Service Accounts',
+    command: 'kubectl get serviceaccounts -n my-namespace',
+    description: 'List all service accounts in a specific namespace',
+    example: 'kubectl get serviceaccounts -n my-namespace',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'serviceaccount,security,rbac,namespace',
+    flags: '-n',
+    output: `NAME      SECRETS   AGE
+default   1         30d
+my-sa     1         5d`,
+  },
+  {
+    category: 'Security & RBAC',
+    subcategory: 'Service Accounts',
+    command: 'kubectl get serviceaccounts -A',
+    description: 'List all service accounts in all namespaces',
+    example: 'kubectl get serviceaccounts -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'serviceaccount,list,all-namespaces',
+    flags: '-A',
+    output: `NAMESPACE     NAME      SECRETS   AGE
+default       default   1         30d
+kube-system   default   1         30d`,
+  },
+  {
+    category: 'Security & RBAC',
+    subcategory: 'Service Accounts',
     command: 'kubectl create serviceaccount',
     description: 'Create a service account',
     example: 'kubectl create serviceaccount my-service-account',
@@ -1071,6 +1728,43 @@ my-sa     1         5d`,
     difficultyLevel: 'intermediate',
     tags: 'serviceaccount,create,security',
     output: `serviceaccount/my-service-account created`,
+  },
+  {
+    category: 'Security & RBAC',
+    subcategory: 'Service Accounts',
+    command: 'kubectl describe serviceaccount',
+    description: 'Describe a service account',
+    example: 'kubectl describe serviceaccount default',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'serviceaccount,describe',
+    output: `Name:                default
+Namespace:           default
+Labels:              <none>
+Annotations:         <none>
+Image pull secrets:  <none>
+Mountable secrets:   default-token-abc12
+Tokens:              default-token-abc12
+Events:              <none>`,
+  },
+  {
+    category: 'Security & RBAC',
+    subcategory: 'Service Accounts',
+    command: 'kubectl describe serviceaccount -n my-namespace',
+    description: 'Describe a service account in a specific namespace',
+    example: 'kubectl describe serviceaccount default -n my-namespace',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'serviceaccount,describe,namespace',
+    flags: '-n',
+    output: `Name:                default
+Namespace:           my-namespace
+Labels:              <none>
+Annotations:         <none>
+Image pull secrets:  <none>
+Mountable secrets:   default-token-abc12
+Tokens:              default-token-abc12
+Events:              <none>`,
   },
   {
     category: 'Security & RBAC',
@@ -1084,6 +1778,34 @@ my-sa     1         5d`,
     output: `NAME          CREATED AT
 pod-reader    2024-01-26T10:00:00Z
 secret-admin  2024-01-25T15:30:00Z`,
+  },
+  {
+    category: 'Security & RBAC',
+    subcategory: 'Roles',
+    command: 'kubectl get roles -n my-namespace',
+    description: 'List all roles in a specific namespace',
+    example: 'kubectl get roles -n my-namespace',
+    versionIntroduced: '1.6',
+    difficultyLevel: 'advanced',
+    tags: 'roles,list,namespace',
+    flags: '-n',
+    output: `NAME          CREATED AT
+pod-reader    2024-01-26T10:00:00Z
+secret-admin  2024-01-25T15:30:00Z`,
+  },
+  {
+    category: 'Security & RBAC',
+    subcategory: 'Roles',
+    command: 'kubectl get roles -A',
+    description: 'List all roles in all namespaces',
+    example: 'kubectl get roles -A',
+    versionIntroduced: '1.6',
+    difficultyLevel: 'advanced',
+    tags: 'roles,list,all-namespaces',
+    flags: '-A',
+    output: `NAMESPACE   NAME          CREATED AT
+default     pod-reader    2024-01-26T10:00:00Z
+dev         secret-admin  2024-01-25T15:30:00Z`,
   },
   {
     category: 'Security & RBAC',
@@ -1112,6 +1834,20 @@ view             2023-12-25T00:00:00Z`,
     output: `NAME             ROLE                AGE
 read-pods        Role/pod-reader     5d
 admin-binding    ClusterRole/admin   2d`,
+  },
+  {
+    category: 'Security & RBAC',
+    subcategory: 'Role Bindings',
+    command: 'kubectl get rolebindings -A',
+    description: 'List all role bindings in all namespaces',
+    example: 'kubectl get rolebindings -A',
+    versionIntroduced: '1.6',
+    difficultyLevel: 'advanced',
+    tags: 'rolebindings,list,all-namespaces',
+    flags: '-A',
+    output: `NAMESPACE   NAME             ROLE                AGE
+default     read-pods        Role/pod-reader     5d
+kube-system admin-binding    ClusterRole/admin   2d`,
   },
   {
     category: 'Security & RBAC',
@@ -1195,6 +1931,20 @@ restricted   false          RunAsAny   MustRunAs   MustRunAs  MustRunAs  false  
   {
     category: 'Observability',
     subcategory: 'Events',
+    command: 'kubectl get events -A',
+    description: 'List all events in all namespaces',
+    example: 'kubectl get events -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'events,debug,monitoring,all-namespaces',
+    flags: '-A',
+    output: `NAMESPACE   LAST SEEN   TYPE      REASON      OBJECT              MESSAGE
+default     12s         Normal    Scheduled   pod/nginx           Successfully assigned default/nginx to worker-node-1
+kube-system 10s         Normal    Pulling     pod/coredns         Pulling image "coredns:latest"`,
+  },
+  {
+    category: 'Observability',
+    subcategory: 'Events',
     command: 'kubectl get events --watch',
     description: 'Watch events in real-time',
     example: 'kubectl get events --watch --all-namespaces',
@@ -1218,6 +1968,34 @@ restricted   false          RunAsAny   MustRunAs   MustRunAs  MustRunAs  false  
     output: `NAME        CPU(cores)   MEMORY(bytes)
 nginx       100m         120Mi
 web-app     250m         512Mi`,
+  },
+  {
+    category: 'Observability',
+    subcategory: 'Resource Usage',
+    command: 'kubectl top pod -n my-namespace',
+    description: 'Display pod resource usage in a specific namespace',
+    example: 'kubectl top pod -n my-namespace',
+    versionIntroduced: '1.8',
+    difficultyLevel: 'intermediate',
+    tags: 'metrics,resources,monitoring,namespace',
+    flags: '-n',
+    output: `NAME        CPU(cores)   MEMORY(bytes)
+nginx       100m         120Mi
+web-app     250m         512Mi`,
+  },
+  {
+    category: 'Observability',
+    subcategory: 'Resource Usage',
+    command: 'kubectl top pod -A',
+    description: 'Display pod resource usage in all namespaces',
+    example: 'kubectl top pod -A',
+    versionIntroduced: '1.8',
+    difficultyLevel: 'intermediate',
+    tags: 'metrics,resources,monitoring,all-namespaces',
+    flags: '-A',
+    output: `NAMESPACE   NAME        CPU(cores)   MEMORY(bytes)
+default     nginx       100m         120Mi
+prod        web-app     250m         512Mi`,
   },
   {
     category: 'Observability',
@@ -1293,6 +2071,20 @@ redis     3/3     10d`,
   {
     category: 'Advanced Workloads',
     subcategory: 'StatefulSets',
+    command: 'kubectl get statefulsets -A',
+    description: 'List all StatefulSets in all namespaces',
+    example: 'kubectl get statefulsets -A',
+    versionIntroduced: '1.5',
+    difficultyLevel: 'advanced',
+    tags: 'statefulset,workload,list,all-namespaces',
+    flags: '-A',
+    output: `NAMESPACE   NAME      READY   AGE
+default     mysql     3/3     5d
+prod        redis     3/3     10d`,
+  },
+  {
+    category: 'Advanced Workloads',
+    subcategory: 'StatefulSets',
     command: 'kubectl describe statefulset',
     description: 'Show detailed information about a StatefulSet',
     example: 'kubectl describe statefulset mysql',
@@ -1317,6 +2109,23 @@ Volume Claims:
   Name:          data
   StorageClass:  standard
 Events:          <none>`,
+  },
+  {
+    category: 'Advanced Workloads',
+    subcategory: 'StatefulSets',
+    command: 'kubectl describe statefulset -A',
+    description: 'Describe all StatefulSets in all namespaces',
+    example: 'kubectl describe statefulset -A',
+    versionIntroduced: '1.5',
+    difficultyLevel: 'advanced',
+    tags: 'statefulset,describe,info,all-namespaces',
+    flags: '-A',
+    output: `Name:               mysql
+Namespace:          default
+...
+Name:               redis
+Namespace:          prod
+...`,
   },
   {
     category: 'Advanced Workloads',
@@ -1365,6 +2174,23 @@ Events:       <none>`,
   },
   {
     category: 'Advanced Workloads',
+    subcategory: 'DaemonSets',
+    command: 'kubectl describe daemonsets -A',
+    description: 'Describe all DaemonSets in all namespaces',
+    example: 'kubectl describe daemonsets -A',
+    versionIntroduced: '1.1',
+    difficultyLevel: 'advanced',
+    tags: 'daemonset,describe,all-namespaces',
+    flags: '-A',
+    output: `Name:           fluentd
+Namespace:      logging
+...
+Name:           kube-proxy
+Namespace:      kube-system
+...`,
+  },
+  {
+    category: 'Advanced Workloads',
     subcategory: 'Jobs',
     command: 'kubectl get jobs',
     description: 'List all jobs',
@@ -1375,6 +2201,20 @@ Events:       <none>`,
     output: `NAME        COMPLETIONS   DURATION   AGE
 batch-job   1/1           15s        2m
 pi          1/1           5s         10m`,
+  },
+  {
+    category: 'Advanced Workloads',
+    subcategory: 'Jobs',
+    command: 'kubectl get jobs -A',
+    description: 'List all jobs in all namespaces',
+    example: 'kubectl get jobs -A',
+    versionIntroduced: '1.1',
+    difficultyLevel: 'intermediate',
+    tags: 'job,workload,list,all-namespaces',
+    flags: '-A',
+    output: `NAMESPACE   NAME        COMPLETIONS   DURATION   AGE
+default     batch-job   1/1           15s        2m
+prod        pi          1/1           5s         10m`,
   },
   {
     category: 'Advanced Workloads',
@@ -1410,6 +2250,23 @@ Events:
   {
     category: 'Advanced Workloads',
     subcategory: 'Jobs',
+    command: 'kubectl describe jobs -A',
+    description: 'Describe all jobs in all namespaces',
+    example: 'kubectl describe jobs -A',
+    versionIntroduced: '1.1',
+    difficultyLevel: 'intermediate',
+    tags: 'job,describe,info,all-namespaces',
+    flags: '-A',
+    output: `Name:             batch-job
+Namespace:        default
+...
+Name:             pi
+Namespace:        prod
+...`,
+  },
+  {
+    category: 'Advanced Workloads',
+    subcategory: 'Jobs',
     command: 'kubectl create job',
     description: 'Create a job',
     example: 'kubectl create job test-job --image=busybox -- echo "Hello World"',
@@ -1431,6 +2288,20 @@ Events:
     output: `NAME      SCHEDULE      SUSPEND   ACTIVE   LAST SCHEDULE   AGE
 backup    0 2 * * *     False     0        10h             30d
 cleanup   0 0 * * 0     False     1        10s             5d`,
+  },
+  {
+    category: 'Advanced Workloads',
+    subcategory: 'CronJobs',
+    command: 'kubectl get cronjobs -A',
+    description: 'List all CronJobs in all namespaces',
+    example: 'kubectl get cronjobs -A',
+    versionIntroduced: '1.5',
+    difficultyLevel: 'intermediate',
+    tags: 'cronjob,workload,list,all-namespaces',
+    flags: '-A',
+    output: `NAMESPACE   NAME      SCHEDULE      SUSPEND   ACTIVE   LAST SCHEDULE   AGE
+default     backup    0 2 * * *     False     0        10h             30d
+prod        cleanup   0 0 * * 0     False     1        10s             5d`,
   },
   {
     category: 'Advanced Workloads',
@@ -1467,6 +2338,23 @@ Events:
   {
     category: 'Advanced Workloads',
     subcategory: 'CronJobs',
+    command: 'kubectl describe cronjobs -A',
+    description: 'Describe all CronJobs in all namespaces',
+    example: 'kubectl describe cronjobs -A',
+    versionIntroduced: '1.5',
+    difficultyLevel: 'intermediate',
+    tags: 'cronjob,describe,info,all-namespaces',
+    flags: '-A',
+    output: `Name:                          backup
+Namespace:                     default
+...
+Name:                          cleanup
+Namespace:                     prod
+...`,
+  },
+  {
+    category: 'Advanced Workloads',
+    subcategory: 'CronJobs',
     command: 'kubectl create cronjob',
     description: 'Create a CronJob',
     example: 'kubectl create cronjob backup --image=backup:latest --schedule="0 2 * * *" -- /backup.sh',
@@ -1492,6 +2380,20 @@ frontend-5f89      3         3         3       10d`,
   {
     category: 'Advanced Workloads',
     subcategory: 'ReplicaSets',
+    command: 'kubectl get replicasets -A',
+    description: 'List all ReplicaSets in all namespaces',
+    example: 'kubectl get replicasets -A',
+    versionIntroduced: '1.2',
+    difficultyLevel: 'intermediate',
+    tags: 'replicaset,workload,list,all-namespaces',
+    flags: '-A',
+    output: `NAMESPACE   NAME               DESIRED   CURRENT   READY   AGE
+default     nginx-rs           3         3         3       5d
+prod        frontend-5f89      3         3         3       10d`,
+  },
+  {
+    category: 'Advanced Workloads',
+    subcategory: 'ReplicaSets',
     command: 'kubectl describe replicaset',
     description: 'Show detailed information about a ReplicaSet',
     example: 'kubectl describe replicaset nginx-rs',
@@ -1510,6 +2412,23 @@ Pod Template:
    nginx:
     Image:      nginx:latest
 Events:         <none>`,
+  },
+  {
+    category: 'Advanced Workloads',
+    subcategory: 'ReplicaSets',
+    command: 'kubectl describe replicasets -A',
+    description: 'Describe all ReplicaSets in all namespaces',
+    example: 'kubectl describe replicasets -A',
+    versionIntroduced: '1.2',
+    difficultyLevel: 'intermediate',
+    tags: 'replicaset,describe,info,all-namespaces',
+    flags: '-A',
+    output: `Name:           nginx-rs
+Namespace:      default
+...
+Name:           frontend-5f89
+Namespace:      prod
+...`,
   },
   {
     category: 'Troubleshooting',
@@ -1586,6 +2505,24 @@ deployment.apps/web     1/1     1            1           2d
 NAME                             DESIRED   CURRENT   READY   AGE
 replicaset.apps/nginx-6b6c597d   1         1         1       5d
 replicaset.apps/web-7890123456   1         1         1       2d`,
+  },
+  {
+    category: 'Troubleshooting',
+    subcategory: 'Diagnostics',
+    command: 'kubectl get all -A',
+    description: 'Get all resources in all namespaces',
+    example: 'kubectl get all -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'list,all,resources,all-namespaces',
+    flags: '-A',
+    output: `NAMESPACE   NAME                           READY   STATUS    RESTARTS   AGE
+default     pod/nginx-6b6c597d57-abcde     1/1     Running   0          5d
+kube-system pod/coredns-7890123456-fghij   1/1     Running   0          2d
+
+NAMESPACE   NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+default     service/kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   30d
+prod        service/nginx        ClusterIP   10.96.0.2    <none>        80/TCP    5d`,
   },
   {
     category: 'Troubleshooting',
@@ -1871,6 +2808,20 @@ web-7890123456-fghij         Running`,
     output: `NAME         REFERENCE               TARGETS   MINPODS   MAXPODS   REPLICAS   AGE
 php-apache   Deployment/php-apache   0%/50%    1         10        1          30d
 nginx-hpa    Deployment/nginx        50%/80%   2         5         3          5d`,
+  },
+  {
+    category: 'Advanced Workloads',
+    subcategory: 'Horizontal Pod Autoscaler',
+    command: 'kubectl get hpa -A',
+    description: 'List all Horizontal Pod Autoscalers in all namespaces',
+    example: 'kubectl get hpa -A',
+    versionIntroduced: '1.1',
+    difficultyLevel: 'intermediate',
+    tags: 'hpa,autoscale,scaling,all-namespaces',
+    flags: '-A',
+    output: `NAMESPACE   NAME         REFERENCE               TARGETS   MINPODS   MAXPODS   REPLICAS   AGE
+default     php-apache   Deployment/php-apache   0%/50%    1         10        1          30d
+prod        nginx-hpa    Deployment/nginx        50%/80%   2         5         3          5d`,
   },
   {
     category: 'Advanced Workloads',

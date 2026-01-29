@@ -205,5 +205,147 @@ Spec:
     tags: 'role,create,rbac',
     flags: '--verb --resource',
     output: 'role.rbac.authorization.k8s.io/pod-reader created'
+  },
+
+  // --- Missing Variations ---
+  {
+    category: 'Security & RBAC',
+    subcategory: 'RBAC Analysis',
+    command: 'kubectl get roles',
+    description: 'List Roles in current namespace',
+    example: 'kubectl get roles',
+    versionIntroduced: '1.8',
+    difficultyLevel: 'beginner',
+    tags: 'rbac,list,role',
+    output: `NAME         CREATED AT
+pod-reader   2024-01-20T10:00:00Z`
+  },
+  {
+    category: 'Security & RBAC',
+    subcategory: 'RBAC Analysis',
+    command: 'kubectl get rolebindings',
+    description: 'List RoleBindings in current namespace',
+    example: 'kubectl get rolebindings',
+    versionIntroduced: '1.8',
+    difficultyLevel: 'beginner',
+    tags: 'rbac,list,rolebinding',
+    output: `NAME        ROLE              AGE
+read-pods   Role/pod-reader   5d`
+  },
+  {
+    category: 'Security & RBAC',
+    subcategory: 'RBAC Analysis',
+    command: 'kubectl get clusterroles',
+    description: 'List ClusterRoles',
+    example: 'kubectl get clusterroles',
+    versionIntroduced: '1.8',
+    difficultyLevel: 'beginner',
+    tags: 'rbac,list,clusterrole',
+    output: `NAME          CREATED AT
+cluster-admin 2024-01-01T00:00:00Z
+edit          2024-01-01T00:00:00Z`
+  },
+  {
+    category: 'Security & RBAC',
+    subcategory: 'RBAC Analysis',
+    command: 'kubectl get clusterrolebindings',
+    description: 'List ClusterRoleBindings',
+    example: 'kubectl get clusterrolebindings',
+    versionIntroduced: '1.8',
+    difficultyLevel: 'beginner',
+    tags: 'rbac,list,clusterrolebinding',
+    output: `NAME            ROLE                        AGE
+cluster-admin   ClusterRole/cluster-admin   25d`
+  },
+  {
+    category: 'Security & RBAC',
+    subcategory: 'Network Security',
+    command: 'kubectl get networkpolicies',
+    description: 'List NetworkPolicies in current namespace',
+    example: 'kubectl get networkpolicies',
+    versionIntroduced: '1.7',
+    difficultyLevel: 'beginner',
+    tags: 'networkpolicy,list,netpol',
+    output: `NAME       POD-SELECTOR   AGE
+deny-all   <none>         5d`
+  },
+  {
+    category: 'Security & RBAC',
+    subcategory: 'Service Accounts',
+    command: 'kubectl get serviceaccounts',
+    description: 'List ServiceAccounts in current namespace',
+    example: 'kubectl get serviceaccounts',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'serviceaccount,list',
+    output: `NAME      SECRETS   AGE
+default   1         30d
+my-sa     1         5d`
+  },
+  {
+    category: 'Security & RBAC',
+    subcategory: 'Service Accounts',
+    command: 'kubectl get serviceaccounts --all-namespaces',
+    description: 'List ServiceAccounts across all namespaces',
+    example: 'kubectl get serviceaccounts --all-namespaces',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'serviceaccount,list,all-namespaces',
+    flags: '--all-namespaces',
+    output: `NAMESPACE     NAME      SECRETS   AGE
+kube-system   coredns   1         30d`
+  },
+
+  // Admission Controllers & Webhooks
+  {
+    category: 'Security & RBAC',
+    subcategory: 'Admission Control',
+    command: 'kubectl get mutatingwebhookconfigurations',
+    description: 'List Mutating Webhook Configurations',
+    example: 'kubectl get mutatingwebhookconfigurations',
+    versionIntroduced: '1.9',
+    difficultyLevel: 'expert',
+    tags: 'webhook,mutating,admission,security',
+    output: `NAME                     WEBHOOKS   AGE
+cert-manager-webhook     1          30d
+istio-sidecar-injector   2          15d`
+  },
+  {
+    category: 'Security & RBAC',
+    subcategory: 'Admission Control',
+    command: 'kubectl get validatingwebhookconfigurations',
+    description: 'List Validating Webhook Configurations',
+    example: 'kubectl get validatingwebhookconfigurations',
+    versionIntroduced: '1.9',
+    difficultyLevel: 'expert',
+    tags: 'webhook,validating,admission,security',
+    output: `NAME                     WEBHOOKS   AGE
+ingress-nginx-admission  1          30d
+cert-manager-webhook     1          30d`
+  },
+
+  // Certificate Management
+  {
+    category: 'Security & RBAC',
+    subcategory: 'Certificates',
+    command: 'kubectl get csr',
+    description: 'List Certificate Signing Requests',
+    example: 'kubectl get csr',
+    versionIntroduced: '1.6',
+    difficultyLevel: 'intermediate',
+    tags: 'csr,certificate,security',
+    output: `NAME        AGE   SIGNERNAME                            REQUESTOR          REQUESTEDDURATION   CONDITION
+csr-5b85d   10m   kubernetes.io/kube-apiserver-client   kubernetes-admin   <none>              Approved,Issued`
+  },
+  {
+    category: 'Security & RBAC',
+    subcategory: 'Certificates',
+    command: 'kubectl certificate approve my-csr',
+    description: 'Approve a Certificate Signing Request',
+    example: 'kubectl certificate approve csr-5b85d',
+    versionIntroduced: '1.6',
+    difficultyLevel: 'intermediate',
+    tags: 'csr,certificate,approve,security',
+    output: 'certificatesigningrequest.certificates.k8s.io/csr-5b85d approved'
   }
 ];

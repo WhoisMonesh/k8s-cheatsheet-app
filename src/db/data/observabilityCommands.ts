@@ -339,5 +339,168 @@ If you don't see a command prompt, try pressing enter.
     flags: '--copy-to --image',
     output: `Targeting pod/frontend-123. If you don't see a command prompt, try pressing enter.
 / #`
+  },
+  
+  // --- Missing Variations ---
+  {
+    category: 'Observability',
+    subcategory: 'Metrics',
+    command: 'kubectl top pods',
+    description: 'Show metrics for pods in the current namespace',
+    example: 'kubectl top pods',
+    versionIntroduced: '1.8',
+    difficultyLevel: 'beginner',
+    tags: 'metrics,top,pods',
+    output: `NAME        CPU(cores)   MEMORY(bytes)
+nginx-pod   10m          50Mi`
+  },
+  {
+    category: 'Observability',
+    subcategory: 'Metrics',
+    command: 'kubectl top pods -n my-namespace',
+    description: 'Show metrics for pods in a specific namespace',
+    example: 'kubectl top pods -n my-namespace',
+    versionIntroduced: '1.8',
+    difficultyLevel: 'beginner',
+    tags: 'metrics,top,pods,namespace',
+    flags: '-n',
+    output: `NAME        CPU(cores)   MEMORY(bytes)
+app-pod     12m          60Mi`
+  },
+  {
+    category: 'Observability',
+    subcategory: 'Events',
+    command: 'kubectl get events',
+    description: 'List events in the current namespace',
+    example: 'kubectl get events',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'events,list',
+    output: `LAST SEEN   TYPE      REASON      OBJECT          MESSAGE
+5m          Normal    Scheduled   pod/my-pod      Successfully assigned default/my-pod to worker-node-1`
+  },
+  {
+    category: 'Observability',
+    subcategory: 'Events',
+    command: 'kubectl get events -n my-namespace',
+    description: 'List events in a specific namespace',
+    example: 'kubectl get events -n my-namespace',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'events,list,namespace',
+    flags: '-n',
+    output: `LAST SEEN   TYPE      REASON      OBJECT          MESSAGE
+2m          Normal    Scheduled   pod/app     Successfully assigned my-namespace/app to worker-node-1`
+  },
+  {
+    category: 'Observability',
+    subcategory: 'Events',
+    command: 'kubectl get events --all-namespaces',
+    description: 'List events across all namespaces',
+    example: 'kubectl get events --all-namespaces',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'events,list,all-namespaces',
+    flags: '--all-namespaces',
+    output: `NAMESPACE     LAST SEEN   TYPE      REASON      OBJECT          MESSAGE
+default       5m          Normal    Scheduled   pod/my-pod      Successfully assigned default/my-pod to worker-node-1
+kube-system   1m          Normal    Pulled      pod/coredns     Successfully pulled image "coredns"`
+  },
+  {
+    category: 'Observability',
+    subcategory: 'Events',
+    command: 'kubectl get events sorted -A',
+    description: 'List events sorted by timestamp in all namespaces',
+    example: 'kubectl get events --sort-by=.metadata.creationTimestamp -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'events,sort,all-namespaces',
+    flags: '--sort-by, -A',
+    output: `NAMESPACE   LAST SEEN   TYPE      REASON      OBJECT          MESSAGE
+default     5m          Normal    Scheduled   pod/my-pod      Successfully assigned default/my-pod to worker-node-1
+kube-system 2m          Normal    Pulling     pod/coredns     Pulling image "coredns"`
+  },
+  {
+    category: 'Observability',
+    subcategory: 'Event Monitoring',
+    command: 'kubectl get events warnings -A',
+    description: 'List all warning events in all namespaces',
+    example: 'kubectl get events --field-selector type=Warning -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'events,warning,filter,all-namespaces',
+    flags: '--field-selector, -A',
+    output: `NAMESPACE   LAST SEEN   TYPE      REASON             OBJECT             MESSAGE
+default     10m         Warning   FailedScheduling   pod/pending-pod    0/2 nodes are available: 2 Insufficient cpu`
+  },
+  {
+    category: 'Observability',
+    subcategory: 'Event Monitoring',
+    command: 'kubectl get events sorted by last timestamp -A',
+    description: 'List events sorted by last occurrence in all namespaces',
+    example: 'kubectl get events --sort-by=.lastTimestamp -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'events,sort,timestamp,all-namespaces',
+    flags: '--sort-by, -A',
+    output: `NAMESPACE   LAST SEEN   TYPE      REASON      OBJECT          MESSAGE
+default     5m          Normal    Scheduled   pod/my-pod      Successfully assigned default/my-pod to worker-node-1`
+  },
+  {
+    category: 'Observability',
+    subcategory: 'Resource Usage',
+    command: 'kubectl top pod by cpu -A',
+    description: 'List pods sorted by CPU usage in all namespaces',
+    example: 'kubectl top pod --sort-by=cpu -A',
+    versionIntroduced: '1.8',
+    difficultyLevel: 'intermediate',
+    tags: 'top,metrics,cpu,sort,all-namespaces',
+    flags: '--sort-by, -A',
+    output: `NAMESPACE   NAME          CPU(cores)   MEMORY(bytes)
+default     heavy-calc    800m         200Mi
+kube-system coredns       10m          20Mi`
+  },
+  {
+    category: 'Observability',
+    subcategory: 'Metrics',
+    command: 'kubectl top pods -A',
+    description: 'Show metrics for all pods in all namespaces (short flag)',
+    example: 'kubectl top pods -A',
+    versionIntroduced: '1.8',
+    difficultyLevel: 'beginner',
+    tags: 'metrics,top,pods,all-namespaces',
+    flags: '-A',
+    output: `NAMESPACE   NAME         CPU(cores)   MEMORY(bytes)
+default     nginx-pod    10m          50Mi
+kube-system coredns-123  5m           15Mi
+monitoring  prometheus   500m         1024Mi`
+  },
+  {
+    category: 'Observability',
+    subcategory: 'Events',
+    command: 'kubectl get events -A',
+    description: 'List events across all namespaces (short flag)',
+    example: 'kubectl get events -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'events,list,all-namespaces',
+    flags: '-A',
+    output: `NAMESPACE     LAST SEEN   TYPE      REASON      OBJECT          MESSAGE
+default       5m          Normal    Scheduled   pod/my-pod      Successfully assigned default/my-pod to worker-node-1
+kube-system   1m          Normal    Pulled      pod/coredns     Successfully pulled image "coredns"`
+  },
+  {
+    category: 'Observability',
+    subcategory: 'Resource Usage',
+    command: 'kubectl top pod by memory -A',
+    description: 'List pods sorted by memory usage in all namespaces',
+    example: 'kubectl top pod --sort-by=memory -A',
+    versionIntroduced: '1.8',
+    difficultyLevel: 'intermediate',
+    tags: 'top,metrics,memory,sort,all-namespaces',
+    flags: '--sort-by, -A',
+    output: `NAMESPACE   NAME          CPU(cores)   MEMORY(bytes)
+default     db-cache      200m         2048Mi
+kube-system etcd          100m         512Mi`
   }
 ];

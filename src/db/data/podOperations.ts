@@ -127,7 +127,7 @@ status: {}`
     subcategory: 'Pod Status',
     command: 'kubectl get pods --field-selector=status.phase=Pending',
     description: 'Get all pending pods',
-    example: 'kubectl get pods --field-selector=status.phase=Pending -A',
+    example: 'kubectl get pods --field-selector=status.phase=Pending\nkubectl get pods --field-selector=status.phase=Pending -n prod',
     versionIntroduced: '1.0',
     difficultyLevel: 'intermediate',
     tags: 'get,pods,pending,status',
@@ -139,13 +139,41 @@ prod        web-1     0/1     Pending   0          5s`
   {
     category: 'Pods',
     subcategory: 'Pod Status',
+    command: 'kubectl get pods --field-selector=status.phase=Pending -A',
+    description: 'Get all pending pods in all namespaces',
+    example: 'kubectl get pods --field-selector=status.phase=Pending -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'get,pods,pending,status,all-namespaces',
+    flags: '--field-selector=status.phase=Pending, -A',
+    output: `NAMESPACE   NAME      READY   STATUS    RESTARTS   AGE
+default     db-init   0/1     Pending   0          2m
+prod        web-1     0/1     Pending   0          5s`
+  },
+  {
+    category: 'Pods',
+    subcategory: 'Pod Status',
     command: 'kubectl get pods --field-selector=status.phase=Failed',
     description: 'Get all failed pods',
-    example: 'kubectl get pods --field-selector=status.phase=Failed -A',
+    example: 'kubectl get pods --field-selector=status.phase=Failed\nkubectl get pods --field-selector=status.phase=Failed -n prod',
     versionIntroduced: '1.0',
     difficultyLevel: 'intermediate',
     tags: 'get,pods,failed,status,error',
     flags: '--field-selector=status.phase=Failed',
+    output: `NAMESPACE   NAME           READY   STATUS   RESTARTS   AGE
+default     job-123        0/1     Error    0          5h
+test        load-test-1    0/1     Error    0          2d`
+  },
+  {
+    category: 'Pods',
+    subcategory: 'Pod Status',
+    command: 'kubectl get pods --field-selector=status.phase=Failed -A',
+    description: 'Get all failed pods in all namespaces',
+    example: 'kubectl get pods --field-selector=status.phase=Failed -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'get,pods,failed,status,error,all-namespaces',
+    flags: '--field-selector=status.phase=Failed, -A',
     output: `NAMESPACE   NAME           READY   STATUS   RESTARTS   AGE
 default     job-123        0/1     Error    0          5h
 test        load-test-1    0/1     Error    0          2d`
@@ -167,13 +195,40 @@ init-schema    0/1     Completed   0          2d`
   {
     category: 'Pods',
     subcategory: 'Pod Status',
+    command: 'kubectl get pods --field-selector=status.phase=Succeeded -A',
+    description: 'Get all succeeded pods in all namespaces',
+    example: 'kubectl get pods --field-selector=status.phase=Succeeded -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'get,pods,succeeded,status,all-namespaces',
+    flags: '--field-selector=status.phase=Succeeded, -A',
+    output: `NAMESPACE   NAME           READY   STATUS      RESTARTS   AGE
+default     backup-job     0/1     Completed   0          10h
+test        init-schema    0/1     Completed   0          2d`
+  },
+  {
+    category: 'Pods',
+    subcategory: 'Pod Status',
     command: 'kubectl get pods --field-selector=status.phase=Unknown',
     description: 'Get all pods with unknown status',
-    example: 'kubectl get pods --field-selector=status.phase=Unknown -A',
+    example: 'kubectl get pods --field-selector=status.phase=Unknown\nkubectl get pods --field-selector=status.phase=Unknown -n prod',
     versionIntroduced: '1.0',
     difficultyLevel: 'intermediate',
     tags: 'get,pods,unknown,status,problem',
     flags: '--field-selector=status.phase=Unknown',
+    output: `NAMESPACE   NAME      READY   STATUS    RESTARTS   AGE
+default     web-pod   1/1     Unknown   0          5d`
+  },
+  {
+    category: 'Pods',
+    subcategory: 'Pod Status',
+    command: 'kubectl get pods --field-selector=status.phase=Unknown -A',
+    description: 'Get all pods with unknown status in all namespaces',
+    example: 'kubectl get pods --field-selector=status.phase=Unknown -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'get,pods,unknown,status,problem,all-namespaces',
+    flags: '--field-selector=status.phase=Unknown, -A',
     output: `NAMESPACE   NAME      READY   STATUS    RESTARTS   AGE
 default     web-pod   1/1     Unknown   0          5d`
   },
@@ -193,9 +248,22 @@ nginx     1/1     Running   0          5h`
   {
     category: 'Pods',
     subcategory: 'Pod Status',
+    command: 'kubectl get pods --field-selector=status.podIP -A',
+    description: 'Get pods by IP address in all namespaces',
+    example: 'kubectl get pods --field-selector=status.podIP=10.244.1.5 -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'advanced',
+    tags: 'get,pods,ip,network,all-namespaces',
+    flags: '--field-selector=status.podIP, -A',
+    output: `NAMESPACE   NAME      READY   STATUS    RESTARTS   AGE
+default     nginx     1/1     Running   0          5h`
+  },
+  {
+    category: 'Pods',
+    subcategory: 'Pod Status',
     command: 'kubectl get pods --field-selector=spec.nodeName',
     description: 'Get pods running on specific node',
-    example: 'kubectl get pods --field-selector=spec.nodeName=worker-1',
+    example: 'kubectl get pods --field-selector=spec.nodeName=worker-1\nkubectl get pods --field-selector=spec.nodeName=worker-1 -n prod',
     versionIntroduced: '1.0',
     difficultyLevel: 'intermediate',
     tags: 'get,pods,node,placement',
@@ -207,9 +275,23 @@ db        1/1     Running   0          2d`
   {
     category: 'Pods',
     subcategory: 'Pod Status',
+    command: 'kubectl get pods --field-selector=spec.nodeName -A',
+    description: 'Get pods running on specific node in all namespaces',
+    example: 'kubectl get pods --field-selector=spec.nodeName=worker-1 -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'get,pods,node,placement,all-namespaces',
+    flags: '--field-selector=spec.nodeName, -A',
+    output: `NAMESPACE   NAME      READY   STATUS    RESTARTS   AGE
+default     nginx     1/1     Running   0          5h
+prod        db        1/1     Running   0          2d`
+  },
+  {
+    category: 'Pods',
+    subcategory: 'Pod Status',
     command: 'kubectl get pods --field-selector=spec.restartPolicy',
     description: 'Get pods by restart policy',
-    example: 'kubectl get pods --field-selector=spec.restartPolicy=Always',
+    example: 'kubectl get pods --field-selector=spec.restartPolicy=Always\nkubectl get pods --field-selector=spec.restartPolicy=Always -n prod',
     versionIntroduced: '1.0',
     difficultyLevel: 'intermediate',
     tags: 'get,pods,restart-policy',
@@ -221,9 +303,23 @@ api       1/1     Running   0          5h`
   {
     category: 'Pods',
     subcategory: 'Pod Status',
+    command: 'kubectl get pods --field-selector=spec.restartPolicy -A',
+    description: 'Get pods by restart policy in all namespaces',
+    example: 'kubectl get pods --field-selector=spec.restartPolicy=Always -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'get,pods,restart-policy,all-namespaces',
+    flags: '--field-selector=spec.restartPolicy, -A',
+    output: `NAMESPACE   NAME      READY   STATUS    RESTARTS   AGE
+default     nginx     1/1     Running   0          5h
+prod        api       1/1     Running   0          5h`
+  },
+  {
+    category: 'Pods',
+    subcategory: 'Pod Status',
     command: 'kubectl get pods --field-selector=spec.serviceAccountName',
     description: 'Get pods by service account',
-    example: 'kubectl get pods --field-selector=spec.serviceAccountName=my-sa',
+    example: 'kubectl get pods --field-selector=spec.serviceAccountName=my-sa\nkubectl get pods --field-selector=spec.serviceAccountName=my-sa -n prod',
     versionIntroduced: '1.0',
     difficultyLevel: 'advanced',
     tags: 'get,pods,serviceaccount,rbac',
@@ -231,6 +327,20 @@ api       1/1     Running   0          5h`
     output: `NAME      READY   STATUS    RESTARTS   AGE
 app-1     1/1     Running   0          5h
 app-2     1/1     Running   0          5h`
+  },
+  {
+    category: 'Pods',
+    subcategory: 'Pod Status',
+    command: 'kubectl get pods --field-selector=spec.serviceAccountName -A',
+    description: 'Get pods by service account in all namespaces',
+    example: 'kubectl get pods --field-selector=spec.serviceAccountName=my-sa -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'advanced',
+    tags: 'get,pods,serviceaccount,rbac,all-namespaces',
+    flags: '--field-selector=spec.serviceAccountName, -A',
+    output: `NAMESPACE   NAME      READY   STATUS    RESTARTS   AGE
+default     app-1     1/1     Running   0          5h
+prod        app-2     1/1     Running   0          5h`
   },
   {
     category: 'Pods',
@@ -250,9 +360,39 @@ new-pod   1/1     Running   0          1h`
   {
     category: 'Pods',
     subcategory: 'Pod Status',
+    command: 'kubectl get pods --sort-by=.status.startTime -A',
+    description: 'Sort pods by start time in all namespaces',
+    example: 'kubectl get pods --sort-by=.status.startTime -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'get,pods,sort,start-time,all-namespaces',
+    flags: '--sort-by=.status.startTime, -A',
+    output: `NAMESPACE   NAME      READY   STATUS    RESTARTS   AGE
+default     old-pod   1/1     Running   0          10d
+prod        mid-pod   1/1     Running   0          5d
+test        new-pod   1/1     Running   0          1h`
+  },,
+  {
+    category: 'Pods',
+    subcategory: 'Pod Status',
+    command: 'kubectl get pods --sort-by=.metadata.creationTimestamp -A',
+    description: 'Sort pods by creation time in all namespaces',
+    example: 'kubectl get pods --sort-by=.metadata.creationTimestamp -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'get,pods,sort,creation,all-namespaces',
+    flags: '--sort-by=.metadata.creationTimestamp, -A',
+    output: `NAMESPACE   NAME      READY   STATUS    RESTARTS   AGE
+default     old-pod   1/1     Running   0          10d
+prod        mid-pod   1/1     Running   0          5d
+test        new-pod   1/1     Running   0          1h`
+  },
+  {
+    category: 'Pods',
+    subcategory: 'Pod Status',
     command: 'kubectl get pods --sort-by=.status.containerStatuses[0].restartCount',
     description: 'Sort pods by restart count',
-    example: 'kubectl get pods --sort-by=.status.containerStatuses[0].restartCount',
+    example: 'kubectl get pods --sort-by=.status.containerStatuses[0].restartCount\nkubectl get pods --sort-by=.status.containerStatuses[0].restartCount -n prod',
     versionIntroduced: '1.0',
     difficultyLevel: 'advanced',
     tags: 'get,pods,sort,restarts',
@@ -261,6 +401,36 @@ new-pod   1/1     Running   0          1h`
 stable    1/1     Running   0          5d
 flaky     0/1     CrashLoop 5          5d
 bad       0/1     CrashLoop 20         5d`
+  },
+  {
+    category: 'Pods',
+    subcategory: 'Pod Status',
+    command: 'kubectl get pods --sort-by=.status.containerStatuses[0].restartCount -A',
+    description: 'Sort pods by restart count in all namespaces',
+    example: 'kubectl get pods --sort-by=.status.containerStatuses[0].restartCount -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'advanced',
+    tags: 'get,pods,sort,restarts,all-namespaces',
+    flags: '--sort-by, -A',
+    output: `NAMESPACE   NAME      READY   STATUS    RESTARTS   AGE
+default     stable    1/1     Running   0          5d
+prod        flaky     0/1     CrashLoop 5          5d
+test        bad       0/1     CrashLoop 20         5d`
+  },
+  {
+    category: 'Pods',
+    subcategory: 'Pod Status',
+    command: 'kubectl get pods --sort-by=.status.containerStatuses[0].restartCount -A',
+    description: 'Sort pods by restart count in all namespaces',
+    example: 'kubectl get pods --sort-by=.status.containerStatuses[0].restartCount -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'advanced',
+    tags: 'get,pods,sort,restarts,all-namespaces',
+    flags: '--sort-by, -A',
+    output: `NAMESPACE   NAME      READY   STATUS    RESTARTS   AGE
+default     stable    1/1     Running   0          5d
+prod        flaky     0/1     CrashLoop 5          5d
+test        bad       0/1     CrashLoop 20         5d`
   },
   {
     category: 'Pods',
@@ -292,6 +462,19 @@ new-pod   1/1     Running   0          1h`
     output: `Forwarding from 127.0.0.1:8080 -> 80
 Forwarding from [::1]:8080 -> 80
 Handling connection for 8080`
+  },
+  {
+    category: 'Pods',
+    subcategory: 'Pod Debugging',
+    command: 'kubectl port-forward -n namespace pod/name local:remote',
+    description: 'Forward local port to pod in specific namespace',
+    example: 'kubectl port-forward -n production pod/nginx 8080:80',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'port-forward,pod,access,debug,namespace',
+    flags: '-n, --address',
+    output: `Forwarding from 127.0.0.1:8080 -> 80
+Forwarding from [::1]:8080 -> 80`
   },
   {
     category: 'Pods',

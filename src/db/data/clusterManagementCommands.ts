@@ -272,5 +272,84 @@ Done renewing certificates. You must restart the kube-apiserver, kube-controller
     output: `NAME        AGE   SIGNERNAME                                    REQUESTOR               REQUESTEDDURATION   CONDITION
 my-csr      10m   kubernetes.io/kube-apiserver-client           kubernetes-admin        <none>              Approved,Issued
 node-csr    5m    kubernetes.io/kube-apiserver-client-kubelet   system:node:worker-1    <none>              Pending`
+  },
+
+  // --- Missing Variations ---
+  {
+    category: 'Cluster Management',
+    subcategory: 'Nodes',
+    command: 'kubectl get nodes -o wide',
+    description: 'List nodes with extended information (IP, OS, Kernel)',
+    example: 'kubectl get nodes -o wide',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'nodes,list,wide',
+    flags: '-o wide',
+    output: `NAME       STATUS   ROLES           AGE   VERSION   INTERNAL-IP    EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION
+node-1     Ready    control-plane   30d   v1.29.0   192.168.1.10   <none>        Ubuntu 22.04.3 LTS   5.15.0-91-generic`
+  },
+  {
+    category: 'Cluster Management',
+    subcategory: 'Configuration',
+    command: 'kubectl config view',
+    description: 'Display the current kubeconfig',
+    example: 'kubectl config view',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'config,view',
+    output: `apiVersion: v1
+clusters:
+- cluster:
+    server: https://127.0.0.1:6443
+  name: kubernetes
+contexts:
+- context:
+    cluster: kubernetes
+    user: kubernetes-admin
+  name: kubernetes-admin@kubernetes
+current-context: kubernetes-admin@kubernetes
+kind: Config
+preferences: {}
+users:
+- name: kubernetes-admin
+  user:
+    client-certificate-data: REDACTED
+    client-key-data: REDACTED`
+  },
+  {
+    category: 'Cluster Management',
+    subcategory: 'Configuration',
+    command: 'kubectl config get-contexts',
+    description: 'List available contexts',
+    example: 'kubectl config get-contexts',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'config,context,list',
+    output: `CURRENT   NAME                          CLUSTER      AUTHINFO           NAMESPACE
+*         kubernetes-admin@kubernetes   kubernetes   kubernetes-admin   default
+          dev-context                   dev-cluster  dev-user           development`
+  },
+  {
+    category: 'Cluster Management',
+    subcategory: 'Configuration',
+    command: 'kubectl config use-context',
+    description: 'Switch to a different context',
+    example: 'kubectl config use-context dev-context',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'config,context,switch',
+    output: 'Switched to context "dev-context".'
+  },
+  {
+    category: 'Cluster Management',
+    subcategory: 'Configuration',
+    command: 'kubectl config set-context --current --namespace',
+    description: 'Set default namespace for current context',
+    example: 'kubectl config set-context --current --namespace=dev',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'config,context,namespace',
+    flags: '--current, --namespace',
+    output: 'Context "kubernetes-admin@kubernetes" modified.'
   }
 ];

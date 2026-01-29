@@ -226,5 +226,278 @@ requests.cpu     2     4`
     tags: 'configmap,create,keys',
     flags: '--from-literal',
     output: 'configmap/special-config created'
+  },
+  
+  // --- Missing Variations ---
+  {
+    category: 'Configuration',
+    subcategory: 'Resource Quotas',
+    command: 'kubectl get resourcequota',
+    description: 'List Resource Quotas in current namespace',
+    example: 'kubectl get resourcequota',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'quota,list',
+    output: `NAME       AGE   REQUEST                     LIMIT
+my-quota   5d    pods: 5/10, requests.cpu: 2/4   limits.memory: 2Gi/10Gi`
+  },
+  {
+    category: 'Configuration',
+    subcategory: 'Resource Quotas',
+    command: 'kubectl get resourcequota -n my-namespace',
+    description: 'List Resource Quotas in a specific namespace',
+    example: 'kubectl get resourcequota -n my-namespace',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'quota,list,namespace',
+    flags: '-n',
+    output: `NAME       AGE   REQUEST                     LIMIT
+my-quota   5d    pods: 5/10, requests.cpu: 2/4   limits.memory: 2Gi/10Gi`
+  },
+  {
+    category: 'Configuration',
+    subcategory: 'PDB',
+    command: 'kubectl get pdb',
+    description: 'List Pod Disruption Budgets in current namespace',
+    example: 'kubectl get pdb',
+    versionIntroduced: '1.5',
+    difficultyLevel: 'beginner',
+    tags: 'pdb,list',
+    output: `NAME     MIN AVAILABLE   MAX UNAVAILABLE   ALLOWED DISRUPTIONS   AGE
+my-pdb   1               N/A               2                     5d`
+  },
+  {
+    category: 'Configuration',
+    subcategory: 'PDB',
+    command: 'kubectl get pdb -n my-namespace',
+    description: 'List Pod Disruption Budgets in a specific namespace',
+    example: 'kubectl get pdb -n my-namespace',
+    versionIntroduced: '1.5',
+    difficultyLevel: 'beginner',
+    tags: 'pdb,list,namespace',
+    flags: '-n',
+    output: `NAME     MIN AVAILABLE   MAX UNAVAILABLE   ALLOWED DISRUPTIONS   AGE
+my-pdb   1               N/A               2                     5d`
+  },
+  {
+    category: 'Configuration',
+    subcategory: 'ConfigMaps',
+    command: 'kubectl get configmaps',
+    description: 'List ConfigMaps in current namespace',
+    example: 'kubectl get configmaps',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'configmap,list',
+    output: `NAME               DATA   AGE
+kube-root-ca.crt   1      30d
+my-config          2      5m`
+  },
+  {
+    category: 'Configuration',
+    subcategory: 'ConfigMaps',
+    command: 'kubectl get configmaps --all-namespaces',
+    description: 'List ConfigMaps across all namespaces',
+    example: 'kubectl get configmaps --all-namespaces',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'configmap,list,all-namespaces',
+    flags: '--all-namespaces',
+    output: `NAMESPACE     NAME               DATA   AGE
+default       kube-root-ca.crt   1      30d
+kube-system   coredns            1      30d`
+  },
+  {
+    category: 'Configuration',
+    subcategory: 'Secrets',
+    command: 'kubectl get secrets',
+    description: 'List Secrets in current namespace',
+    example: 'kubectl get secrets',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'secret,list',
+    output: `NAME                  TYPE                                  DATA   AGE
+default-token-abcde   kubernetes.io/service-account-token   3      30d
+my-secret             Opaque                                2      5m`
+  },
+  {
+    category: 'Configuration',
+    subcategory: 'Secrets',
+    command: 'kubectl get secrets --all-namespaces',
+    description: 'List Secrets across all namespaces',
+    example: 'kubectl get secrets --all-namespaces',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'secret,list,all-namespaces',
+    flags: '--all-namespaces',
+    output: `NAMESPACE     NAME                  TYPE                                  DATA   AGE
+default       default-token-abcde   kubernetes.io/service-account-token   3      30d
+kube-system   bootstrap-token-123   bootstrap.kubernetes.io/token         6      30d`
+  },
+  {
+    category: 'Configuration',
+    subcategory: 'Limit Ranges',
+    command: 'kubectl get limitrange',
+    description: 'List LimitRanges in current namespace',
+    example: 'kubectl get limitrange',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'limitrange,list',
+    output: `NAME             CREATED AT
+my-limit-range   2024-01-20T10:00:00Z`
+  },
+  {
+    category: 'Configuration',
+    subcategory: 'Limit Ranges',
+    command: 'kubectl get limitrange -n my-namespace',
+    description: 'List LimitRanges in a specific namespace',
+    example: 'kubectl get limitrange -n my-namespace',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'limitrange,list,namespace',
+    flags: '-n',
+    output: `NAME             CREATED AT
+my-limit-range   2024-01-20T10:00:00Z`
+  },
+  {
+    category: 'Configuration',
+    subcategory: 'Limit Ranges',
+    command: 'kubectl get limitrange -A',
+    description: 'List LimitRanges in all namespaces',
+    example: 'kubectl get limitrange -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'limitrange,list,all-namespaces',
+    flags: '-A',
+    output: `NAMESPACE   NAME             CREATED AT
+default     my-limit-range   2024-01-20T10:00:00Z`
+  },
+  {
+    category: 'Configuration',
+    subcategory: 'Resource Quotas',
+    command: 'kubectl describe resourcequota -A',
+    description: 'Describe all ResourceQuotas in all namespaces',
+    example: 'kubectl describe resourcequota -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'quota,describe,all-namespaces',
+    flags: '-A',
+    output: `Name:       my-quota
+Namespace:  default
+...
+Name:       dev-quota
+Namespace:  dev
+...`
+  },
+  {
+    category: 'Configuration',
+    subcategory: 'Limit Ranges',
+    command: 'kubectl describe limitrange -A',
+    description: 'Describe all LimitRanges in all namespaces',
+    example: 'kubectl describe limitrange -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'limitrange,describe,all-namespaces',
+    flags: '-A',
+    output: `Name:       my-limit-range
+Namespace:  default
+...`
+  },
+  {
+    category: 'Configuration',
+    subcategory: 'PDB',
+    command: 'kubectl describe pdb -A',
+    description: 'Describe all PodDisruptionBudgets in all namespaces',
+    example: 'kubectl describe pdb -A',
+    versionIntroduced: '1.5',
+    difficultyLevel: 'intermediate',
+    tags: 'pdb,describe,all-namespaces',
+    flags: '-A',
+    output: `Name:       my-pdb
+Namespace:  default
+...`
+  },
+  {
+    category: 'Configuration',
+    subcategory: 'ConfigMaps',
+    command: 'kubectl describe configmaps -A',
+    description: 'Describe all ConfigMaps in all namespaces',
+    example: 'kubectl describe configmaps -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'configmap,describe,all-namespaces',
+    flags: '-A',
+    output: `Name:         my-config
+Namespace:    default
+...`
+  },
+  {
+    category: 'Configuration',
+    subcategory: 'Secrets',
+    command: 'kubectl describe secrets -A',
+    description: 'Describe all Secrets in all namespaces',
+    example: 'kubectl describe secrets -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'intermediate',
+    tags: 'secret,describe,all-namespaces',
+    flags: '-A',
+    output: `Name:         my-secret
+Namespace:    default
+...`
+  },
+  {
+    category: 'Configuration',
+    subcategory: 'Resource Quotas',
+    command: 'kubectl get resourcequota -A',
+    description: 'List all resource quotas in all namespaces',
+    example: 'kubectl get resourcequota -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'quota,list,all-namespaces',
+    flags: '-A',
+    output: `NAMESPACE   NAME       AGE   REQUEST                                           LIMIT
+default     my-quota   5d    pods: 5/10, requests.cpu: 2/4                     limits.memory: 2Gi/10Gi
+dev         dev-quota  2d    pods: 1/20, requests.cpu: 500m/2                  limits.memory: 1Gi/4Gi`
+  },
+  {
+    category: 'Configuration',
+    subcategory: 'PDB',
+    command: 'kubectl get pdb -A',
+    description: 'List all PDBs in all namespaces',
+    example: 'kubectl get pdb -A',
+    versionIntroduced: '1.5',
+    difficultyLevel: 'beginner',
+    tags: 'pdb,list,all-namespaces',
+    flags: '-A',
+    output: `NAMESPACE   NAME         MIN AVAILABLE   MAX UNAVAILABLE   ALLOWED DISRUPTIONS   AGE
+default     my-pdb       1               N/A               2                     5d
+prod        backend-pdb  80%             N/A               1                     10d`
+  },
+  {
+    category: 'Configuration',
+    subcategory: 'ConfigMaps',
+    command: 'kubectl get configmaps -A',
+    description: 'List ConfigMaps in all namespaces',
+    example: 'kubectl get configmaps -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'configmap,list,all-namespaces',
+    flags: '-A',
+    output: `NAMESPACE     NAME               DATA   AGE
+default       kube-root-ca.crt   1      30d
+kube-system   coredns            1      30d`
+  },
+  {
+    category: 'Configuration',
+    subcategory: 'Secrets',
+    command: 'kubectl get secrets -A',
+    description: 'List Secrets in all namespaces',
+    example: 'kubectl get secrets -A',
+    versionIntroduced: '1.0',
+    difficultyLevel: 'beginner',
+    tags: 'secret,list,all-namespaces',
+    flags: '-A',
+    output: `NAMESPACE     NAME                  TYPE                                  DATA   AGE
+default       default-token-abcde   kubernetes.io/service-account-token   3      30d
+kube-system   bootstrap-token-123   bootstrap.kubernetes.io/token         6      30d`
   }
 ];
