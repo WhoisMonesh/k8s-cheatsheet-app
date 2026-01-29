@@ -1,0 +1,22 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#8b5cf6" />
+    </linearGradient>
+  </defs>
+  <path
+    d="M50 5 L85.2 21.9 L93.9 60 L69.5 90.5 L30.5 90.5 L6.1 60 L14.8 21.9 Z"
+    fill="url(#logoGradient)"
+  />
+  <g transform="translate(50, 50)" fill="white">
+    <circle r="8" />
+    <g transform="rotate(0)"><rect x="-3" y="-28" width="6" height="16" rx="2" /><rect x="-6" y="-34" width="12" height="6" rx="2" /></g>
+    <g transform="rotate(51.428)"><rect x="-3" y="-28" width="6" height="16" rx="2" /><rect x="-6" y="-34" width="12" height="6" rx="2" /></g>
+    <g transform="rotate(102.857)"><rect x="-3" y="-28" width="6" height="16" rx="2" /><rect x="-6" y="-34" width="12" height="6" rx="2" /></g>
+    <g transform="rotate(154.285)"><rect x="-3" y="-28" width="6" height="16" rx="2" /><rect x="-6" y="-34" width="12" height="6" rx="2" /></g>
+    <g transform="rotate(205.714)"><rect x="-3" y="-28" width="6" height="16" rx="2" /><rect x="-6" y="-34" width="12" height="6" rx="2" /></g>
+    <g transform="rotate(257.142)"><rect x="-3" y="-28" width="6" height="16" rx="2" /><rect x="-6" y="-34" width="12" height="6" rx="2" /></g>
+    <g transform="rotate(308.571)"><rect x="-3" y="-28" width="6" height="16" rx="2" /><rect x="-6" y="-34" width="12" height="6" rx="2" /></g>
+  </g>
+</svg>
