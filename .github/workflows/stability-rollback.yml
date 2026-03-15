@@ -18,71 +18,60 @@ on:
         options:
           - check
           - rollback
-          - pin-stable
+          - pin
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  checks: read
+  actions: read
+
+concurrency:
+  group: stability-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   stability-check:
     name: Stability Check
     runs-on: ubuntu-latest
     outputs:
-      is-stable: ${{ steps.check.outputs.is-stable }}
-      last-stable-sha: ${{ steps.check.outputs.last-stable-sha }}
-      failure-count: ${{ steps.check.outputs.failure-count }}
+      status: ${{ steps.check.outputs.status }}
+      stable_sha: ${{ steps.check.outputs.stable_sha }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 50
 
       - name: Check recent workflow runs
         id: check
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const { data: runs } = await github.rest.actions.listWorkflowRunsForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              branch: 'main',
-              per_page: 10,
-              status: 'completed'
-            });
-
-            let failureCount = 0;
-            let lastStableSha = null;
-
-            for (const run of runs.workflow_runs) {
-              if (run.conclusion === 'failure') {
-                failureCount++;
-              } else if (run.conclusion === 'success' && !lastStableSha) {
-                lastStableSha = run.head_sha;
-              }
-            }
-
-            const isStable = failureCount < 3;
-            core.setOutput('is-stable', isStable.toString());
-            core.setOutput('last-stable-sha', lastStableSha || '');
-            core.setOutput('failure-count', failureCount.toString());
-
-            console.log('Failure count: ' + failureCount);
-            console.log('Is stable: ' + isStable);
-            console.log('Last stable SHA: ' + lastStableSha);
-
-            if (!isStable) {
-              core.warning(failureCount + ' consecutive failures detected!');
-            }
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Checking recent CI runs..."
+          RECENT=$(gh run list --workflow="CI Test Suite" --limit=5 --json conclusion,headSha --jq '.[] | select(.conclusion != null)')
+          FAILURES=$(echo "$RECENT" | jq -r 'select(.conclusion=="failure") | .headSha' | wc -l | tr -d ' ')
+          STABLE_SHA=$(echo "$RECENT" | jq -r 'select(.conclusion=="success") | .headSha' | head -1)
+          echo "Recent failures: $FAILURES"
+          echo "Last stable SHA: $STABLE_SHA"
+          if [ "$FAILURES" -ge 3 ]; then
+            echo "status=unstable" >> $GITHUB_OUTPUT
+          else
+            echo "status=stable" >> $GITHUB_OUTPUT
+          fi
+          echo "stable_sha=$STABLE_SHA" >> $GITHUB_OUTPUT
 
   auto-rollback:
     name: Auto Rollback
-    runs-on: ubuntu-latest
     needs: stability-check
-    if: needs.stability-check.outputs.is-stable == 'false' && needs.stability-check.outputs.last-stable-sha != ''
-    permissions:
-      contents: write
-      issues: write
+    if: needs.stability-check.outputs.status == 'unstable' || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'rollback')
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 50
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Configure Git
@@ -90,111 +79,82 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+      - name: Create rollback issue
+        id: create-issue
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          STABLE_SHA="${{ needs.stability-check.outputs.stable_sha }}"
+          TITLE="[Auto-Rollback] CI instability detected - rollback recommended"
+          BODY="## Auto-Rollback Alert"
+          BODY="$BODY
+
+The CI pipeline has experienced multiple consecutive failures."
+          BODY="$BODY
+
+**Recommended stable commit:** $STABLE_SHA"
+          BODY="$BODY
+
+Please review recent commits and consider rolling back to the stable SHA above."
+          gh issue create --title "$TITLE" --body "$BODY" --label "bug" || echo "Issue creation skipped"
+
       - name: Create rollback branch
+        id: rollback-branch
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          STABLE_SHA="${{ needs.stability-check.outputs.last-stable-sha }}"
-          ROLLBACK_BRANCH="rollback/auto-$(date +%Y%m%d-%H%M%S)"
-          echo "Rolling back to: $STABLE_SHA"
-          git checkout -b "$ROLLBACK_BRANCH" "$STABLE_SHA"
-          git push origin "$ROLLBACK_BRANCH"
-          echo "ROLLBACK_BRANCH=$ROLLBACK_BRANCH" >> $GITHUB_ENV
-          echo "STABLE_SHA=$STABLE_SHA" >> $GITHUB_ENV
+          STABLE_SHA="${{ needs.stability-check.outputs.stable_sha }}"
+          BRANCH="rollback/auto-$(date +%Y%m%d-%H%M%S)"
+          if [ -z "$STABLE_SHA" ] || [ "$STABLE_SHA" = "null" ]; then
+            echo "No stable SHA found, skipping rollback branch creation"
+            exit 0
+          fi
+          git checkout -b "$BRANCH" "$STABLE_SHA" -- . ':!.github/'
+          git checkout -b "$BRANCH"
+          git reset --soft "$STABLE_SHA"
+          echo "Rollback branch $BRANCH created pointing to $STABLE_SHA"
 
-      - name: Create rollback PR and issue
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const rollbackBranch = process.env.ROLLBACK_BRANCH;
-            const stableSha = process.env.STABLE_SHA;
-            const failureCount = '${{ needs.stability-check.outputs.failure-count }}';
+      - name: Rollback summary
+        run: |
+          echo "## Rollback Action Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Status: ${{ needs.stability-check.outputs.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Stable SHA: ${{ needs.stability-check.outputs.stable_sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Action: Rollback issue created, manual intervention recommended" >> $GITHUB_STEP_SUMMARY
 
-            const prTitle = '[Auto-Rollback] Reverting to stable commit ' + stableSha.substring(0, 7);
-            const prBody = '## Automatic Rollback\n\n' +
-              '> This PR was automatically created due to ' + failureCount + ' consecutive CI failures.\n\n' +
-              '**Stable SHA:** `' + stableSha + '`\n' +
-              '**Failure Count:** ' + failureCount + '\n\n' +
-              '### Actions Required\n' +
-              '- [ ] Review recent changes that caused failures\n' +
-              '- [ ] Fix the root cause\n' +
-              '- [ ] Merge this PR to rollback to stable state\n\n' +
-              '> Auto-generated by Stability Monitor workflow';
-
-            const { data: pr } = await github.rest.pulls.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: prTitle,
-              body: prBody,
-              head: rollbackBranch,
-              base: 'main',
-              draft: false
-            });
-
-            await github.rest.issues.addLabels({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: pr.number,
-              labels: ['rollback', 'automated', 'urgent']
-            });
-
-            const issueTitle = '[Stability Alert] Main branch unstable - Auto-rollback initiated';
-            const issueBody = '## Stability Alert\n\n' +
-              'The main branch is unstable with **' + failureCount + ' consecutive failures**.\n\n' +
-              '**Auto-Rollback PR:** #' + pr.number + '\n' +
-              '**Target Stable SHA:** `' + stableSha + '`\n\n' +
-              '### Immediate Actions\n' +
-              '1. Check the failing workflow runs\n' +
-              '2. Review recent commits to main\n' +
-              '3. Either fix the issue or merge the rollback PR';
-
-            await github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: issueTitle,
-              body: issueBody,
-              labels: ['stability', 'automated', 'urgent']
-            });
-
-  pin-stable:
+  pin-stable-commit:
     name: Pin Stable Commit
-    runs-on: ubuntu-latest
     needs: stability-check
-    if: |
-      needs.stability-check.outputs.is-stable == 'true' &&
-      (github.event_name == 'push' || github.event.inputs.action == 'pin-stable')
-    permissions:
-      contents: write
+    if: needs.stability-check.outputs.status == 'stable' && (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'pin')
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Tag as stable
+      - name: Pin stable commit
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          STABLE_TAG="stable-latest"
-          git tag -fa "$STABLE_TAG" -m "Auto-tagged stable build: $(date -u)"
-          git push origin "$STABLE_TAG" --force
-          DATED_TAG="stable-$(date +%Y%m%d)"
-          git tag -fa "$DATED_TAG" -m "Stable build $(date -u)" || true
-          git push origin "$DATED_TAG" --force || true
-          echo "Tagged ${{ github.sha }} as stable"
+          SHA="${{ needs.stability-check.outputs.stable_sha }}"
+          gh release create "stable-$(date +%Y%m%d-%H%M%S)" --title "Stable Release $(date +%Y-%m-%d)" --notes "Auto-pinned stable commit: $SHA" --target "$SHA" || echo "Release creation skipped"
 
   health-report:
     name: Health Report
-    runs-on: ubuntu-latest
     needs: stability-check
+    runs-on: ubuntu-latest
     if: always()
     steps:
-      - name: Report Status
+      - name: Generate health report
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "=== Branch Health Report ==="
-          echo "Time: $(date -u)"
-          echo "Branch: main"
-          echo "Is Stable: ${{ needs.stability-check.outputs.is-stable }}"
-          echo "Failure Count: ${{ needs.stability-check.outputs.failure-count }}"
-          echo "Last Stable SHA: ${{ needs.stability-check.outputs.last-stable-sha }}"
-          if [ "${{ needs.stability-check.outputs.is-stable }}" = "true" ]; then
-            echo "Status: HEALTHY"
-          else
-            echo "Status: UNSTABLE - Rollback may be triggered"
-          fi
+          echo "## Repository Health Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Stability Status | ${{ needs.stability-check.outputs.status }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Last Stable SHA | ${{ needs.stability-check.outputs.stable_sha }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Timestamp | $(date -u) |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Health check completed successfully." >> $GITHUB_STEP_SUMMARY
