@@ -13,7 +13,6 @@ jobs:
       contents: write
       pull-requests: write
       issues: write
-
     # Only run when issue has 'implement' or 'auto-implement' label,
     # or comment contains /implement command
     if: |
@@ -23,7 +22,6 @@ jobs:
       )) ||
       (github.event_name == 'issue_comment' &&
         startsWith(github.event.comment.body, '/implement'))
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -59,39 +57,19 @@ jobs:
         id: implement
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ISSUE_TITLE: ${{ steps.issue.outputs.title }}
+          ISSUE_BODY: ${{ steps.issue.outputs.body }}
         run: |
-          ISSUE_TITLE=$(echo '${{ steps.issue.outputs.title }}' | sed "s/'/\\\\'/g")
-          ISSUE_BODY=$(echo '${{ steps.issue.outputs.body }}' | head -c 2000 | sed "s/'/\\\\'/g")
-
-          # Get existing source structure
           SRC_STRUCTURE=$(find src/ -name '*.tsx' -o -name '*.ts' 2>/dev/null | head -20 | tr '\n' ',' || echo "src/")
 
           cat > implement.js << 'JSEOF'
           const https = require('https');
           const fs = require('fs');
+          const title = process.env.ISSUE_TITLE || 'No title';
+          const body = process.env.ISSUE_BODY || '';
+          const structure = process.env.SRC_STRUCTURE || '';
 
-          const title = process.env.ISSUE_TITLE;
-          const body = process.env.ISSUE_BODY;
-          const structure = process.env.SRC_STRUCTURE;
-
-          const prompt = `You are a senior React/TypeScript developer. Based on this GitHub issue, generate implementation code.
-
-Issue Title: ${title}
-Issue Body: ${body}
-Existing source files: ${structure}
-
-Generate a complete implementation. Respond with JSON:
-{
-  "files": [
-    {
-      "path": "src/components/NewComponent.tsx",
-      "content": "// full file content here",
-      "description": "what this file does"
-    }
-  ],
-  "summary": "Brief description of what was implemented",
-  "pr_body": "Detailed PR description"
-}`;
+          const prompt = 'You are a senior React/TypeScript developer. Based on this GitHub issue for a Kubernetes Cheatsheet app, generate implementation code. Issue: ' + title + '\n' + body + '\nExisting files: ' + structure + '\n\nGenerate a complete implementation. Respond with JSON: {"files": [{"path": "src/components/NewComponent.tsx", "content": "// full file content", "description": "what this does"}], "summary": "Brief description", "pr_body": "Detailed PR description"}';
 
           const data = JSON.stringify({
             model: 'gpt-4o',
@@ -106,7 +84,7 @@ Generate a complete implementation. Respond with JSON:
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+              'Authorization': 'Bearer ' + process.env.OPENAI_API_KEY,
               'Content-Length': Buffer.byteLength(data)
             }
           };
@@ -123,7 +101,7 @@ Generate a complete implementation. Respond with JSON:
                 console.log('Implementation generated:', parsed.summary);
               } catch(e) {
                 console.error('Error:', e.message);
-                fs.writeFileSync('implementation.json', JSON.stringify({ files: [], summary: 'Failed to generate', pr_body: '' }));
+                fs.writeFileSync('implementation.json', JSON.stringify({ files: [], summary: 'Failed', pr_body: '' }));
               }
             });
           });
@@ -143,22 +121,21 @@ Generate a complete implementation. Respond with JSON:
             echo "No implementation file found"
             exit 0
           fi
-
           node -e "
-          const fs = require('fs');
-          const data = JSON.parse(fs.readFileSync('implementation.json', 'utf8'));
-          const files = data.files || [];
-          let created = [];
-          files.forEach(f => {
-            if (f.path && f.content && f.path.startsWith('src/')) {
-              const dir = require('path').dirname(f.path);
-              fs.mkdirSync(dir, { recursive: true });
-              fs.writeFileSync(f.path, f.content);
-              created.push(f.path);
-              console.log('Created:', f.path);
-            }
-          });
-          fs.writeFileSync('created-files.txt', created.join('\\n'));
+            const fs = require('fs');
+            const data = JSON.parse(fs.readFileSync('implementation.json', 'utf8'));
+            const files = data.files || [];
+            let created = [];
+            files.forEach(f => {
+              if (f.path && f.content && f.path.startsWith('src/')) {
+                const dir = require('path').dirname(f.path);
+                fs.mkdirSync(dir, { recursive: true });
+                fs.writeFileSync(f.path, f.content);
+                created.push(f.path);
+                console.log('Created:', f.path);
+              }
+            });
+            fs.writeFileSync('created-files.txt', created.join('\\n'));
           "
 
       - name: Create pull request
@@ -167,27 +144,18 @@ Generate a complete implementation. Respond with JSON:
         run: |
           ISSUE_NUM=${{ steps.issue.outputs.number }}
           BRANCH_NAME="implement/issue-${ISSUE_NUM}-$(date +%s)"
-
           git config --local user.email "issue-to-code-bot@github.com"
           git config --local user.name "Issue To Code Bot"
-
           git checkout -b "$BRANCH_NAME"
           git add src/ 2>/dev/null || true
-
           if git diff --staged --quiet; then
             echo "No files to commit"
             exit 0
           fi
-
           SUMMARY=$(node -e "const d=require('./implementation.json'); console.log(d.summary||'Implementation')" 2>/dev/null || echo "Implementation")
           PR_BODY=$(node -e "const d=require('./implementation.json'); console.log(d.pr_body||'Auto-generated implementation')" 2>/dev/null || echo "Auto-generated")
-
           git commit -m "feat: implement issue #${ISSUE_NUM} - ${SUMMARY}"
           git push origin "$BRANCH_NAME"
-
-          gh pr create \
-            --title "feat: implement issue #${ISSUE_NUM} - ${SUMMARY}" \
-            --body "Closes #${ISSUE_NUM}\n\n${PR_BODY}\n\n_Auto-generated by Issue To Code Bot_" \
-            --base main \
-            --head "$BRANCH_NAME" \
-            --label "auto-implemented"
+          TITLE="feat: implement issue #${ISSUE_NUM} - ${SUMMARY}"
+          BODY="Closes #${ISSUE_NUM}. ${PR_BODY}. Auto-generated by Issue To Code Bot"
+          gh pr create --title "$TITLE" --body "$BODY" --base main --head "$BRANCH_NAME" --label "auto-implemented"
