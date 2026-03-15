@@ -1,0 +1,139 @@
+name: Evolution Bot
+
+on:
+  schedule:
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+
+jobs:
+  evolve:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests and collect metrics
+        run: |
+          npm test -- --coverage --json --outputFile=test-results.json 2>/dev/null || true
+          echo "Tests completed"
+
+      - name: Analyze codebase with AI
+        id: analysis
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cat > analyze.js << 'EOF'
+          const https = require('https');
+          const fs = require('fs');
+          const path = require('path');
+
+          const srcFiles = [];
+          function walkDir(dir) {
+            try {
+              const files = fs.readdirSync(dir);
+              files.forEach(file => {
+                const fullPath = path.join(dir, file);
+                const stat = fs.statSync(fullPath);
+                if (stat.isDirectory() && !file.startsWith('.') && file !== 'node_modules') {
+                  walkDir(fullPath);
+                } else if (file.match(/\.(tsx?|jsx?|css)$/) && srcFiles.length < 10) {
+                  srcFiles.push({ path: fullPath, content: fs.readFileSync(fullPath, 'utf8').slice(0, 500) });
+                }
+              });
+            } catch(e) {}
+          }
+          walkDir('src');
+
+          const summary = srcFiles.map(f => `File: ${f.path}\n${f.content}`).join('\n---\n').slice(0, 3000);
+
+          const prompt = `You are a senior software architect. Analyze this React/TypeScript codebase and suggest 3 specific improvements as GitHub issues. For each, provide: title, body (with implementation details), and labels.\n\nCode summary:\n${summary}\n\nRespond with JSON array: [{"title": "", "body": "", "labels": ["enhancement"]}]`;
+
+          const data = JSON.stringify({
+            model: 'gpt-4o',
+            messages: [{ role: 'user', content: prompt }],
+            max_tokens: 1500,
+            response_format: { type: 'json_object' }
+          });
+
+          const options = {
+            hostname: 'api.openai.com',
+            path: '/v1/chat/completions',
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+              'Content-Length': data.length
+            }
+          };
+
+          const req = https.request(options, (res) => {
+            let body = '';
+            res.on('data', chunk => body += chunk);
+            res.on('end', () => {
+              try {
+                const result = JSON.parse(body);
+                const content = result.choices[0].message.content;
+                fs.writeFileSync('evolution-suggestions.json', content);
+                console.log('Analysis complete');
+              } catch(e) {
+                fs.writeFileSync('evolution-suggestions.json', JSON.stringify({suggestions: []}));
+              }
+            });
+          });
+          req.on('error', () => fs.writeFileSync('evolution-suggestions.json', JSON.stringify({suggestions: []})));
+          req.write(data);
+          req.end();
+          EOF
+          node analyze.js
+
+      - name: Create evolution issues
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -f evolution-suggestions.json ]; then
+            node -e "
+            const fs = require('fs');
+            const https = require('https');
+            const data = JSON.parse(fs.readFileSync('evolution-suggestions.json', 'utf8'));
+            const suggestions = data.suggestions || data || [];
+            const arr = Array.isArray(suggestions) ? suggestions : [];
+            arr.slice(0,3).forEach(s => {
+              const body = JSON.stringify({ title: s.title || 'Evolution suggestion', body: s.body || 'AI-generated improvement', labels: s.labels || ['enhancement', 'evolution'] });
+              const opts = {
+                hostname: 'api.github.com',
+                path: '/repos/${{ github.repository }}/issues',
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'token ${{ secrets.GITHUB_TOKEN }}', 'User-Agent': 'evolution-bot', 'Content-Length': body.length }
+              };
+              const req = https.request(opts, r => { let b=''; r.on('data',c=>b+=c); r.on('end',()=>console.log('Created issue:', JSON.parse(b).number)); });
+              req.on('error', e => console.error(e));
+              req.write(body); req.end();
+            });
+            "
+          fi
+
+      - name: Check for outdated dependencies
+        run: |
+          npm outdated --json > outdated.json 2>/dev/null || true
+          OUTDATED=$(cat outdated.json | node -e "const d=require('/dev/stdin'); const keys=Object.keys(d); console.log(keys.length)" 2>/dev/null || echo '0')
+          echo "Outdated packages: $OUTDATED"
+          if [ "$OUTDATED" -gt "5" ]; then
+            echo "::warning::$OUTDATED outdated packages found. Consider running dependency update."
+          fi
