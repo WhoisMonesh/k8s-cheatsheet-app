@@ -1,0 +1,231 @@
+name: Code Review Bot
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  lint-review:
+    name: ESLint Code Review
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint with annotations
+        id: eslint
+        run: |
+          npm run lint -- --format json > eslint-report.json 2>&1 || true
+          npm run lint -- --format stylish 2>&1 | tee eslint-output.txt || true
+
+      - name: Parse ESLint and post inline review comments
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            let report = [];
+            try {
+              report = JSON.parse(fs.readFileSync('eslint-report.json', 'utf8'));
+            } catch(e) {
+              console.log('Could not parse ESLint JSON report:', e.message);
+              return;
+            }
+
+            const pr = context.payload.pull_request;
+            const baseSha = pr.base.sha;
+            const headSha = pr.head.sha;
+
+            // Get PR diff to find which files/lines are changed
+            const files = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number
+            });
+            const changedFiles = new Set(files.data.map(f => f.filename));
+
+            let totalErrors = 0;
+            let totalWarnings = 0;
+            const reviewComments = [];
+            const summaryLines = [];
+
+            for (const fileReport of report) {
+              const filePath = fileReport.filePath.replace(process.cwd() + '/', '');
+              if (!changedFiles.has(filePath)) continue;
+
+              totalErrors += fileReport.errorCount;
+              totalWarnings += fileReport.warningCount;
+
+              for (const msg of fileReport.messages) {
+                const severity = msg.severity === 2 ? '❌ Error' : '⚠️ Warning';
+                const rule = msg.ruleId ? `\`${msg.ruleId}\`` : 'unknown rule';
+                summaryLines.push(`- ${severity}: **${filePath}** line ${msg.line}: ${msg.message} (${rule})`);
+
+                // Only add inline comments for errors on changed lines
+                if (msg.severity === 2 && msg.line) {
+                  reviewComments.push({
+                    path: filePath,
+                    line: msg.line,
+                    body: `🤖 **ESLint Bot** ${severity}: ${msg.message}\n\nRule: ${rule}\n\n_Fix this issue to keep the codebase clean._`
+                  });
+                }
+              }
+            }
+
+            // Post review with inline comments
+            const event = totalErrors > 0 ? 'REQUEST_CHANGES' : 'COMMENT';
+            const reviewBody = totalErrors === 0 && totalWarnings === 0
+              ? `✅ **Code Review Bot**: No ESLint issues found in the changed files! Great work.`
+              : `## 🤖 Code Review Bot - ESLint Analysis\n\n` +
+                `| Metric | Count |\n|--------|-------|\n` +
+                `| ❌ Errors | ${totalErrors} |\n` +
+                `| ⚠️ Warnings | ${totalWarnings} |\n\n` +
+                (summaryLines.length > 0
+                  ? `**Issues found:**\n${summaryLines.slice(0, 20).join('\n')}` +
+                    (summaryLines.length > 20 ? `\n\n_...and ${summaryLines.length - 20} more issues_` : '')
+                  : '') +
+                (totalErrors > 0 ? `\n\n❌ **Please fix all errors before this PR can be merged.**` : '');
+
+            try {
+              await github.rest.pulls.createReview({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+                commit_id: headSha,
+                body: reviewBody,
+                event: event,
+                comments: reviewComments.slice(0, 30) // GitHub limits inline comments
+              });
+            } catch(e) {
+              // Fallback to regular comment if review fails
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                body: reviewBody
+              });
+            }
+
+  typecheck-review:
+    name: TypeScript Review
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run TypeScript check
+        id: tsc
+        run: npm run typecheck 2>&1 | tee tsc-output.txt
+        continue-on-error: true
+
+      - name: Post TypeScript review comment
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const output = fs.readFileSync('tsc-output.txt', 'utf8');
+            const passed = !output.includes('error TS');
+            const errors = output.match(/error TS\d+/g) || [];
+            const uniqueErrors = [...new Set(errors)];
+
+            if (passed) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: `✅ **TypeScript Bot**: All type checks passed! No type errors found.`
+              });
+            } else {
+              const body = `## ❌ TypeScript Bot - Type Errors Found\n\n` +
+                `Found **${errors.length}** type error(s) (${uniqueErrors.length} unique).\n\n` +
+                `<details><summary>Full TypeScript Output</summary>\n\n\`\`\`\n${output.slice(0, 4000)}\n\`\`\`\n</details>\n\n` +
+                `_Please fix all TypeScript errors. Run \`npm run typecheck\` locally to see details._`;
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body
+              });
+            }
+
+  bundle-size-review:
+    name: Bundle Size Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and analyze bundle
+        id: build
+        run: |
+          npm run build 2>&1 | tee build-output.txt
+          # Get dist folder size
+          if [ -d dist ]; then
+            DIST_SIZE=$(du -sh dist | cut -f1)
+            echo "dist_size=$DIST_SIZE" >> $GITHUB_OUTPUT
+            # List large files
+            find dist -type f -name '*.js' -o -name '*.css' | xargs ls -lh 2>/dev/null | sort -k5 -rh | head -10 > large-files.txt
+          fi
+        continue-on-error: true
+
+      - name: Post bundle analysis
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            let largeFiles = '';
+            try { largeFiles = fs.readFileSync('large-files.txt', 'utf8'); } catch(e) {}
+            const distSize = '${{ steps.build.outputs.dist_size }}' || 'N/A';
+            const buildOutput = (() => { try { return fs.readFileSync('build-output.txt', 'utf8').slice(-2000); } catch(e) { return ''; } })();
+            const buildOk = '${{ steps.build.outcome }}' === 'success';
+
+            const body = `## 📦 Bundle Size Bot - Build Analysis\n\n` +
+              `| Metric | Value |\n|--------|-------|\n` +
+              `| Build Status | ${buildOk ? '✅ Success' : '❌ Failed'} |\n` +
+              `| Total dist size | \`${distSize}\` |\n\n` +
+              (largeFiles ? `**Largest JS/CSS files:**\n\`\`\`\n${largeFiles}\n\`\`\`\n` : '') +
+              (!buildOk ? `<details><summary>Build Output</summary>\n\n\`\`\`\n${buildOutput}\n\`\`\`\n</details>\n` : '') +
+              `\n_Bundle analysis helps track performance regressions._`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body
+            });
