@@ -1,0 +1,64 @@
+# CODEOWNERS - Automatic code review assignments
+# Format: <pattern> <owner(s)>
+# Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global owner - reviews everything by default
+* @WhoisMonesh
+
+# === Source Code ===
+src/                          @WhoisMonesh
+src/components/               @WhoisMonesh
+src/context/                  @WhoisMonesh
+src/db/                       @WhoisMonesh
+src/types/                    @WhoisMonesh
+
+# === Core App Files ===
+src/App.tsx                   @WhoisMonesh
+src/main.tsx                  @WhoisMonesh
+src/index.css                 @WhoisMonesh
+
+# === Feature Components (require owner review) ===
+src/components/QuizMode.tsx       @WhoisMonesh
+src/components/ExamMode.tsx       @WhoisMonesh
+src/components/YamlBuilder.tsx    @WhoisMonesh
+src/components/YamlTemplates.tsx  @WhoisMonesh
+src/components/CommandList.tsx    @WhoisMonesh
+src/components/CommandDetails.tsx @WhoisMonesh
+src/components/Favorites.tsx      @WhoisMonesh
+src/components/Scenarios.tsx      @WhoisMonesh
+src/components/ConsolePractice.tsx @WhoisMonesh
+src/components/BestPractices.tsx  @WhoisMonesh
+src/components/Settings.tsx       @WhoisMonesh
+src/components/Sidebar.tsx        @WhoisMonesh
+src/components/Header.tsx         @WhoisMonesh
+
+# === Electron (Desktop App Shell) ===
+electron/                     @WhoisMonesh
+
+# === Build & Config ===
+package.json                  @WhoisMonesh
+package-lock.json             @WhoisMonesh
+vite.config.*                 @WhoisMonesh
+tsconfig*.json                @WhoisMonesh
+eslint.config.*               @WhoisMonesh
+postcss.config.*              @WhoisMonesh
+tailwind.config.*             @WhoisMonesh
+
+# === CI/CD & GitHub Automation ===
+.github/                      @WhoisMonesh
+.github/workflows/            @WhoisMonesh
+.github/dependabot.yml        @WhoisMonesh
+
+# === Scripts ===
+scripts/                      @WhoisMonesh
+build/                        @WhoisMonesh
+
+# === Documentation ===
+*.md                          @WhoisMonesh
+CHANGELOG.md                  @WhoisMonesh
+README.md                     @WhoisMonesh
+
+# === Security Sensitive Files ===
+.env*                         @WhoisMonesh
+*.pem                         @WhoisMonesh
+*.key                         @WhoisMonesh
