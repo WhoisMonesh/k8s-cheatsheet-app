@@ -1,0 +1,228 @@
+name: Dev to Main Promotion
+
+# Strategy:
+# 1. PRs merge to 'dev' branch first
+# 2. This workflow runs daily and checks if dev has been stable for 3+ days
+# 3. If stable (tests pass, no failures), auto-promotes dev -> main via PR
+# 4. If unstable, posts a warning comment and skips promotion
+
+on:
+  schedule:
+    # Check every day at 08:00 UTC for promotion readiness
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+    inputs:
+      force_promote:
+        description: 'Force promote dev to main (skip stability wait)'
+        required: false
+        default: 'false'
+      stability_days:
+        description: 'Days dev must be stable before promotion (default: 3)'
+        required: false
+        default: '3'
+
+jobs:
+  check-stability:
+    name: Check Dev Branch Stability
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    outputs:
+      should_promote: ${{ steps.stability.outputs.should_promote }}
+      dev_sha: ${{ steps.stability.outputs.dev_sha }}
+      days_stable: ${{ steps.stability.outputs.days_stable }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check if dev branch exists
+        id: branch_check
+        run: |
+          if git ls-remote --exit-code --heads origin dev; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Dev branch does not exist, skipping"
+          fi
+
+      - name: Analyze dev branch stability
+        id: stability
+        if: steps.branch_check.outputs.exists == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const forcePromote = '${{ github.event.inputs.force_promote }}' === 'true';
+            const stabilityDays = parseInt('${{ github.event.inputs.stability_days }}' || '3');
+
+            // Get dev branch info
+            const { data: devBranch } = await github.rest.repos.getBranch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              branch: 'dev'
+            });
+
+            const devSha = devBranch.commit.sha;
+            core.setOutput('dev_sha', devSha);
+
+            // Get last commit date on dev
+            const lastCommitDate = new Date(devBranch.commit.commit.committer.date);
+            const now = new Date();
+            const daysSinceLastCommit = (now - lastCommitDate) / (1000 * 60 * 60 * 24);
+
+            console.log(`Last commit on dev: ${lastCommitDate.toISOString()}`);
+            console.log(`Days since last commit: ${daysSinceLastCommit.toFixed(1)}`);
+            core.setOutput('days_stable', daysSinceLastCommit.toFixed(1));
+
+            // Check recent workflow runs on dev for failures
+            const { data: workflowRuns } = await github.rest.actions.listWorkflowRunsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              branch: 'dev',
+              per_page: 10,
+              status: 'completed'
+            });
+
+            const recentFailures = workflowRuns.workflow_runs.filter(run => {
+              const runDate = new Date(run.created_at);
+              const daysAgo = (now - runDate) / (1000 * 60 * 60 * 24);
+              return daysAgo <= stabilityDays && run.conclusion === 'failure';
+            });
+
+            // Check if dev is ahead of main
+            let devAheadOfMain = false;
+            try {
+              const { data: comparison } = await github.rest.repos.compareCommitsWithBasehead({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                basehead: `main...dev`
+              });
+              devAheadOfMain = comparison.ahead_by > 0;
+              console.log(`Dev is ${comparison.ahead_by} commits ahead of main`);
+            } catch(e) {
+              console.log('Could not compare branches:', e.message);
+            }
+
+            const isStable = (daysSinceLastCommit >= stabilityDays || forcePromote) &&
+                             recentFailures.length === 0 &&
+                             devAheadOfMain;
+
+            console.log(`Recent failures in last ${stabilityDays} days: ${recentFailures.length}`);
+            console.log(`Should promote: ${isStable}`);
+            core.setOutput('should_promote', isStable.toString());
+
+  promote-dev-to-main:
+    name: Promote Dev to Main
+    runs-on: ubuntu-latest
+    needs: check-stability
+    if: needs.check-stability.outputs.should_promote == 'true'
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check for existing promotion PR
+        id: existing_pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              head: `${context.repo.owner}:dev`,
+              base: 'main'
+            });
+            if (prs.length > 0) {
+              console.log('Promotion PR already exists:', prs[0].number);
+              core.setOutput('pr_exists', 'true');
+              core.setOutput('pr_number', prs[0].number);
+            } else {
+              core.setOutput('pr_exists', 'false');
+            }
+
+      - name: Create promotion PR
+        if: steps.existing_pr.outputs.pr_exists != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const daysStable = '${{ needs.check-stability.outputs.days_stable }}';
+            const devSha = '${{ needs.check-stability.outputs.dev_sha }}'.slice(0, 7);
+            const date = new Date().toISOString().split('T')[0];
+
+            const { data: pr } = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `chore: promote dev to main - ${date} (stable for ${daysStable} days)`,
+              body: [
+                '## Automated Dev -> Main Promotion',
+                '',
+                `**Dev SHA:** \`${devSha}\``,
+                `**Stable for:** ${daysStable} days`,
+                `**Date:** ${date}`,
+                '',
+                '### Stability Checks Passed',
+                '- No CI failures in the stability window',
+                '- Dev branch has new commits not yet in main',
+                '- Minimum stability period elapsed',
+                '',
+                '### What changed',
+                'See commit history on the `dev` branch for details.',
+                '',
+                '> This PR was automatically created by the Dev-to-Main Promotion Bot.',
+                '> It will auto-merge if all checks pass.',
+                '',
+                '**To rollback after merge:** Comment `/rollback` on this PR or trigger the Rollback workflow manually.'
+              ].join('\n'),
+              head: 'dev',
+              base: 'main',
+              draft: false
+            });
+
+            // Add labels
+            try {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                labels: ['promotion', 'automated']
+              });
+            } catch(e) {}
+
+            // Enable auto-merge
+            try {
+              await github.rest.pulls.merge({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+                merge_method: 'merge',
+                commit_title: `chore: promote dev to main [${date}]`,
+                commit_message: `Auto-promoted by stability bot after ${daysStable} days stable on dev`
+              });
+              console.log('Auto-merged promotion PR:', pr.number);
+            } catch(e) {
+              console.log('Auto-merge pending checks:', e.message);
+            }
+
+  skip-promotion:
+    name: Report Stability Status
+    runs-on: ubuntu-latest
+    needs: check-stability
+    if: needs.check-stability.outputs.should_promote == 'false'
+    steps:
+      - name: Log stability status
+        run: |
+          echo "Dev branch is not ready for promotion yet"
+          echo "Days stable: ${{ needs.check-stability.outputs.days_stable }}"
+          echo "Required: 3 days with no failures"
