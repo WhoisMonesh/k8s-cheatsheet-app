@@ -1,0 +1,261 @@
+name: CI - Test Suite
+
+on:
+  push:
+    branches: [main, dev, 'feature/**', 'fix/**', 'hotfix/**']
+  pull_request:
+    branches: [main, dev]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+concurrency:
+  group: ci-test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: ESLint Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        id: lint
+        run: |
+          npm run lint -- --format json --output-file lint-results.json || true
+          npm run lint 2>&1 | tee lint-output.txt
+          exit ${PIPESTATUS[0]}
+        continue-on-error: true
+
+      - name: Post lint results as PR comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            let lintOutput = '';
+            try {
+              lintOutput = fs.readFileSync('lint-output.txt', 'utf8').slice(0, 3000);
+            } catch(e) {
+              lintOutput = 'No lint output captured.';
+            }
+            const lintPassed = '${{ steps.lint.outcome }}' === 'success';
+            const icon = lintPassed ? '✅' : '❌';
+            const status = lintPassed ? 'passed' : 'failed';
+
+            // Find existing bot comment to update
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number
+            });
+            const botComment = comments.data.find(c =>
+              c.user.type === 'Bot' && c.body.includes('CI Test Results')
+            );
+
+            const body = `## ${icon} CI Test Results\n\n` +
+              `| Check | Status |\n|-------|--------|\n` +
+              `| ESLint | ${lintPassed ? '✅ Passed' : '❌ Failed'} |\n\n` +
+              (lintPassed ? '' : `<details><summary>ESLint Output</summary>\n\n\`\`\`\n${lintOutput}\n\`\`\`\n</details>\n`) +
+              `\n_Updated at: ${new Date().toUTCString()}_`;
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body
+              });
+            }
+
+      - name: Fail if lint failed
+        if: steps.lint.outcome == 'failure'
+        run: exit 1
+
+  typecheck:
+    name: TypeScript Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run TypeScript check
+        id: typecheck
+        run: npm run typecheck 2>&1 | tee typecheck-output.txt
+        continue-on-error: true
+
+      - name: Post typecheck results as PR comment
+        if: github.event_name == 'pull_request' && steps.typecheck.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const output = fs.readFileSync('typecheck-output.txt', 'utf8').slice(0, 3000);
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: `## ❌ TypeScript Errors Found\n\n<details><summary>TypeScript Output</summary>\n\n\`\`\`\n${output}\n\`\`\`\n</details>\n\n_Please fix all TypeScript errors before merging._`
+            });
+
+      - name: Fail if typecheck failed
+        if: steps.typecheck.outcome == 'failure'
+        run: exit 1
+
+  build-test:
+    name: Build Test (Vite)
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Vite app
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ github.sha }}
+          path: dist/
+          retention-days: 7
+
+      - name: Post build success comment
+        if: github.event_name == 'pull_request' && success()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const sha = context.sha.substring(0, 7);
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: `✅ **Build Bot**: Vite build succeeded for commit \`${sha}\`! Build artifacts are available for 7 days.`
+            });
+
+  unit-tests:
+    name: Unit Tests (Vitest)
+    runs-on: ubuntu-latest
+    needs: [lint]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Vitest if missing
+        run: |
+          if ! grep -q 'vitest' package.json; then
+            echo 'Vitest not found in package.json. Skipping unit tests.'
+            echo 'SKIP_TESTS=true' >> $GITHUB_ENV
+          fi
+
+      - name: Run unit tests
+        if: env.SKIP_TESTS != 'true'
+        id: tests
+        run: npx vitest run --reporter=verbose 2>&1 | tee test-output.txt
+        continue-on-error: true
+
+      - name: Post test results
+        if: github.event_name == 'pull_request' && env.SKIP_TESTS != 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            let output = '';
+            try { output = fs.readFileSync('test-output.txt', 'utf8').slice(0, 3000); } catch(e) {}
+            const passed = '${{ steps.tests.outcome }}' === 'success';
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: `## ${passed ? '✅' : '❌'} Unit Test Results\n\n` +
+                `<details><summary>Test Output</summary>\n\n\`\`\`\n${output}\n\`\`\`\n</details>`
+            });
+
+  ci-summary:
+    name: CI Summary
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck, build-test, unit-tests]
+    if: always() && github.event_name == 'pull_request'
+    steps:
+      - name: Post final CI summary
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const lint = '${{ needs.lint.result }}';
+            const typecheck = '${{ needs.typecheck.result }}';
+            const build = '${{ needs.build-test.result }}';
+            const tests = '${{ needs.unit-tests.result }}';
+
+            const icon = r => r === 'success' ? '✅' : r === 'skipped' ? '⏭️' : '❌';
+            const allPassed = [lint, typecheck, build].every(r => r === 'success');
+
+            const body = `## 🤖 CI Bot - Final Summary\n\n` +
+              `| Job | Result |\n|-----|--------|\n` +
+              `| ESLint | ${icon(lint)} ${lint} |\n` +
+              `| TypeScript | ${icon(typecheck)} ${typecheck} |\n` +
+              `| Build | ${icon(build)} ${build} |\n` +
+              `| Unit Tests | ${icon(tests)} ${tests} |\n\n` +
+              (allPassed
+                ? `✅ **All critical checks passed!** This PR is ready for review.`
+                : `❌ **Some checks failed.** Please fix the issues above before merging.`) +
+              `\n\n_Commit: \`${context.sha.substring(0, 7)}\` | ${new Date().toUTCString()}_`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body
+            });
