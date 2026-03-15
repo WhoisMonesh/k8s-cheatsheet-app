@@ -1,0 +1,179 @@
+name: Issue Bot
+
+on:
+  issues:
+    types: [opened, reopened, labeled, closed]
+  schedule:
+    - cron: '0 2 * * *'  # Daily at 2 AM UTC - stale check
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  greet-new-issue:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues' && github.event.action == 'opened'
+    steps:
+      - name: Greet issue author
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue = context.payload.issue;
+            const author = issue.user.login;
+            const isFirstIssue = issue.author_association === 'FIRST_TIME_CONTRIBUTOR' ||
+                                  issue.author_association === 'NONE';
+
+            const greeting = isFirstIssue
+              ? `🎉 Welcome @${author}! This is your first issue - thank you for contributing to **k8s-cheatsheet-app**!`
+              : `👋 Thanks for opening an issue @${author}!`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              body: `${greeting}\n\n` +
+                `🤖 **Issue Bot**: Your issue has been received and will be reviewed soon.\n\n` +
+                `**Please make sure you have provided:**\n` +
+                `- [ ] Clear description of the problem or request\n` +
+                `- [ ] Steps to reproduce (if a bug)\n` +
+                `- [ ] Expected vs actual behavior (if a bug)\n` +
+                `- [ ] App version and OS (e.g., v1.4.3-dev on Ubuntu 22.04)\n\n` +
+                `_We'll triage this soon. You can add the \`bug\`, \`enhancement\`, or \`question\` label to help us prioritize._`
+            });
+
+  auto-label-issue:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues' && github.event.action == 'opened'
+    steps:
+      - name: Auto-label issue by keywords
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue = context.payload.issue;
+            const title = issue.title.toLowerCase();
+            const body = (issue.body || '').toLowerCase();
+            const text = title + ' ' + body;
+
+            const labelMap = [
+              { keywords: ['bug', 'error', 'crash', 'fail', 'broken', 'exception', 'fix'], label: 'bug' },
+              { keywords: ['feature', 'enhancement', 'add', 'new', 'improve', 'request'], label: 'enhancement' },
+              { keywords: ['docs', 'documentation', 'readme', 'typo', 'spelling'], label: 'documentation' },
+              { keywords: ['question', 'how', 'help', 'support', 'why', 'what'], label: 'question' },
+              { keywords: ['security', 'vulnerability', 'cve', 'exploit', 'auth'], label: 'security' },
+              { keywords: ['performance', 'slow', 'memory', 'cpu', 'optimize'], label: 'performance' },
+              { keywords: ['ui', 'ux', 'design', 'style', 'css', 'layout', 'tailwind'], label: 'ui/ux' },
+              { keywords: ['kubernetes', 'k8s', 'kubectl', 'pod', 'namespace', 'cluster'], label: 'k8s-content' },
+              { keywords: ['electron', 'desktop', 'window', 'app'], label: 'electron' },
+              { keywords: ['ci', 'cd', 'workflow', 'action', 'pipeline', 'build'], label: 'ci/cd' },
+              { keywords: ['duplicate', 'already', 'existing'], label: 'duplicate' },
+            ];
+
+            const existingLabels = await github.rest.issues.listLabelsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            const existingNames = new Set(existingLabels.data.map(l => l.name));
+
+            const colorMap = {
+              'bug': 'd73a4a', 'enhancement': 'a2eeef', 'documentation': '0075ca',
+              'question': 'd876e3', 'security': 'ee0701', 'performance': 'f9d0c4',
+              'ui/ux': 'e4e669', 'k8s-content': '0075ca', 'electron': '6f42c1',
+              'ci/cd': 'e4e669', 'duplicate': 'cfd3d7', 'wontfix': 'ffffff',
+              'stale': 'fef2c0', 'invalid': 'e4e669', 'triage': 'ededed'
+            };
+
+            const labelsToAdd = [];
+            for (const { keywords, label } of labelMap) {
+              if (keywords.some(kw => text.includes(kw))) {
+                if (!existingNames.has(label)) {
+                  try {
+                    await github.rest.issues.createLabel({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      name: label,
+                      color: colorMap[label] || 'ededed'
+                    });
+                  } catch(e) {}
+                }
+                labelsToAdd.push(label);
+              }
+            }
+
+            // Always add 'triage' to new issues
+            if (!existingNames.has('triage')) {
+              try {
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: 'triage',
+                  color: 'ededed'
+                });
+              } catch(e) {}
+            }
+            labelsToAdd.push('triage');
+
+            if (labelsToAdd.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: [...new Set(labelsToAdd)]
+              });
+            }
+
+  stale-issues:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - name: Mark and close stale issues
+        uses: actions/stale@v9
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          stale-issue-message: |
+            🤖 **Stale Bot**: This issue has been inactive for **30 days**.
+            It will be automatically closed in **7 days** unless there is new activity.
+            If this issue is still relevant, please leave a comment or update the description.
+          close-issue-message: |
+            🔒 **Stale Bot**: This issue has been closed due to **37 days of inactivity**.
+            Feel free to reopen it if you encounter the problem again or have more information.
+          stale-pr-message: |
+            🤖 **Stale Bot**: This pull request has been inactive for **14 days**.
+            It will be automatically closed in **7 days** unless there is new activity.
+          close-pr-message: |
+            🔒 **Stale Bot**: This PR has been closed due to **21 days of inactivity**.
+            Please reopen and rebase if you'd like to continue.
+          days-before-stale: 30
+          days-before-close: 7
+          days-before-pr-stale: 14
+          days-before-pr-close: 7
+          stale-issue-label: 'stale'
+          stale-pr-label: 'stale'
+          exempt-issue-labels: 'pinned,security,in-progress,blocked'
+          exempt-pr-labels: 'pinned,security,in-progress,blocked'
+          operations-per-run: 100
+
+  close-completed-issue:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues' && github.event.action == 'closed'
+    steps:
+      - name: Comment on closed issue
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue = context.payload.issue;
+            const closedBy = context.payload.sender.login;
+            const hasLinkedPR = (issue.body || '').match(/(closes|fixes|resolves)\s+#\d+/i);
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              body: `✅ **Issue Bot**: This issue has been closed by @${closedBy}. Thank you!\n\n` +
+                    `If this resolved your problem, please consider starring the repo ⭐\n` +
+                    `If the issue persists, feel free to reopen with updated details.`
+            });
