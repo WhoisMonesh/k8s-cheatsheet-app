@@ -1,9 +1,5 @@
 name: AI Code Review & Suggestions Bot
 
-# Uses OpenAI GPT-4 to review PRs, suggest improvements,
-# and post intelligent inline code change suggestions.
-# Requires: OPENAI_API_KEY secret in repository settings.
-
 on:
   pull_request:
     types: [opened, synchronize, reopened]
@@ -25,12 +21,12 @@ jobs:
   ai-pr-review:
     name: AI Code Review
     runs-on: ubuntu-latest
-    if: |
+    if: >
       github.event_name == 'pull_request' ||
+      github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'issue_comment' &&
        github.event.issue.pull_request != null &&
-       contains(github.event.comment.body, '/ai-review')) ||
-      github.event_name == 'workflow_dispatch'
+       contains(github.event.comment.body, '/ai-review'))
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -42,7 +38,7 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install AI review dependencies
+      - name: Install dependencies
         run: npm install openai @octokit/rest
 
       - name: Run AI Code Review
@@ -53,8 +49,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const { execSync } = require('child_process');
-            const fs = require('fs');
-
             let prNumber;
             if (context.eventName === 'pull_request') {
               prNumber = context.payload.pull_request.number;
@@ -63,74 +57,54 @@ jobs:
             } else {
               prNumber = parseInt('${{ github.event.inputs.pr_number }}');
             }
-
             if (!prNumber) { console.log('No PR number found.'); return; }
-
             const apiKey = process.env.OPENAI_API_KEY;
             if (!apiKey) {
               await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
+                owner: context.repo.owner, repo: context.repo.repo,
                 issue_number: prNumber,
                 body: 'AI Review Bot: OpenAI API key not configured. Add OPENAI_API_KEY to repository secrets.'
               });
               return;
             }
-
             const pr = await github.rest.pulls.get({
               owner: context.repo.owner, repo: context.repo.repo, pull_number: prNumber
             });
             const files = await github.rest.pulls.listFiles({
               owner: context.repo.owner, repo: context.repo.repo, pull_number: prNumber
             });
-
-            const relevantFiles = files.data.filter(f =>
-              (f.filename.endsWith('.ts') || f.filename.endsWith('.tsx') ||
-               f.filename.endsWith('.js') || f.filename.endsWith('.jsx')) &&
-              f.status !== 'removed'
-            ).slice(0, 8);
-
+            const relevantFiles = files.data
+              .filter(f => ['.ts','.tsx','.js','.jsx'].some(e => f.filename.endsWith(e)) && f.status !== 'removed')
+              .slice(0, 8);
             let diffContent = '';
             for (const file of relevantFiles) {
-              const patch = file.patch || '';
-              diffContent += `\n\n### File: ${file.filename} (+${file.additions}/-${file.deletions})\n\`\`\`diff\n${patch.slice(0, 1500)}\n\`\`\``;
+              const patch = (file.patch || '').slice(0, 1500);
+              diffContent += `\n\n### File: ${file.filename}\n\`\`\`diff\n${patch}\n\`\`\``;
             }
-
             if (!diffContent.trim()) {
               await github.rest.issues.createComment({
-                owner: context.repo.owner, repo: context.repo.repo, issue_number: prNumber,
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: prNumber,
                 body: 'AI Review Bot: No TypeScript/JavaScript files changed. Skipping AI review.'
               });
               return;
             }
-
             const { OpenAI } = require('openai');
             const openai = new OpenAI({ apiKey });
-
-            const systemPrompt = 'You are an expert TypeScript/React/Electron code reviewer for a Kubernetes Cheatsheet desktop app. Review the PR diff and provide: 1. Overall Assessment 2. Critical Issues 3. Code Quality 4. Specific Suggestions 5. Positive Feedback. Format as clean Markdown. Keep under 1500 words.';
-            const userPrompt = `PR #${prNumber}: **${pr.data.title}**\n\nDescription: ${pr.data.body || 'No description'}\n\nChanged files diff:\n${diffContent}`;
-
+            const systemPrompt = 'You are an expert TypeScript/React code reviewer. Review the PR diff and provide: 1. Overall Assessment 2. Critical Issues 3. Suggestions. Keep under 1500 words.';
+            const userPrompt = `PR #${prNumber}: **${pr.data.title}**\n\nDiff:\n${diffContent}`;
             let aiResponse;
             try {
               const completion = await openai.chat.completions.create({
-                model: 'gpt-4o',
-                messages: [
-                  { role: 'system', content: systemPrompt },
-                  { role: 'user', content: userPrompt }
-                ],
-                max_tokens: 2000,
-                temperature: 0.3
+                model: 'gpt-4o-mini',
+                messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }],
+                max_tokens: 1500, temperature: 0.3
               });
               aiResponse = completion.choices[0].message.content;
-            } catch (e) {
+            } catch(e) {
               aiResponse = `_AI review unavailable: ${e.message}_`;
             }
-
-            const body = `## AI Code Review Bot (GPT-4o)\n\n` +
-              `> Reviewing PR #${prNumber} | ${relevantFiles.length} file(s) analyzed\n\n` +
-              `${aiResponse}\n\n` +
-              `---\n_Powered by OpenAI GPT-4o | To re-run: comment \`/ai-review\`_`;
-
+            const body = `## AI Code Review Bot\n\n> PR #${prNumber} | ${relevantFiles.length} file(s) analyzed\n\n${aiResponse}\n\n---\n_Powered by OpenAI | Comment \`/ai-review\` to re-run_`;
             const comments = await github.rest.issues.listComments({
               owner: context.repo.owner, repo: context.repo.repo, issue_number: prNumber
             });
@@ -141,15 +115,12 @@ jobs:
                 });
               }
             }
-
             await github.rest.issues.createComment({
-              owner: context.repo.owner, repo: context.repo.repo, issue_number: prNumber, body
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: prNumber, body
             });
-
             try {
-              const hasIssues = aiResponse.toLowerCase().includes('critical') ||
-                aiResponse.toLowerCase().includes('bug') ||
-                aiResponse.toLowerCase().includes('error');
+              const hasIssues = aiResponse.toLowerCase().includes('critical') || aiResponse.toLowerCase().includes('bug');
               const label = hasIssues ? 'needs-revision' : 'ai-approved';
               try {
                 await github.rest.issues.createLabel({
@@ -177,44 +148,22 @@ jobs:
           script: |
             const apiKey = process.env.OPENAI_API_KEY;
             if (!apiKey) return;
-
             const pr = context.payload.pull_request;
-            const title = pr.title;
-            const body = pr.body || '';
-            const filesCount = pr.changed_files;
-            const additions = pr.additions;
-            const deletions = pr.deletions;
-
             const { OpenAI } = require('openai');
             const openai = new OpenAI({ apiKey });
-
-            const prompt = `Analyze this GitHub PR for a Kubernetes Cheatsheet Electron app:\nTitle: ${title}\nDescription: ${body}\nFiles changed: ${filesCount}, +${additions}/-${deletions} lines\n\nRespond with a JSON object (no markdown):\n{\n  "quality_score": 1-10,\n  "summary": "2 sentence summary",\n  "suggested_labels": ["label1"],\n  "missing_info": ["list of missing info"],\n  "merge_readiness": "ready|needs-work|incomplete"\n}`;
-
+            const prompt = `Analyze this GitHub PR:\nTitle: ${pr.title}\nDescription: ${pr.body || ''}\nFiles: ${pr.changed_files}, +${pr.additions}/-${pr.deletions}\n\nRespond with JSON only (no markdown):\n{"quality_score":1-10,"summary":"2 sentences","merge_readiness":"ready|needs-work|incomplete"}`;
             let analysis;
             try {
               const completion = await openai.chat.completions.create({
                 model: 'gpt-4o-mini',
                 messages: [{ role: 'user', content: prompt }],
-                max_tokens: 400,
-                temperature: 0.2
+                max_tokens: 300, temperature: 0.2
               });
               analysis = JSON.parse(completion.choices[0].message.content);
-            } catch(e) {
-              console.log('AI triage failed:', e.message);
-              return;
-            }
-
-            const readinessIcon = { ready: 'OK', 'needs-work': 'WARN', incomplete: 'FAIL' };
-            const comment = `## AI Triage Bot\n\n` +
-              `| Field | Value |\n|-------|-------|\n` +
-              `| Quality Score | ${analysis.quality_score}/10 |\n` +
-              `| Merge Readiness | ${readinessIcon[analysis.merge_readiness] || '?'} ${analysis.merge_readiness} |\n\n` +
-              `**Summary:** ${analysis.summary}\n\n` +
-              `_Auto-triaged by AI | GPT-4o-mini_`;
-
+            } catch(e) { console.log('AI triage failed:', e.message); return; }
+            const icons = { ready: 'OK', 'needs-work': 'WARN', incomplete: 'FAIL' };
+            const comment = `## AI Triage Bot\n\n| Field | Value |\n|-------|-------|\n| Quality | ${analysis.quality_score}/10 |\n| Readiness | ${icons[analysis.merge_readiness] || '?'} ${analysis.merge_readiness} |\n\n**Summary:** ${analysis.summary}\n\n_Auto-triaged by AI_`;
             await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: pr.number,
-              body: comment
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: pr.number, body: comment
             });
