@@ -1,0 +1,64 @@
+# Dependabot - Automated Dependency Update Bot
+# Keeps npm packages and GitHub Actions up to date automatically
+
+version: 2
+updates:
+  # npm - JavaScript/Node.js dependencies
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+      time: '09:00'
+      timezone: 'Asia/Kolkata'
+    open-pull-requests-limit: 10
+    target-branch: 'dev'
+    labels:
+      - 'dependencies'
+      - 'automated'
+    commit-message:
+      prefix: 'chore'
+      prefix-development: 'chore(dev)'
+      include: 'scope'
+    reviewers:
+      - 'WhoisMonesh'
+    assignees:
+      - 'WhoisMonesh'
+    groups:
+      # Group all minor/patch updates together
+      minor-and-patch:
+        update-types:
+          - 'minor'
+          - 'patch'
+      # Keep major updates separate (breaking changes)
+      major-updates:
+        update-types:
+          - 'major'
+    ignore:
+      # Ignore Electron major versions (manual review required)
+      - dependency-name: 'electron'
+        update-types: ['version-update:semver-major']
+      - dependency-name: 'electron-builder'
+        update-types: ['version-update:semver-major']
+
+  # GitHub Actions - Keep CI/CD actions up to date
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+      time: '09:00'
+      timezone: 'Asia/Kolkata'
+    open-pull-requests-limit: 5
+    target-branch: 'dev'
+    labels:
+      - 'ci/cd'
+      - 'dependencies'
+      - 'automated'
+    commit-message:
+      prefix: 'ci'
+      include: 'scope'
+    reviewers:
+      - 'WhoisMonesh'
+    assignees:
+      - 'WhoisMonesh'
