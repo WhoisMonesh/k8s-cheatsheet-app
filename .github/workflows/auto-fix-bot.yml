@@ -1,0 +1,178 @@
+name: Auto Fix Bot
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to auto-fix'
+        required: true
+        default: 'main'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-fix-lint:
+    name: Auto Fix ESLint Issues
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.event.inputs.branch }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check for fixable lint issues
+        id: lint-check
+        run: |
+          npm run lint -- --fix-dry-run --format json > lint-fixable.json 2>&1 || true
+          FIXABLE=$(node -e "
+            try {
+              const r = require('./lint-fixable.json');
+              const count = r.reduce((a, f) => a + f.output ? 1 : 0, 0);
+              console.log(count);
+            } catch(e) { console.log(0); }
+          " 2>/dev/null || echo 0)
+          echo "fixable=$FIXABLE" >> $GITHUB_OUTPUT
+          echo "Fixable files: $FIXABLE"
+
+      - name: Auto-fix ESLint issues
+        id: lint-fix
+        run: |
+          # Run ESLint with --fix
+          npm run lint -- --fix 2>&1 || true
+          # Check if any files were modified
+          CHANGED=$(git diff --name-only)
+          if [ -n "$CHANGED" ]; then
+            echo "files_changed=true" >> $GITHUB_OUTPUT
+            echo "Changed files after lint fix:"
+            echo "$CHANGED"
+          else
+            echo "files_changed=false" >> $GITHUB_OUTPUT
+            echo "No files changed by lint fix."
+          fi
+
+      - name: Configure Git
+        if: steps.lint-fix.outputs.files_changed == 'true'
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Commit auto-fixes
+        if: steps.lint-fix.outputs.files_changed == 'true'
+        run: |
+          git add -A
+          git commit -m "fix: auto-fix ESLint issues [bot]"
+          git push
+
+      - name: Post fix summary comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fixed = '${{ steps.lint-fix.outputs.files_changed }}' === 'true';
+            const body = fixed
+              ? `🤖 **Auto-Fix Bot**: Automatically fixed ESLint issues and committed the changes to this PR.\n\n` +
+                `Run \`git pull\` to get the latest fixes.\n\n` +
+                `_Commit message: \`fix: auto-fix ESLint issues [bot]\`_`
+              : `✅ **Auto-Fix Bot**: No auto-fixable ESLint issues found. The code looks clean!`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body
+            });
+
+  auto-format:
+    name: Auto Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check if Prettier is configured
+        id: prettier-check
+        run: |
+          if grep -q 'prettier' package.json; then
+            echo "has_prettier=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_prettier=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run Prettier auto-format
+        if: steps.prettier-check.outputs.has_prettier == 'true'
+        id: prettier-fix
+        run: |
+          npx prettier --write 'src/**/*.{ts,tsx,js,jsx,css,json}' 2>&1 || true
+          CHANGED=$(git diff --name-only)
+          if [ -n "$CHANGED" ]; then
+            echo "files_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "files_changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Configure Git for Prettier
+        if: steps.prettier-check.outputs.has_prettier == 'true' && steps.prettier-fix.outputs.files_changed == 'true'
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Commit Prettier fixes
+        if: steps.prettier-check.outputs.has_prettier == 'true' && steps.prettier-fix.outputs.files_changed == 'true'
+        run: |
+          git add -A
+          git commit -m "style: auto-format with Prettier [bot]"
+          git push
+
+      - name: Post format results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const hasPrettier = '${{ steps.prettier-check.outputs.has_prettier }}' === 'true';
+            const formatted = '${{ steps.prettier-fix.outputs.files_changed }}' === 'true';
+
+            let body;
+            if (!hasPrettier) {
+              body = `ℹ️ **Format Bot**: Prettier not configured in this project. Skipping auto-format.`;
+            } else if (formatted) {
+              body = `🤖 **Format Bot**: Auto-formatted files with Prettier and committed changes.\n\n` +
+                `Run \`git pull\` to sync the formatting changes.`;
+            } else {
+              body = `✅ **Format Bot**: All files are properly formatted. No changes needed!`;
+            }
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body
+            });
