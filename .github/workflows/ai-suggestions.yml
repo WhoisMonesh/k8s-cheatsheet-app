@@ -1,0 +1,275 @@
+name: AI Code Review & Suggestions Bot
+
+# Uses OpenAI GPT-4 to review PRs, suggest improvements,
+# and post intelligent inline code change suggestions.
+# Requires: OPENAI_API_KEY secret in repository settings.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to review'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  ai-pr-review:
+    name: AI Code Review
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.pull_request != null &&
+       contains(github.event.comment.body, '/ai-review')) ||
+      github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install AI review dependencies
+        run: npm install openai @octokit/rest
+
+      - name: Run AI Code Review
+        uses: actions/github-script@v7
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { execSync } = require('child_process');
+            const fs = require('fs');
+
+            // Determine PR number
+            let prNumber;
+            if (context.eventName === 'pull_request') {
+              prNumber = context.payload.pull_request.number;
+            } else if (context.eventName === 'issue_comment') {
+              prNumber = context.payload.issue.number;
+            } else {
+              prNumber = parseInt('${{ github.event.inputs.pr_number }}');
+            }
+
+            if (!prNumber) { console.log('No PR number found.'); return; }
+
+            const apiKey = process.env.OPENAI_API_KEY;
+            if (!apiKey) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: `⚠️ **AI Review Bot**: OpenAI API key not configured.\n\nTo enable AI reviews, add \`OPENAI_API_KEY\` to repository secrets:\n**Settings** → **Secrets and variables** → **Actions** → **New repository secret**`
+              });
+              return;
+            }
+
+            // Get PR diff
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+
+            const files = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+
+            // Build diff summary for AI (limit tokens)
+            const relevantFiles = files.data.filter(f =>
+              (f.filename.endsWith('.ts') || f.filename.endsWith('.tsx') ||
+               f.filename.endsWith('.js') || f.filename.endsWith('.jsx')) &&
+              f.status !== 'removed'
+            ).slice(0, 8);
+
+            let diffContent = '';
+            for (const file of relevantFiles) {
+              const patch = file.patch || '';
+              diffContent += `\n\n### File: ${file.filename} (${file.status}, +${file.additions}/-${file.deletions})\n\`\`\`diff\n${patch.slice(0, 1500)}\n\`\`\``;
+            }
+
+            if (!diffContent.trim()) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: `ℹ️ **AI Review Bot**: No TypeScript/JavaScript files changed. Skipping AI review.`
+              });
+              return;
+            }
+
+            // Call OpenAI GPT-4
+            const { OpenAI } = require('openai');
+            const openai = new OpenAI({ apiKey });
+
+            const systemPrompt = `You are an expert TypeScript/React/Electron code reviewer for a Kubernetes Cheatsheet desktop app.
+The app uses: React 18, TypeScript, Vite, Electron, Tailwind CSS, Supabase, sql.js.
+Components include: QuizMode, ExamMode, YamlBuilder, Favorites, ConsolePractice, CommandList, Scenarios, etc.
+
+Review the PR diff and provide:
+1. **Overall Assessment**: Brief quality score and summary
+2. **Critical Issues**: Any bugs, security issues, or breaking changes (if any)
+3. **Code Quality**: TypeScript typing, React best practices, performance
+4. **Specific Suggestions**: Concrete code improvements with before/after examples
+5. **K8s Content**: Any suggestions for improving Kubernetes content accuracy
+6. **Positive Feedback**: What was done well
+
+Format as clean Markdown. Be specific, actionable, and constructive. Keep under 1500 words.`;
+
+            const userPrompt = `PR #${prNumber}: **${pr.data.title}**\n\nDescription: ${pr.data.body || 'No description'}\n\nChanged files diff:\n${diffContent}`;
+
+            let aiResponse;
+            try {
+              const completion = await openai.chat.completions.create({
+                model: 'gpt-4o',
+                messages: [
+                  { role: 'system', content: systemPrompt },
+                  { role: 'user', content: userPrompt }
+                ],
+                max_tokens: 2000,
+                temperature: 0.3
+              });
+              aiResponse = completion.choices[0].message.content;
+            } catch (e) {
+              aiResponse = `_AI review unavailable: ${e.message}_`;
+            }
+
+            // Post AI review comment
+            const body = `## 🤖 AI Code Review Bot (GPT-4o)\n\n` +
+              `> Reviewing PR #${prNumber} | ${relevantFiles.length} file(s) analyzed\n\n` +
+              `${aiResponse}\n\n` +
+              `---\n_Powered by OpenAI GPT-4o | To re-run: comment \`/ai-review\` | [Configure AI key](https://github.com/${context.repo.owner}/${context.repo.repo}/settings/secrets/actions)_`;
+
+            // Remove old AI review comments first
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber
+            });
+            for (const c of comments.data) {
+              if (c.user.type === 'Bot' && c.body.includes('AI Code Review Bot')) {
+                await github.rest.issues.deleteComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: c.id
+                });
+              }
+            }
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body
+            });
+
+            // Add label based on review sentiment
+            try {
+              const hasIssues = aiResponse.toLowerCase().includes('critical') ||
+                                aiResponse.toLowerCase().includes('bug') ||
+                                aiResponse.toLowerCase().includes('error');
+              const label = hasIssues ? 'needs-revision' : 'ai-approved';
+              // Create label if needed
+              try {
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: label,
+                  color: hasIssues ? 'e11d48' : '22c55e'
+                });
+              } catch(e) {}
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                labels: [label]
+              });
+            } catch(e) { console.log('Could not add label:', e.message); }
+
+  ai-issue-triage:
+    name: AI Issue Triage
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.action == 'opened'
+    steps:
+      - name: AI checks PR description quality
+        uses: actions/github-script@v7
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const apiKey = process.env.OPENAI_API_KEY;
+            if (!apiKey) return;
+
+            const pr = context.payload.pull_request;
+            const title = pr.title;
+            const body = pr.body || '';
+            const filesCount = pr.changed_files;
+            const additions = pr.additions;
+            const deletions = pr.deletions;
+
+            const { OpenAI } = require('openai');
+            const openai = new OpenAI({ apiKey });
+
+            const prompt = `Analyze this GitHub PR for a Kubernetes Cheatsheet Electron app:
+
+Title: ${title}
+Description: ${body}
+Files changed: ${filesCount}, +${additions}/-${deletions} lines
+
+Respond with a JSON object (no markdown):
+{
+  "quality_score": 1-10,
+  "summary": "2 sentence summary of what this PR does",
+  "suggested_labels": ["label1", "label2"],
+  "missing_info": ["list of missing info if any"],
+  "merge_readiness": "ready|needs-work|incomplete"
+}`;
+
+            let analysis;
+            try {
+              const completion = await openai.chat.completions.create({
+                model: 'gpt-4o-mini',
+                messages: [{ role: 'user', content: prompt }],
+                max_tokens: 400,
+                temperature: 0.2
+              });
+              analysis = JSON.parse(completion.choices[0].message.content);
+            } catch(e) {
+              console.log('AI triage failed:', e.message);
+              return;
+            }
+
+            const readinessIcon = { ready: '✅', 'needs-work': '⚠️', incomplete: '❌' };
+            const comment = `## 🤖 AI Triage Bot\n\n` +
+              `| Field | Value |\n|-------|-------|\n` +
+              `| Quality Score | ${'⭐'.repeat(Math.round(analysis.quality_score / 2))} ${analysis.quality_score}/10 |\n` +
+              `| Merge Readiness | ${readinessIcon[analysis.merge_readiness] || '?'} ${analysis.merge_readiness} |\n\n` +
+              `**Summary:** ${analysis.summary}\n\n` +
+              (analysis.missing_info?.length
+                ? `**Missing info:** ${analysis.missing_info.map(i => `\`${i}\``).join(', ')}\n\n`
+                : '') +
+              `_Auto-triaged by AI | GPT-4o-mini_`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              body: comment
+            });
