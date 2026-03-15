@@ -1,0 +1,237 @@
+name: Security & Vulnerability Scanner
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Run daily at 2:00 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      scan_type:
+        description: 'Type of scan to run'
+        required: false
+        default: 'full'
+        type: choice
+        options:
+          - full
+          - dependencies
+          - secrets
+          - docker
+
+jobs:
+  # ── Dependency Vulnerability Scan ────────────────────────────────────────
+  dependency-audit:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Run npm audit
+        run: |
+          npm audit --audit-level=moderate --json > audit-report.json || true
+          CRITICAL=$(cat audit-report.json | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('metadata',{}).get('vulnerabilities',{}).get('critical',0))" 2>/dev/null || echo 0)
+          HIGH=$(cat audit-report.json | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('metadata',{}).get('vulnerabilities',{}).get('high',0))" 2>/dev/null || echo 0)
+          echo "Critical: $CRITICAL, High: $HIGH"
+          if [ "$CRITICAL" -gt 0 ]; then
+            echo "::error::$CRITICAL critical vulnerabilities found!"
+            exit 1
+          fi
+          if [ "$HIGH" -gt 5 ]; then
+            echo "::warning::$HIGH high vulnerabilities found"
+          fi
+
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dependency-audit-report
+          path: audit-report.json
+
+  # ── Secret Scanning ───────────────────────────────────────────────────────
+  secret-scan:
+    name: Secret Scanner
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check for hardcoded secrets patterns
+        run: |
+          echo "Scanning for common secret patterns..."
+          FOUND=0
+          # Check for AWS keys
+          if grep -rE 'AKIA[0-9A-Z]{16}' --include='*.ts' --include='*.js' --include='*.tsx' --include='*.json' src/ 2>/dev/null; then
+            echo "::error::Potential AWS access key found!"
+            FOUND=1
+          fi
+          # Check for private keys
+          if grep -rE '-----BEGIN (RSA|EC|DSA|OPENSSH) PRIVATE KEY-----' src/ 2>/dev/null; then
+            echo "::error::Private key found in source!"
+            FOUND=1
+          fi
+          # Check for generic password patterns
+          if grep -rE '(password|passwd|pwd)\s*=\s*["'\''`][^"'\''`]{8,}["'\''`]' --include='*.ts' --include='*.tsx' src/ 2>/dev/null; then
+            echo "::warning::Potential hardcoded password found"
+          fi
+          if [ $FOUND -eq 1 ]; then exit 1; fi
+          echo "No obvious secrets found."
+
+  # ── SAST - Static Application Security Testing ───────────────────────────
+  sast-scan:
+    name: SAST Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+          queries: security-extended
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:javascript-typescript"
+
+  # ── Docker Image Security Scan ────────────────────────────────────────────
+  docker-scan:
+    name: Docker Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check if Dockerfile exists
+        id: dockerfile-check
+        run: |
+          if [ -f Dockerfile ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "No Dockerfile found, skipping Docker scan"
+          fi
+
+      - name: Build Docker image for scanning
+        if: steps.dockerfile-check.outputs.exists == 'true'
+        run: docker build -t scan-target:latest . --no-cache
+
+      - name: Run Trivy vulnerability scanner
+        if: steps.dockerfile-check.outputs.exists == 'true'
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'scan-target:latest'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '1'
+          ignore-unfixed: true
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        if: steps.dockerfile-check.outputs.exists == 'true' && always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Lint Dockerfile with Hadolint
+        if: steps.dockerfile-check.outputs.exists == 'true'
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+          failure-threshold: error
+
+  # ── License Compliance ────────────────────────────────────────────────────
+  license-check:
+    name: License Compliance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Check licenses
+        run: |
+          npx license-checker --onlyAllow 'MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;CC0-1.0;Unlicense;0BSD;Python-2.0;CC-BY-3.0;CC-BY-4.0' --excludePrivatePackages 2>/dev/null || {
+            echo "::warning::Some packages have non-standard licenses. Review required."
+          }
+
+  # ── Security Summary ─────────────────────────────────────────────────────
+  security-summary:
+    name: Security Summary
+    runs-on: ubuntu-latest
+    needs: [dependency-audit, secret-scan, sast-scan, license-check]
+    if: always()
+    steps:
+      - name: Security Report
+        run: |
+          echo "=== Security Scan Summary ==="
+          echo "Date: $(date -u)"
+          echo "Repository: ${{ github.repository }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo ""
+          echo "Job Results:"
+          echo "  Dependency Audit:  ${{ needs.dependency-audit.result }}"
+          echo "  Secret Scan:       ${{ needs.secret-scan.result }}"
+          echo "  SAST Analysis:     ${{ needs.sast-scan.result }}"
+          echo "  License Check:     ${{ needs.license-check.result }}"
+          echo ""
+          # Determine overall status
+          if [ "${{ needs.dependency-audit.result }}" = "failure" ] || \
+             [ "${{ needs.secret-scan.result }}" = "failure" ] || \
+             [ "${{ needs.sast-scan.result }}" = "failure" ]; then
+            echo "::error::SECURITY SCAN FAILED - Review findings immediately!"
+            exit 1
+          else
+            echo "All critical security checks passed."
+          fi
+
+      - name: Create Security Issue on Failure
+        if: failure() && github.event_name == 'schedule'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['security', 'automated'],
+              state: 'open'
+            });
+            if (issues.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `[Security Alert] Vulnerabilities detected - ${new Date().toISOString().split('T')[0]}`,
+                body: `## Security Scan Failed\n\nThe daily security scan detected issues that require immediate attention.\n\n**Scan Results:**\n- Dependency Audit: ${{ needs.dependency-audit.result }}\n- Secret Scan: ${{ needs.secret-scan.result }}\n- SAST Analysis: ${{ needs.sast-scan.result }}\n- License Check: ${{ needs.license-check.result }}\n\n**Actions Required:**\n- [ ] Review dependency vulnerabilities\n- [ ] Check for exposed secrets\n- [ ] Address CodeQL findings\n- [ ] Fix license compliance issues\n\n[View Workflow Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`,
+                labels: ['security', 'automated', 'high-priority']
+              });
+            }
