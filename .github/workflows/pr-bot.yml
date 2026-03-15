@@ -1,0 +1,142 @@
+name: PR Bot
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review, synchronize]
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  greet-pr-author:
+    runs-on: ubuntu-latest
+    if: github.event.action == 'opened'
+    steps:
+      - name: Greet PR Author
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            const author = pr.user.login;
+            const isFirstContribution = pr.author_association === 'FIRST_TIME_CONTRIBUTOR' ||
+                                        pr.author_association === 'NONE';
+            let greeting = isFirstContribution
+              ? `🎉 Welcome @${author}! Thank you for your **first contribution** to k8s-cheatsheet-app!`
+              : `👋 Hey @${author}! Thanks for opening this PR.`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              body: `${greeting}\n\n` +
+                    `🤖 **PR Bot checklist:**\n` +
+                    `- [ ] Description clearly explains the change\n` +
+                    `- [ ] Related issues are referenced (fixes #<issue_number>)\n` +
+                    `- [ ] Tests have been added / updated\n` +
+                    `- [ ] Lint and typecheck pass\n\n` +
+                    `A reviewer will take a look shortly. Add the \`automerge\` label to enable auto-merge once checks pass.`
+            });
+
+  auto-label-pr:
+    runs-on: ubuntu-latest
+    if: github.event.action == 'opened' || github.event.action == 'synchronize'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Auto Label PR based on changed files
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            const files = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number
+            });
+
+            const labels = new Set();
+            for (const file of files.data) {
+              const f = file.filename;
+              if (f.startsWith('src/')) labels.add('frontend');
+              if (f.startsWith('electron/')) labels.add('electron');
+              if (f.startsWith('.github/')) labels.add('ci/cd');
+              if (f.startsWith('scripts/')) labels.add('scripts');
+              if (f.includes('test') || f.includes('spec')) labels.add('tests');
+              if (f === 'package.json' || f === 'package-lock.json') labels.add('dependencies');
+              if (f.endsWith('.md')) labels.add('documentation');
+              if (f.includes('security') || f.includes('auth')) labels.add('security');
+            }
+
+            // Size label
+            const additions = pr.additions + pr.deletions;
+            if (additions < 10) labels.add('size/XS');
+            else if (additions < 50) labels.add('size/S');
+            else if (additions < 200) labels.add('size/M');
+            else if (additions < 500) labels.add('size/L');
+            else labels.add('size/XL');
+
+            if (labels.size > 0) {
+              // Create labels if they don't exist
+              const existingLabels = await github.rest.issues.listLabelsForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo
+              });
+              const existingNames = new Set(existingLabels.data.map(l => l.name));
+              const colorMap = {
+                'frontend': '0075ca', 'electron': '6f42c1', 'ci/cd': 'e4e669',
+                'scripts': 'f9d0c4', 'tests': 'd93f0b', 'dependencies': '0052cc',
+                'documentation': '0075ca', 'security': 'ee0701',
+                'size/XS': 'c5def5', 'size/S': '84b6eb', 'size/M': '1d76db',
+                'size/L': '0025ea', 'size/XL': 'e11d48', 'automerge': '00b300'
+              };
+              for (const label of labels) {
+                if (!existingNames.has(label)) {
+                  try {
+                    await github.rest.issues.createLabel({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      name: label,
+                      color: colorMap[label] || 'ededed'
+                    });
+                  } catch(e) { /* ignore if exists */ }
+                }
+              }
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                labels: Array.from(labels)
+              });
+            }
+
+  request-review:
+    runs-on: ubuntu-latest
+    if: github.event.action == 'opened' || github.event.action == 'ready_for_review'
+    steps:
+      - name: Request review from owner
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            // Skip if PR author is the owner
+            if (pr.user.login === 'WhoisMonesh') return;
+            try {
+              await github.rest.pulls.requestReviewers({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+                reviewers: ['WhoisMonesh']
+              });
+            } catch(e) {
+              console.log('Could not request review:', e.message);
+            }
