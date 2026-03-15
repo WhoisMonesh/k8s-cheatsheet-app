@@ -50,9 +50,9 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "Checking recent CI runs..."
-          RECENT=$(gh run list --workflow="CI Test Suite" --limit=5 --json conclusion,headSha --jq '.[] | select(.conclusion != null)')
-          FAILURES=$(echo "$RECENT" | jq -r 'select(.conclusion=="failure") | .headSha' | wc -l | tr -d ' ')
-          STABLE_SHA=$(echo "$RECENT" | jq -r 'select(.conclusion=="success") | .headSha' | head -1)
+          RECENT=$(gh run list --workflow="CI Test Suite" --limit=5 --json conclusion,headSha 2>/dev/null || echo "[]")
+          FAILURES=$(echo "$RECENT" | jq -r '[.[] | select(.conclusion=="failure")] | length' 2>/dev/null || echo "0")
+          STABLE_SHA=$(echo "$RECENT" | jq -r '[.[] | select(.conclusion=="success")] | .[0].headSha // empty' 2>/dev/null || echo "")
           echo "Recent failures: $FAILURES"
           echo "Last stable SHA: $STABLE_SHA"
           if [ "$FAILURES" -ge 3 ]; then
@@ -60,7 +60,7 @@ jobs:
           else
             echo "status=stable" >> $GITHUB_OUTPUT
           fi
-          echo "stable_sha=$STABLE_SHA" >> $GITHUB_OUTPUT
+          echo "stable_sha=${STABLE_SHA}" >> $GITHUB_OUTPUT
 
   auto-rollback:
     name: Auto Rollback
@@ -80,41 +80,13 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Create rollback issue
-        id: create-issue
         continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STABLE_SHA: ${{ needs.stability-check.outputs.stable_sha }}
         run: |
-          STABLE_SHA="${{ needs.stability-check.outputs.stable_sha }}"
-          TITLE="[Auto-Rollback] CI instability detected - rollback recommended"
-          BODY="## Auto-Rollback Alert"
-          BODY="$BODY
-
-The CI pipeline has experienced multiple consecutive failures."
-          BODY="$BODY
-
-**Recommended stable commit:** $STABLE_SHA"
-          BODY="$BODY
-
-Please review recent commits and consider rolling back to the stable SHA above."
-          gh issue create --title "$TITLE" --body "$BODY" --label "bug" || echo "Issue creation skipped"
-
-      - name: Create rollback branch
-        id: rollback-branch
-        continue-on-error: true
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          STABLE_SHA="${{ needs.stability-check.outputs.stable_sha }}"
-          BRANCH="rollback/auto-$(date +%Y%m%d-%H%M%S)"
-          if [ -z "$STABLE_SHA" ] || [ "$STABLE_SHA" = "null" ]; then
-            echo "No stable SHA found, skipping rollback branch creation"
-            exit 0
-          fi
-          git checkout -b "$BRANCH" "$STABLE_SHA" -- . ':!.github/'
-          git checkout -b "$BRANCH"
-          git reset --soft "$STABLE_SHA"
-          echo "Rollback branch $BRANCH created pointing to $STABLE_SHA"
+          ISSUE_BODY="CI instability detected. Recommended stable commit: ${STABLE_SHA}. Please review recent commits and consider manual rollback."
+          gh issue create --title "[Auto-Rollback] CI instability detected" --body "${ISSUE_BODY}" --label "bug" || echo "Issue creation skipped"
 
       - name: Rollback summary
         run: |
@@ -126,18 +98,19 @@ Please review recent commits and consider rolling back to the stable SHA above."
   pin-stable-commit:
     name: Pin Stable Commit
     needs: stability-check
-    if: needs.stability-check.outputs.status == 'stable' && (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'pin')
+    if: needs.stability-check.outputs.status == 'stable' && github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'pin'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Pin stable commit
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STABLE_SHA: ${{ needs.stability-check.outputs.stable_sha }}
         run: |
-          SHA="${{ needs.stability-check.outputs.stable_sha }}"
-          gh release create "stable-$(date +%Y%m%d-%H%M%S)" --title "Stable Release $(date +%Y-%m-%d)" --notes "Auto-pinned stable commit: $SHA" --target "$SHA" || echo "Release creation skipped"
+          gh release create "stable-$(date +%Y%m%d-%H%M%S)" --title "Stable Release $(date +%Y-%m-%d)" --notes "Auto-pinned stable commit: ${STABLE_SHA}" --target "${STABLE_SHA}" || echo "Release creation skipped"
 
   health-report:
     name: Health Report
@@ -146,8 +119,6 @@ Please review recent commits and consider rolling back to the stable SHA above."
     if: always()
     steps:
       - name: Generate health report
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "## Repository Health Report" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
