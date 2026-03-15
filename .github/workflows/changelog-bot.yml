@@ -1,0 +1,105 @@
+name: Changelog Bot
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'CHANGELOG.md'
+      - '.github/**'
+  workflow_dispatch:
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate changelog from commits
+        id: generate
+        run: |
+          # Get latest tag or use initial commit
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || git rev-list --max-parents=0 HEAD)
+          echo "Latest tag/base: $LATEST_TAG"
+
+          # Get commits since last tag
+          COMMITS=$(git log ${LATEST_TAG}..HEAD --pretty=format:"- %s (%h)" --no-merges 2>/dev/null || git log --pretty=format:"- %s (%h)" --no-merges -20)
+
+          if [ -z "$COMMITS" ]; then
+            echo "No new commits to add to changelog"
+            exit 0
+          fi
+
+          DATE=$(date +%Y-%m-%d)
+          VERSION=$(date +%Y.%m.%d)
+
+          # Categorize commits
+          FEATURES=$(echo "$COMMITS" | grep -E "^- (feat|add|new)" || echo "")
+          FIXES=$(echo "$COMMITS" | grep -E "^- (fix|bug|patch)" || echo "")
+          CI=$(echo "$COMMITS" | grep -E "^- (ci|chore|build)" || echo "")
+          DOCS=$(echo "$COMMITS" | grep -E "^- (docs|doc)" || echo "")
+          OTHER=$(echo "$COMMITS" | grep -vE "^- (feat|add|new|fix|bug|patch|ci|chore|build|docs|doc)" || echo "")
+
+          # Build changelog entry
+          ENTRY="## [$VERSION] - $DATE\n"
+
+          if [ -n "$FEATURES" ]; then
+            ENTRY="${ENTRY}\n### Features\n${FEATURES}\n"
+          fi
+          if [ -n "$FIXES" ]; then
+            ENTRY="${ENTRY}\n### Bug Fixes\n${FIXES}\n"
+          fi
+          if [ -n "$CI" ]; then
+            ENTRY="${ENTRY}\n### CI/CD\n${CI}\n"
+          fi
+          if [ -n "$DOCS" ]; then
+            ENTRY="${ENTRY}\n### Documentation\n${DOCS}\n"
+          fi
+          if [ -n "$OTHER" ]; then
+            ENTRY="${ENTRY}\n### Other Changes\n${OTHER}\n"
+          fi
+
+          echo "ENTRY<<EOF" >> $GITHUB_OUTPUT
+          echo -e "$ENTRY" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Update CHANGELOG.md
+        run: |
+          if [ -z "${{ steps.generate.outputs.ENTRY }}" ]; then
+            echo "Nothing to update"
+            exit 0
+          fi
+
+          if [ ! -f CHANGELOG.md ]; then
+            echo "# Changelog" > CHANGELOG.md
+            echo "" >> CHANGELOG.md
+            echo "All notable changes to this project will be documented in this file." >> CHANGELOG.md
+            echo "" >> CHANGELOG.md
+          fi
+
+          # Prepend new entry after the header
+          HEADER=$(head -4 CHANGELOG.md)
+          BODY=$(tail -n +5 CHANGELOG.md)
+          echo "$HEADER" > CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "${{ steps.generate.outputs.ENTRY }}" >> CHANGELOG.md
+          echo "$BODY" >> CHANGELOG.md
+
+      - name: Commit changelog
+        run: |
+          git config --local user.email "changelog-bot@github.com"
+          git config --local user.name "Changelog Bot"
+          git add CHANGELOG.md
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "docs: update CHANGELOG.md [skip ci]"
+            git push
+          fi
