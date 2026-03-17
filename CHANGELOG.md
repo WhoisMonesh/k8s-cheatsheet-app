@@ -1,3 +1,6 @@
+## [2026-03-17]
+- docs: update CHANGELOG.md [skip ci] (d69abe9)
+
 ## [2026-03-16]
 - fix: use .cjs extension to fix require() ESM error in evolution-bot (223e9f6)
 - docs: update CHANGELOG.md [skip ci] (925fff4)
