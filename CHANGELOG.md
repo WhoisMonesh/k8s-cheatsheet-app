@@ -1,3 +1,6 @@
+## [2026-03-21]
+- docs: update CHANGELOG.md [skip ci] (e8751cf)
+
 ## [2026-03-20]
 - docs: update CHANGELOG.md [skip ci] (5a9fdd5)
 
