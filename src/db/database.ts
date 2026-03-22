@@ -1,53 +1,53 @@
-import initSqlJs, { Database } from 'sql.js';
-import { k8sCommandsData } from './data/k8sCommands';
-import { additionalK8sCommands } from './data/k8sCommandsExpanded';
-import { comprehensiveK8sCommands } from './data/comprehensiveCommands';
-import { modernK8sCommands } from './data/modernCommands';
-import { advancedK8sCommands } from './data/advancedCommands';
-import { expertK8sCommands } from './data/expertCommands';
-import { kubectlSubcommandsData } from './data/kubectlSubcommands';
-import { podOperationsData } from './data/podOperations';
-import { advancedFilteringData } from './data/advancedFiltering';
-import { rbacCommandsData } from './data/rbacCommands';
-import { completeCatalogData } from './data/completeCatalog';
-import { advancedOperationsData } from './data/advancedOperations';
-import { containerOperationsData } from './data/containerOperations';
-import { utilityCommandsData } from './data/utilityCommands';
-import { awkCommandsData } from './data/awkCommands';
-import { jqCommandsData } from './data/jqCommands';
-import { textProcessingCommandsData } from './data/textProcessingCommands';
-import { securityCommandsData } from './data/securityCommands';
-import { storageCommandsData } from './data/storageCommands';
-import { observabilityCommandsData } from './data/observabilityCommands';
-import { advancedWorkloadsCommandsData } from './data/advancedWorkloadsCommands';
-import { networkingCommandsData } from './data/networkingCommands';
-import { clusterManagementCommandsData } from './data/clusterManagementCommands';
-import { configurationCommandsData } from './data/configurationCommands';
-import { helmCommandsData } from './data/helmCommands';
-import { k8sVersionsData } from './data/k8sVersions';
-import { categoriesData } from './data/categories';
-import { yamlTemplatesData } from './data/yamlTemplates';
-import { troubleshootingGuidesData } from './data/troubleshootingGuides';
-import { bestPracticesData } from './data/bestPractices';
-import { allKarpenterCommands } from './data/karpenterCommands';
+import initSqlJs, { Database } from "sql.js";
+import { k8sCommandsData } from "./data/k8sCommands";
+import { additionalK8sCommands } from "./data/k8sCommandsExpanded";
+import { comprehensiveK8sCommands } from "./data/comprehensiveCommands";
+import { modernK8sCommands } from "./data/modernCommands";
+import { advancedK8sCommands } from "./data/advancedCommands";
+import { expertK8sCommands } from "./data/expertCommands";
+import { kubectlSubcommandsData } from "./data/kubectlSubcommands";
+import { podOperationsData } from "./data/podOperations";
+import { advancedFilteringData } from "./data/advancedFiltering";
+import { rbacCommandsData } from "./data/rbacCommands";
+import { completeCatalogData } from "./data/completeCatalog";
+import { advancedOperationsData } from "./data/advancedOperations";
+import { containerOperationsData } from "./data/containerOperations";
+import { utilityCommandsData } from "./data/utilityCommands";
+import { awkCommandsData } from "./data/awkCommands";
+import { jqCommandsData } from "./data/jqCommands";
+import { textProcessingCommandsData } from "./data/textProcessingCommands";
+import { securityCommandsData } from "./data/securityCommands";
+import { storageCommandsData } from "./data/storageCommands";
+import { observabilityCommandsData } from "./data/observabilityCommands";
+import { advancedWorkloadsCommandsData } from "./data/advancedWorkloadsCommands";
+import { networkingCommandsData } from "./data/networkingCommands";
+import { clusterManagementCommandsData } from "./data/clusterManagementCommands";
+import { configurationCommandsData } from "./data/configurationCommands";
+import { helmCommandsData } from "./data/helmCommands";
+import { k8sVersionsData } from "./data/k8sVersions";
+import { categoriesData } from "./data/categories";
+import { yamlTemplatesData } from "./data/yamlTemplates";
+import { troubleshootingGuidesData } from "./data/troubleshootingGuides";
+import { bestPracticesData } from "./data/bestPractices";
+import { allKarpenterCommands } from "./data/karpenterCommands";
 
 let db: Database | null = null;
-const CURRENT_DB_VERSION = 'k8s-cheatsheet-db-v21-networking-modern';
+const CURRENT_DB_VERSION = "k8s-cheatsheet-db-v21-networking-modern";
 
 function clearOldDatabases() {
   const oldVersions = [
-    'k8s-cheatsheet-db',
-    'k8s-cheatsheet-db-v1',
-    'k8s-cheatsheet-db-v2',
-    'k8s-cheatsheet-db-v3',
-    'k8s-cheatsheet-db-v4',
-    'k8s-cheatsheet-db-v5',
-    'k8s-cheatsheet-db-v6',
-    'k8s-cheatsheet-db-v7',
-    'k8s-cheatsheet-db-v8-full',
-    'k8s-cheatsheet-db-v9-deduped',
-    'k8s-cheatsheet-db-v10-full-expanded',
-    'k8s-cheatsheet-db-v11-cleaned',
+    "k8s-cheatsheet-db",
+    "k8s-cheatsheet-db-v1",
+    "k8s-cheatsheet-db-v2",
+    "k8s-cheatsheet-db-v3",
+    "k8s-cheatsheet-db-v4",
+    "k8s-cheatsheet-db-v5",
+    "k8s-cheatsheet-db-v6",
+    "k8s-cheatsheet-db-v7",
+    "k8s-cheatsheet-db-v8-full",
+    "k8s-cheatsheet-db-v9-deduped",
+    "k8s-cheatsheet-db-v10-full-expanded",
+    "k8s-cheatsheet-db-v11-cleaned",
   ];
   oldVersions.forEach((version) => {
     if (localStorage.getItem(version)) {
@@ -61,7 +61,7 @@ function getCount(database: Database, table: string): number {
     const result = database.exec(`SELECT COUNT(*) as count FROM ${table}`);
     if (result.length === 0) return 0;
     const value = result[0].values[0][0];
-    return typeof value === 'number' ? value : Number(value);
+    return typeof value === "number" ? value : Number(value);
   } catch {
     return 0;
   }
@@ -69,12 +69,12 @@ function getCount(database: Database, table: string): number {
 
 function isDatabaseHealthy(database: Database): boolean {
   const requiredTables = [
-    'k8s_commands',
-    'categories',
-    'k8s_versions',
-    'yaml_templates',
-    'troubleshooting_guides',
-    'best_practices',
+    "k8s_commands",
+    "categories",
+    "k8s_versions",
+    "yaml_templates",
+    "troubleshooting_guides",
+    "best_practices",
   ];
   return requiredTables.every((t) => getCount(database, t) > 0);
 }
@@ -112,7 +112,7 @@ export async function initDatabase(): Promise<Database> {
         saveDatabase(db);
       }
     } catch (error) {
-      console.error('Error loading saved database, creating new one:', error);
+      console.error("Error loading saved database, creating new one:", error);
       db = new SQL.Database();
       createTables(db);
       populateDatabase(db);
@@ -189,8 +189,12 @@ function createTables(database: Database) {
     );
   `);
 
-  database.run(`CREATE INDEX IF NOT EXISTS idx_category ON k8s_commands(category);`);
-  database.run(`CREATE INDEX IF NOT EXISTS idx_difficulty ON k8s_commands(difficultyLevel);`);
+  database.run(
+    `CREATE INDEX IF NOT EXISTS idx_category ON k8s_commands(category);`,
+  );
+  database.run(
+    `CREATE INDEX IF NOT EXISTS idx_difficulty ON k8s_commands(difficultyLevel);`,
+  );
   database.run(`CREATE INDEX IF NOT EXISTS idx_tags ON k8s_commands(tags);`);
 
   database.run(`
@@ -233,7 +237,7 @@ function populateDatabase(database: Database) {
   categoriesData.forEach((cat) => {
     database.run(
       'INSERT INTO categories (name, icon, description, "order") VALUES (?, ?, ?, ?)',
-      [cat.name, cat.icon, cat.description, cat.order]
+      [cat.name, cat.icon, cat.description, cat.order],
     );
   });
 
@@ -263,7 +267,7 @@ function populateDatabase(database: Database) {
     ...clusterManagementCommandsData,
     ...configurationCommandsData,
     ...helmCommandsData,
-    ...allKarpenterCommands
+    ...allKarpenterCommands,
   ];
 
   const seenCommands = new Set<string>();
@@ -283,70 +287,75 @@ function populateDatabase(database: Database) {
       `INSERT INTO k8s_commands (category, subcategory, command, description, example, versionIntroduced, difficultyLevel, tags, flags, output)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        cmd.category || 'Uncategorized',
-        cmd.subcategory || '',
-        cmd.command || '',
-        cmd.description || '',
-        cmd.example || '',
-        cmd.versionIntroduced || '',
-        cmd.difficultyLevel || 'intermediate',
-        cmd.tags || '',
-        cmd.flags || '',
-        cmd.output || '',
-      ]
+        cmd.category || "Uncategorized",
+        cmd.subcategory || "",
+        cmd.command || "",
+        cmd.description || "",
+        cmd.example || "",
+        cmd.versionIntroduced || "",
+        cmd.difficultyLevel || "intermediate",
+        cmd.tags || "",
+        cmd.flags || "",
+        cmd.output || "",
+      ],
     );
   });
 
   k8sVersionsData.forEach((ver) => {
     database.run(
-      'INSERT INTO k8s_versions (version, releaseDate, majorFeatures, deprecated, breaking, eolDate, cves, projected, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      "INSERT INTO k8s_versions (version, releaseDate, majorFeatures, deprecated, breaking, eolDate, cves, projected, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
       [
         ver.version,
         ver.releaseDate,
         ver.majorFeatures,
-        ver.deprecated || '',
-        ver.breaking || '',
-        ver.eolDate || '',
+        ver.deprecated || "",
+        ver.breaking || "",
+        ver.eolDate || "",
         JSON.stringify(ver.cves || []),
         ver.projected ? 1 : 0,
-        (ver as any).description || ''
-      ]
+        (ver as any).description || "",
+      ],
     );
   });
 
   yamlTemplatesData.forEach((tpl) => {
     database.run(
-      'INSERT INTO yaml_templates (name, category, description, yaml) VALUES (?, ?, ?, ?)',
-      [tpl.name || '', tpl.category || '', tpl.description || '', tpl.yaml || '']
+      "INSERT INTO yaml_templates (name, category, description, yaml) VALUES (?, ?, ?, ?)",
+      [
+        tpl.name || "",
+        tpl.category || "",
+        tpl.description || "",
+        tpl.yaml || "",
+      ],
     );
   });
 
   troubleshootingGuidesData.forEach((guide) => {
     database.run(
-      'INSERT INTO troubleshooting_guides (issue, category, description, symptoms, causes, diagnosis, solutions) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      "INSERT INTO troubleshooting_guides (issue, category, description, symptoms, causes, diagnosis, solutions) VALUES (?, ?, ?, ?, ?, ?, ?)",
       [
-        guide.issue || '',
-        guide.category || '',
-        guide.description || '',
-        guide.symptoms || '',
-        guide.causes || '',
-        guide.diagnosis || '',
-        guide.solutions || ''
-      ]
+        guide.issue || "",
+        guide.category || "",
+        guide.description || "",
+        guide.symptoms || "",
+        guide.causes || "",
+        guide.diagnosis || "",
+        guide.solutions || "",
+      ],
     );
   });
 
   bestPracticesData.forEach((bp) => {
     database.run(
-      'INSERT INTO best_practices (category, title, description, example, impact, tags) VALUES (?, ?, ?, ?, ?, ?)',
+      "INSERT INTO best_practices (category, title, description, example, impact, tags) VALUES (?, ?, ?, ?, ?, ?)",
       [
-        bp.category || '',
-        bp.title || '',
-        bp.description || '',
-        bp.example || '',
-        bp.impact || '',
-        bp.tags || ''
-      ]
+        bp.category || "",
+        bp.title || "",
+        bp.description || "",
+        bp.example || "",
+        bp.impact || "",
+        bp.tags || "",
+      ],
     );
   });
 }

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -8,23 +8,23 @@
   body {
     @apply font-sans antialiased bg-gray-50 text-slate-900;
   }
-  
+
   /* Hide scrollbar for Chrome, Safari and Opera */
   ::-webkit-scrollbar {
     display: none;
   }
-  
+
   /* Hide scrollbar for IE, Edge and Firefox */
   html {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
   }
 
   /* Electron Drag Region */
   .drag-region {
     -webkit-app-region: drag;
   }
-  
+
   .no-drag {
     -webkit-app-region: no-drag;
   }
@@ -38,29 +38,29 @@
   .logo-container:hover .logo-ring {
     animation: spin 3s linear infinite;
   }
-  
+
   .logo-container:hover .logo-cross {
     animation: pulse 2s ease-in-out infinite;
   }
-  
+
   .logo-container:hover .logo-core {
     animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
   }
-  
+
   /* Custom Scrollbar */
   .scrollbar-thin::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar-track {
     background: transparent;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar-thumb {
     @apply bg-gray-300 dark:bg-gray-600 rounded-full;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     @apply bg-gray-400 dark:bg-gray-500;
   }
@@ -78,20 +78,22 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
     transform-origin: center;
   }
   50% {
-    opacity: .7;
+    opacity: 0.7;
     transform: scale(0.95);
     transform-origin: center;
   }
 }
 
 @keyframes ping {
-  75%, 100% {
+  75%,
+  100% {
     transform: scale(1.5);
     opacity: 0;
     transform-origin: center;

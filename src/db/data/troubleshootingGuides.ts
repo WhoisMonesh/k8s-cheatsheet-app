@@ -1,10 +1,12 @@
 export const troubleshootingGuidesData = [
   {
-    issue: 'CrashLoopBackOff',
-    category: 'Pod Errors',
-    description: 'Pod is repeatedly crashing and restarting',
-    symptoms: 'Pod status shows CrashLoopBackOff, container restarts frequently',
-    causes: 'Application error, misconfiguration, missing dependencies, resource constraints',
+    issue: "CrashLoopBackOff",
+    category: "Pod Errors",
+    description: "Pod is repeatedly crashing and restarting",
+    symptoms:
+      "Pod status shows CrashLoopBackOff, container restarts frequently",
+    causes:
+      "Application error, misconfiguration, missing dependencies, resource constraints",
     diagnosis: `# Check pod events
 kubectl describe pod <pod-name>
 
@@ -21,11 +23,12 @@ kubectl top pod <pod-name>`,
 5. Validate health checks configuration`,
   },
   {
-    issue: 'ImagePullBackOff',
-    category: 'Pod Errors',
-    description: 'Unable to pull container image',
-    symptoms: 'Pod status shows ImagePullBackOff or ErrImagePull',
-    causes: 'Invalid image name, authentication issues, network problems, image does not exist',
+    issue: "ImagePullBackOff",
+    category: "Pod Errors",
+    description: "Unable to pull container image",
+    symptoms: "Pod status shows ImagePullBackOff or ErrImagePull",
+    causes:
+      "Invalid image name, authentication issues, network problems, image does not exist",
     diagnosis: `# Check pod events
 kubectl describe pod <pod-name>
 
@@ -42,11 +45,12 @@ kubectl describe secret <secret-name>`,
 5. Check network connectivity to registry`,
   },
   {
-    issue: 'Pending Pods',
-    category: 'Pod Scheduling',
-    description: 'Pod remains in Pending state',
-    symptoms: 'Pod status stuck at Pending, not getting scheduled',
-    causes: 'Insufficient resources, node selector mismatch, taints, affinity rules',
+    issue: "Pending Pods",
+    category: "Pod Scheduling",
+    description: "Pod remains in Pending state",
+    symptoms: "Pod status stuck at Pending, not getting scheduled",
+    causes:
+      "Insufficient resources, node selector mismatch, taints, affinity rules",
     diagnosis: `# Check pod events
 kubectl describe pod <pod-name>
 
@@ -63,11 +67,13 @@ kubectl get pod <pod-name> -o yaml | grep -A 5 resources`,
 5. Verify pod affinity/anti-affinity rules`,
   },
   {
-    issue: 'Service Not Accessible',
-    category: 'Networking',
-    description: 'Cannot access service endpoint',
-    symptoms: 'Connection timeout, refused connections, DNS resolution failures',
-    causes: 'Wrong service type, selector mismatch, network policy blocking, endpoints not ready',
+    issue: "Service Not Accessible",
+    category: "Networking",
+    description: "Cannot access service endpoint",
+    symptoms:
+      "Connection timeout, refused connections, DNS resolution failures",
+    causes:
+      "Wrong service type, selector mismatch, network policy blocking, endpoints not ready",
     diagnosis: `# Check service details
 kubectl describe service <service-name>
 
@@ -86,11 +92,11 @@ kubectl get networkpolicies`,
 5. Test connectivity from within cluster first`,
   },
   {
-    issue: 'DNS Resolution Failures',
-    category: 'Networking',
-    description: 'Pods cannot resolve service names',
-    symptoms: 'nslookup fails, connection errors with service names',
-    causes: 'CoreDNS issues, network policy blocking, wrong service name',
+    issue: "DNS Resolution Failures",
+    category: "Networking",
+    description: "Pods cannot resolve service names",
+    symptoms: "nslookup fails, connection errors with service names",
+    causes: "CoreDNS issues, network policy blocking, wrong service name",
     diagnosis: `# Check CoreDNS pods
 kubectl get pods -n kube-system -l k8s-app=kube-dns
 
@@ -106,11 +112,12 @@ kubectl logs -n kube-system -l k8s-app=kube-dns`,
 5. Check pod's DNS configuration`,
   },
   {
-    issue: 'PersistentVolumeClaim Pending',
-    category: 'Storage',
-    description: 'PVC stuck in Pending state',
-    symptoms: 'PVC status shows Pending, not bound to PV',
-    causes: 'No matching PV, storage class issues, insufficient capacity, access mode mismatch',
+    issue: "PersistentVolumeClaim Pending",
+    category: "Storage",
+    description: "PVC stuck in Pending state",
+    symptoms: "PVC status shows Pending, not bound to PV",
+    causes:
+      "No matching PV, storage class issues, insufficient capacity, access mode mismatch",
     diagnosis: `# Check PVC status
 kubectl describe pvc <pvc-name>
 
@@ -127,11 +134,11 @@ kubectl describe storageclass <class-name>`,
 5. Review storage provisioner logs`,
   },
   {
-    issue: 'OOMKilled Pods',
-    category: 'Resource Management',
-    description: 'Pod killed due to out of memory',
-    symptoms: 'Pod status shows OOMKilled, frequent restarts',
-    causes: 'Memory limit too low, memory leak, unexpected load spike',
+    issue: "OOMKilled Pods",
+    category: "Resource Management",
+    description: "Pod killed due to out of memory",
+    symptoms: "Pod status shows OOMKilled, frequent restarts",
+    causes: "Memory limit too low, memory leak, unexpected load spike",
     diagnosis: `# Check pod events
 kubectl describe pod <pod-name>
 
@@ -147,11 +154,12 @@ kubectl get pod <pod-name> -o jsonpath='{.spec.containers[*].resources}'`,
 5. Consider horizontal scaling`,
   },
   {
-    issue: 'Unauthorized API Requests',
-    category: 'RBAC & Security',
-    description: 'Permission denied errors when accessing resources',
-    symptoms: 'Forbidden (403) errors, unauthorized access messages',
-    causes: 'Missing RBAC permissions, wrong service account, expired credentials',
+    issue: "Unauthorized API Requests",
+    category: "RBAC & Security",
+    description: "Permission denied errors when accessing resources",
+    symptoms: "Forbidden (403) errors, unauthorized access messages",
+    causes:
+      "Missing RBAC permissions, wrong service account, expired credentials",
     diagnosis: `# Check current permissions
 kubectl auth can-i <verb> <resource>
 
@@ -170,11 +178,12 @@ kubectl describe serviceaccount <sa-name>`,
 5. Review audit logs for details`,
   },
   {
-    issue: 'Node NotReady',
-    category: 'Node Issues',
-    description: 'Node marked as NotReady',
-    symptoms: 'kubectl get nodes shows NotReady status',
-    causes: 'Kubelet issues, disk pressure, network problems, insufficient resources',
+    issue: "Node NotReady",
+    category: "Node Issues",
+    description: "Node marked as NotReady",
+    symptoms: "kubectl get nodes shows NotReady status",
+    causes:
+      "Kubelet issues, disk pressure, network problems, insufficient resources",
     diagnosis: `# Check node status
 kubectl describe node <node-name>
 
@@ -191,11 +200,11 @@ journalctl -u kubelet -f`,
 5. Verify node resources`,
   },
   {
-    issue: 'Deployment Rollout Stuck',
-    category: 'Deployments',
-    description: 'Deployment update not progressing',
-    symptoms: 'New pods not starting, old pods not terminating',
-    causes: 'Failed health checks, insufficient resources, image pull errors',
+    issue: "Deployment Rollout Stuck",
+    category: "Deployments",
+    description: "Deployment update not progressing",
+    symptoms: "New pods not starting, old pods not terminating",
+    causes: "Failed health checks, insufficient resources, image pull errors",
     diagnosis: `# Check rollout status
 kubectl rollout status deployment/<deployment-name>
 
@@ -214,11 +223,11 @@ kubectl get rs -l app=<app-label>`,
 5. Rollback if needed: kubectl rollout undo deployment/<name>`,
   },
   {
-    issue: 'ConfigMap/Secret Not Updating',
-    category: 'Configuration',
-    description: 'Pod not seeing updated ConfigMap or Secret',
-    symptoms: 'Application using old configuration values',
-    causes: 'Pod needs restart, mounted as subPath, using envFrom',
+    issue: "ConfigMap/Secret Not Updating",
+    category: "Configuration",
+    description: "Pod not seeing updated ConfigMap or Secret",
+    symptoms: "Application using old configuration values",
+    causes: "Pod needs restart, mounted as subPath, using envFrom",
     diagnosis: `# Check ConfigMap/Secret updated
 kubectl get configmap <name> -o yaml
 kubectl describe pod <pod-name>
@@ -232,11 +241,12 @@ kubectl get pod <pod-name> -o yaml | grep -A 10 volumeMounts`,
 5. Avoid subPath mounts for configs that need updates`,
   },
   {
-    issue: 'High Latency/Slow Performance',
-    category: 'Performance',
-    description: 'Application experiencing high latency',
-    symptoms: 'Slow response times, timeouts, poor user experience',
-    causes: 'Resource constraints, inefficient code, network issues, database problems',
+    issue: "High Latency/Slow Performance",
+    category: "Performance",
+    description: "Application experiencing high latency",
+    symptoms: "Slow response times, timeouts, poor user experience",
+    causes:
+      "Resource constraints, inefficient code, network issues, database problems",
     diagnosis: `# Check resource usage
 kubectl top pods
 kubectl top nodes

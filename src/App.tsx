@@ -1,62 +1,70 @@
-import { useEffect, useState } from 'react';
-import { initDatabase, getDatabase, resetDatabase } from './db/database';
-import { K8sCommand, K8sVersion, Category, YamlTemplate, TroubleshootingGuide, BestPractice, ViewMode } from './types';
-import { Sidebar } from './components/Sidebar';
-import { Header } from './components/Header';
-import { CommandList } from './components/CommandList';
-import { CommandDetails } from './components/CommandDetails';
-import { VersionHistory } from './components/VersionHistory';
-import { YamlTemplates } from './components/YamlTemplates';
-import { TroubleshootingGuide as TroubleshootingGuideComponent } from './components/TroubleshootingGuide';
-import { BestPractices } from './components/BestPractices';
-import { QuickStats } from './components/QuickStats';
-import { QuickReferenceCard } from './components/QuickReferenceCard';
-import { AliasesReference } from './components/AliasesReference';
-import { KeyboardShortcuts } from './components/KeyboardShortcuts';
-import { Footer } from './components/Footer';
-import { Scenarios } from './components/Scenarios';
-import { QuizMode } from './components/QuizMode';
-import { ConsolePractice } from './components/ConsolePractice';
-import { YamlBuilder } from './components/YamlBuilder';
-import { ExamMode } from './components/ExamMode';
-import { About } from './components/About';
-import { Favorites } from './components/Favorites';
-import { Settings } from './components/Settings';
-import { useFavorites } from './context/FavoritesContext';
-import { scenariosData } from './db/data/scenarios';
-import { Loader2, AlertTriangle } from 'lucide-react';
-import { k8sCommandsData } from './db/data/k8sCommands';
-import { additionalK8sCommands } from './db/data/k8sCommandsExpanded';
-import { comprehensiveK8sCommands } from './db/data/comprehensiveCommands';
-import { modernK8sCommands } from './db/data/modernCommands';
-import { advancedK8sCommands } from './db/data/advancedCommands';
-import { expertK8sCommands } from './db/data/expertCommands';
-import { kubectlSubcommandsData } from './db/data/kubectlSubcommands';
-import { podOperationsData } from './db/data/podOperations';
-import { advancedFilteringData } from './db/data/advancedFiltering';
-import { rbacCommandsData } from './db/data/rbacCommands';
-import { completeCatalogData } from './db/data/completeCatalog';
-import { advancedOperationsData } from './db/data/advancedOperations';
-import { containerOperationsData } from './db/data/containerOperations';
-import { utilityCommandsData } from './db/data/utilityCommands';
-import { awkCommandsData } from './db/data/awkCommands';
-import { jqCommandsData } from './db/data/jqCommands';
-import { textProcessingCommandsData } from './db/data/textProcessingCommands';
-import { securityCommandsData } from './db/data/securityCommands';
-import { storageCommandsData } from './db/data/storageCommands';
-import { observabilityCommandsData } from './db/data/observabilityCommands';
-import { advancedWorkloadsCommandsData } from './db/data/advancedWorkloadsCommands';
-import { networkingCommandsData } from './db/data/networkingCommands';
-import { clusterManagementCommandsData } from './db/data/clusterManagementCommands';
-import { configurationCommandsData } from './db/data/configurationCommands';
-import { helmCommandsData } from './db/data/helmCommands';
-import { ecosystemCommandsData } from './db/data/ecosystemCommands';
-import { allKarpenterCommands } from './db/data/karpenterCommands';
-import { k8sVersionsData } from './db/data/k8sVersions';
-import { categoriesData } from './db/data/categories';
-import { yamlTemplatesData } from './db/data/yamlTemplates';
-import { troubleshootingGuidesData } from './db/data/troubleshootingGuides';
-import { bestPracticesData } from './db/data/bestPractices';
+import { useEffect, useState } from "react";
+import { initDatabase, getDatabase, resetDatabase } from "./db/database";
+import {
+  K8sCommand,
+  K8sVersion,
+  Category,
+  YamlTemplate,
+  TroubleshootingGuide,
+  BestPractice,
+  ViewMode,
+} from "./types";
+import { Sidebar } from "./components/Sidebar";
+import { Header } from "./components/Header";
+import { CommandList } from "./components/CommandList";
+import { CommandDetails } from "./components/CommandDetails";
+import { VersionHistory } from "./components/VersionHistory";
+import { YamlTemplates } from "./components/YamlTemplates";
+import { TroubleshootingGuide as TroubleshootingGuideComponent } from "./components/TroubleshootingGuide";
+import { BestPractices } from "./components/BestPractices";
+import { QuickStats } from "./components/QuickStats";
+import { QuickReferenceCard } from "./components/QuickReferenceCard";
+import { AliasesReference } from "./components/AliasesReference";
+import { KeyboardShortcuts } from "./components/KeyboardShortcuts";
+import { Footer } from "./components/Footer";
+import { Scenarios } from "./components/Scenarios";
+import { QuizMode } from "./components/QuizMode";
+import { ConsolePractice } from "./components/ConsolePractice";
+import { YamlBuilder } from "./components/YamlBuilder";
+import { ExamMode } from "./components/ExamMode";
+import { About } from "./components/About";
+import { Favorites } from "./components/Favorites";
+import { Settings } from "./components/Settings";
+import { useFavorites } from "./context/FavoritesContext";
+import { scenariosData } from "./db/data/scenarios";
+import { Loader2, AlertTriangle } from "lucide-react";
+import { k8sCommandsData } from "./db/data/k8sCommands";
+import { additionalK8sCommands } from "./db/data/k8sCommandsExpanded";
+import { comprehensiveK8sCommands } from "./db/data/comprehensiveCommands";
+import { modernK8sCommands } from "./db/data/modernCommands";
+import { advancedK8sCommands } from "./db/data/advancedCommands";
+import { expertK8sCommands } from "./db/data/expertCommands";
+import { kubectlSubcommandsData } from "./db/data/kubectlSubcommands";
+import { podOperationsData } from "./db/data/podOperations";
+import { advancedFilteringData } from "./db/data/advancedFiltering";
+import { rbacCommandsData } from "./db/data/rbacCommands";
+import { completeCatalogData } from "./db/data/completeCatalog";
+import { advancedOperationsData } from "./db/data/advancedOperations";
+import { containerOperationsData } from "./db/data/containerOperations";
+import { utilityCommandsData } from "./db/data/utilityCommands";
+import { awkCommandsData } from "./db/data/awkCommands";
+import { jqCommandsData } from "./db/data/jqCommands";
+import { textProcessingCommandsData } from "./db/data/textProcessingCommands";
+import { securityCommandsData } from "./db/data/securityCommands";
+import { storageCommandsData } from "./db/data/storageCommands";
+import { observabilityCommandsData } from "./db/data/observabilityCommands";
+import { advancedWorkloadsCommandsData } from "./db/data/advancedWorkloadsCommands";
+import { networkingCommandsData } from "./db/data/networkingCommands";
+import { clusterManagementCommandsData } from "./db/data/clusterManagementCommands";
+import { configurationCommandsData } from "./db/data/configurationCommands";
+import { helmCommandsData } from "./db/data/helmCommands";
+import { ecosystemCommandsData } from "./db/data/ecosystemCommands";
+import { allKarpenterCommands } from "./db/data/karpenterCommands";
+import { k8sVersionsData } from "./db/data/k8sVersions";
+import { categoriesData } from "./db/data/categories";
+import { yamlTemplatesData } from "./db/data/yamlTemplates";
+import { troubleshootingGuidesData } from "./db/data/troubleshootingGuides";
+import { bestPracticesData } from "./db/data/bestPractices";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -65,49 +73,56 @@ function App() {
   const [filteredCommands, setFilteredCommands] = useState<K8sCommand[]>([]);
   const [versions, setVersions] = useState<K8sVersion[]>([]);
   const [templates, setTemplates] = useState<YamlTemplate[]>([]);
-  const [troubleshootingGuides, setTroubleshootingGuides] = useState<TroubleshootingGuide[]>([]);
+  const [troubleshootingGuides, setTroubleshootingGuides] = useState<
+    TroubleshootingGuide[]
+  >([]);
   const [bestPractices, setBestPractices] = useState<BestPractice[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [selectedCommand, setSelectedCommand] = useState<K8sCommand | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedCommand, setSelectedCommand] = useState<K8sCommand | null>(
+    null,
+  );
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-  const [difficultyFilter, setDifficultyFilter] = useState<string>('all');
+  const [difficultyFilter, setDifficultyFilter] = useState<string>("all");
   const { favorites, toggleFavorite } = useFavorites();
-  const [viewMode, setViewMode] = useState<ViewMode>('quick-ref');
+  const [viewMode, setViewMode] = useState<ViewMode>("quick-ref");
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [showStats, setShowStats] = useState(true);
   const [showQuickRef, setShowQuickRef] = useState(true);
   const [darkMode, setDarkMode] = useState(() => {
-    const saved = localStorage.getItem('k8s-dark-mode');
+    const saved = localStorage.getItem("k8s-dark-mode");
     return saved ? JSON.parse(saved) : false;
   });
 
   const handleSearchChange = (query: string) => {
     setSearchQuery(query);
-    if (query.trim() && !['quick-ref', 'commands', 'favorites'].includes(viewMode)) {
-      setViewMode('quick-ref');
+    if (
+      query.trim() &&
+      !["quick-ref", "commands", "favorites"].includes(viewMode)
+    ) {
+      setViewMode("quick-ref");
     }
   };
 
   const handleCategorySelect = (category: string) => {
     setSelectedCategory(category);
-    
+
     // If selecting 'all' (usually via "All Commands" button), switch to main view
-    if (category === 'all') {
-      setViewMode('quick-ref');
+    if (category === "all") {
+      setViewMode("quick-ref");
       return;
     }
 
-    if (!['quick-ref', 'commands', 'favorites'].includes(viewMode)) {
-      setViewMode('quick-ref');
+    if (!["quick-ref", "commands", "favorites"].includes(viewMode)) {
+      setViewMode("quick-ref");
     }
   };
 
   const handleDifficultyChange = (difficulty: string) => {
     setDifficultyFilter(difficulty);
-    if (!['quick-ref', 'commands', 'favorites'].includes(viewMode)) {
-      setViewMode('quick-ref');
+    if (!["quick-ref", "commands", "favorites"].includes(viewMode)) {
+      setViewMode("quick-ref");
     }
   };
 
@@ -117,7 +132,7 @@ function App() {
         await initDatabase();
         loadData();
       } catch (error) {
-        console.error('Failed to initialize database:', error);
+        console.error("Failed to initialize database:", error);
         loadDataFallback();
       } finally {
         setLoading(false);
@@ -127,11 +142,11 @@ function App() {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('k8s-dark-mode', JSON.stringify(darkMode));
+    localStorage.setItem("k8s-dark-mode", JSON.stringify(darkMode));
     if (darkMode) {
-      document.documentElement.classList.add('dark');
+      document.documentElement.classList.add("dark");
     } else {
-      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.remove("dark");
     }
   }, [darkMode]);
 
@@ -139,35 +154,37 @@ function App() {
     const handleKeyPress = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey) {
         switch (e.key) {
-          case 'k':
+          case "k":
             e.preventDefault();
-            document.querySelector<HTMLInputElement>('input[type="text"]')?.focus();
+            document
+              .querySelector<HTMLInputElement>('input[type="text"]')
+              ?.focus();
             break;
-          case '1':
+          case "1":
             e.preventDefault();
-            setViewMode('commands');
+            setViewMode("commands");
             break;
-          case '2':
+          case "2":
             e.preventDefault();
-            setViewMode('favorites');
+            setViewMode("favorites");
             break;
-          case '3':
+          case "3":
             e.preventDefault();
-            setViewMode('templates');
+            setViewMode("templates");
             break;
-          case '4':
+          case "4":
             e.preventDefault();
-            setViewMode('troubleshooting');
+            setViewMode("troubleshooting");
             break;
-          case '5':
+          case "5":
             e.preventDefault();
-            setViewMode('best-practices');
+            setViewMode("best-practices");
             break;
-          case '6':
+          case "6":
             e.preventDefault();
-            setViewMode('versions');
+            setViewMode("versions");
             break;
-          case 'd':
+          case "d":
             e.preventDefault();
             setDarkMode(!darkMode);
             break;
@@ -175,8 +192,8 @@ function App() {
       }
     };
 
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
   }, [darkMode]);
 
   // Debounce search query
@@ -193,13 +210,13 @@ function App() {
 
   useEffect(() => {
     if (loading) return;
-    
+
     // Small timeout to allow UI to show loading state before heavy filtering
     const timer = setTimeout(() => {
       filterCommands();
       setIsSearching(false);
     }, 10);
-    
+
     return () => clearTimeout(timer);
   }, [
     commands,
@@ -212,14 +229,16 @@ function App() {
     k8sVersionsData,
     yamlTemplatesData,
     troubleshootingGuidesData,
-    bestPracticesData
+    bestPracticesData,
   ]);
 
   function loadData() {
     const db = getDatabase();
     if (!db) return;
 
-    const categoriesResult = db.exec('SELECT * FROM categories ORDER BY "order"');
+    const categoriesResult = db.exec(
+      'SELECT * FROM categories ORDER BY "order"',
+    );
     if (categoriesResult.length > 0) {
       const cats = categoriesResult[0].values.map((row) => ({
         id: row[0] as number,
@@ -231,7 +250,7 @@ function App() {
       setCategories(cats);
     }
 
-    const commandsResult = db.exec('SELECT * FROM k8s_commands');
+    const commandsResult = db.exec("SELECT * FROM k8s_commands");
     if (commandsResult.length > 0) {
       const cmds = commandsResult[0].values.map((row) => ({
         id: row[0] as number,
@@ -241,7 +260,11 @@ function App() {
         description: row[4] as string,
         example: row[5] as string,
         versionIntroduced: row[6] as string,
-        difficultyLevel: row[7] as 'beginner' | 'intermediate' | 'advanced' | 'expert',
+        difficultyLevel: row[7] as
+          | "beginner"
+          | "intermediate"
+          | "advanced"
+          | "expert",
         tags: row[8] as string,
         flags: row[9] as string,
         output: row[10] as string,
@@ -249,7 +272,7 @@ function App() {
       setCommands(cmds);
     }
 
-    const versionsResult = db.exec('SELECT * FROM k8s_versions');
+    const versionsResult = db.exec("SELECT * FROM k8s_versions");
     if (versionsResult.length > 0) {
       const vers = versionsResult[0].values.map((row) => ({
         id: row[0] as number,
@@ -259,24 +282,24 @@ function App() {
         deprecated: row[4] as string,
         breaking: row[5] as string,
         eolDate: row[6] as string,
-        cves: JSON.parse(row[7] as string || '[]'),
+        cves: JSON.parse((row[7] as string) || "[]"),
         projected: Boolean(row[8]),
         description: row[9] as string,
       }));
-      
+
       // Sort versions semantically (descending)
       vers.sort((a, b) => {
-        const vA = a.version.split('.').map(Number);
-        const vB = b.version.split('.').map(Number);
-        
+        const vA = a.version.split(".").map(Number);
+        const vB = b.version.split(".").map(Number);
+
         if (vA[0] !== vB[0]) return vB[0] - vA[0];
         return vB[1] - vA[1];
       });
-      
+
       setVersions(vers);
     }
 
-    const templatesResult = db.exec('SELECT * FROM yaml_templates');
+    const templatesResult = db.exec("SELECT * FROM yaml_templates");
     if (templatesResult.length > 0) {
       const tmpls = templatesResult[0].values.map((row) => ({
         id: row[0] as number,
@@ -288,7 +311,9 @@ function App() {
       setTemplates(tmpls);
     }
 
-    const troubleshootingResult = db.exec('SELECT * FROM troubleshooting_guides');
+    const troubleshootingResult = db.exec(
+      "SELECT * FROM troubleshooting_guides",
+    );
     if (troubleshootingResult.length > 0) {
       const guides = troubleshootingResult[0].values.map((row) => ({
         id: row[0] as number,
@@ -303,7 +328,7 @@ function App() {
       setTroubleshootingGuides(guides);
     }
 
-    const bestPracticesResult = db.exec('SELECT * FROM best_practices');
+    const bestPracticesResult = db.exec("SELECT * FROM best_practices");
     if (bestPracticesResult.length > 0) {
       const practices = bestPracticesResult[0].values.map((row) => ({
         id: row[0] as number,
@@ -319,17 +344,21 @@ function App() {
 
     // Fallback: if all major datasets are empty, reset and rebuild the database
     const isAllZero =
-      (categoriesResult.length === 0 || categoriesResult[0].values.length === 0) &&
+      (categoriesResult.length === 0 ||
+        categoriesResult[0].values.length === 0) &&
       (commandsResult.length === 0 || commandsResult[0].values.length === 0) &&
       (versionsResult.length === 0 || versionsResult[0].values.length === 0) &&
-      (templatesResult.length === 0 || templatesResult[0].values.length === 0) &&
-      (troubleshootingResult.length === 0 || troubleshootingResult[0].values.length === 0) &&
-      (bestPracticesResult.length === 0 || bestPracticesResult[0].values.length === 0);
+      (templatesResult.length === 0 ||
+        templatesResult[0].values.length === 0) &&
+      (troubleshootingResult.length === 0 ||
+        troubleshootingResult[0].values.length === 0) &&
+      (bestPracticesResult.length === 0 ||
+        bestPracticesResult[0].values.length === 0);
 
     if (isAllZero) {
-      const resetFlag = sessionStorage.getItem('k8s-db-reset-done');
+      const resetFlag = sessionStorage.getItem("k8s-db-reset-done");
       if (!resetFlag) {
-        sessionStorage.setItem('k8s-db-reset-done', 'true');
+        sessionStorage.setItem("k8s-db-reset-done", "true");
         resetDatabase();
         return;
       }
@@ -339,73 +368,89 @@ function App() {
   function filterCommands() {
     let filtered = commands;
 
-    if (viewMode === 'favorites') {
+    if (viewMode === "favorites") {
       filtered = filtered.filter((cmd) => favorites.includes(cmd.id));
     }
 
-    if (selectedCategory !== 'all') {
+    if (selectedCategory !== "all") {
       filtered = filtered.filter((cmd) => cmd.category === selectedCategory);
     }
 
-    if (difficultyFilter !== 'all') {
-      filtered = filtered.filter((cmd) => cmd.difficultyLevel === difficultyFilter);
+    if (difficultyFilter !== "all") {
+      filtered = filtered.filter(
+        (cmd) => cmd.difficultyLevel === difficultyFilter,
+      );
     }
 
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      const queryTokens = query.split(/\s+/).filter(t => t.length > 2); // Ignore short words
-      
+      const queryTokens = query.split(/\s+/).filter((t) => t.length > 2); // Ignore short words
+
       // Smart Search: Check for intent keywords
       const intents: Record<string, string[]> = {
-        'cpu': ['top', 'describe', 'resources', 'limit', 'request'],
-        'memory': ['top', 'describe', 'resources', 'limit', 'request', 'oom'],
-        'usage': ['top', 'metrics'],
-        'crash': ['logs', 'describe', 'events', 'previous', 'restart'],
-        'error': ['logs', 'describe', 'events', 'failure'],
-        'debug': ['exec', 'logs', 'describe', 'debug', 'attach', 'events'],
-        'log': ['logs', 'stdout', 'stderr'],
-        'network': ['service', 'ingress', 'networkpolicy', 'endpoint', 'dns', 'ip'],
-        'access': ['auth', 'rbac', 'config', 'user', 'role', 'token', 'account'],
-        'permission': ['auth', 'rbac', 'role', 'clusterrole', 'binding'],
-        'storage': ['pv', 'pvc', 'storageclass', 'volume', 'claim', 'mount'],
-        'disk': ['pv', 'pvc', 'df', 'capacity'],
-        'clean': ['delete', 'prune', 'remove'],
-        'remove': ['delete', 'uninstall'],
-        'list': ['get', 'all'],
-        'show': ['get', 'describe', 'explain'],
-        'change': ['edit', 'apply', 'patch', 'scale', 'set', 'update'],
-        'deploy': ['deployment', 'create', 'apply', 'rollout', 'run'],
-        'scale': ['replicas', 'autoscale', 'resize'],
-        'monitor': ['top', 'events', 'describe', 'logs', 'watch'],
-        'security': ['auth', 'rbac', 'secret', 'serviceaccount', 'policy', 'context'],
-        'health': ['probe', 'ready', 'live', 'status', 'liveness', 'readiness'],
-        'history': ['rollout', 'history', 'revision', 'undo'],
-        'rollback': ['undo', 'rollout', 'revert'],
-        'restart': ['rollout', 'restart'],
-        'copy': ['cp', 'transfer'],
-        'forward': ['port-forward', 'proxy', 'tunnel'],
-        'connect': ['exec', 'attach', 'port-forward'],
-        'user': ['config', 'auth', 'kubeconfig', 'context'],
-        'context': ['config', 'ctx', 'namespace'],
-        'kill': ['delete', 'force'],
-        'stop': ['scale', 'delete'],
-        'start': ['scale', 'apply'],
-        'expose': ['service', 'ingress', 'expose', 'port'],
-        'public': ['LoadBalancer', 'NodePort', 'Ingress']
+        cpu: ["top", "describe", "resources", "limit", "request"],
+        memory: ["top", "describe", "resources", "limit", "request", "oom"],
+        usage: ["top", "metrics"],
+        crash: ["logs", "describe", "events", "previous", "restart"],
+        error: ["logs", "describe", "events", "failure"],
+        debug: ["exec", "logs", "describe", "debug", "attach", "events"],
+        log: ["logs", "stdout", "stderr"],
+        network: [
+          "service",
+          "ingress",
+          "networkpolicy",
+          "endpoint",
+          "dns",
+          "ip",
+        ],
+        access: ["auth", "rbac", "config", "user", "role", "token", "account"],
+        permission: ["auth", "rbac", "role", "clusterrole", "binding"],
+        storage: ["pv", "pvc", "storageclass", "volume", "claim", "mount"],
+        disk: ["pv", "pvc", "df", "capacity"],
+        clean: ["delete", "prune", "remove"],
+        remove: ["delete", "uninstall"],
+        list: ["get", "all"],
+        show: ["get", "describe", "explain"],
+        change: ["edit", "apply", "patch", "scale", "set", "update"],
+        deploy: ["deployment", "create", "apply", "rollout", "run"],
+        scale: ["replicas", "autoscale", "resize"],
+        monitor: ["top", "events", "describe", "logs", "watch"],
+        security: [
+          "auth",
+          "rbac",
+          "secret",
+          "serviceaccount",
+          "policy",
+          "context",
+        ],
+        health: ["probe", "ready", "live", "status", "liveness", "readiness"],
+        history: ["rollout", "history", "revision", "undo"],
+        rollback: ["undo", "rollout", "revert"],
+        restart: ["rollout", "restart"],
+        copy: ["cp", "transfer"],
+        forward: ["port-forward", "proxy", "tunnel"],
+        connect: ["exec", "attach", "port-forward"],
+        user: ["config", "auth", "kubeconfig", "context"],
+        context: ["config", "ctx", "namespace"],
+        kill: ["delete", "force"],
+        stop: ["scale", "delete"],
+        start: ["scale", "apply"],
+        expose: ["service", "ingress", "expose", "port"],
+        public: ["LoadBalancer", "NodePort", "Ingress"],
       };
 
       // Find active intents based on query tokens
       const activeIntents = new Set<string>();
-      queryTokens.forEach(token => {
+      queryTokens.forEach((token) => {
         Object.entries(intents).forEach(([key, values]) => {
           if (key.includes(token) || token.includes(key)) {
-            values.forEach(v => activeIntents.add(v));
+            values.forEach((v) => activeIntents.add(v));
           }
         });
       });
 
       // Calculate score for each command
-      const scoredCommands = filtered.map(cmd => {
+      const scoredCommands = filtered.map((cmd) => {
         let score = 0;
         const cmdStr = cmd.command.toLowerCase();
         const descStr = cmd.description.toLowerCase();
@@ -417,7 +462,7 @@ function App() {
         if (descStr.includes(query)) score += 10;
 
         // Token matches
-        queryTokens.forEach(token => {
+        queryTokens.forEach((token) => {
           if (cmdStr.includes(token)) score += 5;
           if (descStr.includes(token)) score += 3;
           if (tagsStr.includes(token)) score += 3;
@@ -425,7 +470,7 @@ function App() {
         });
 
         // Intent matches
-        activeIntents.forEach(intent => {
+        activeIntents.forEach((intent) => {
           if (cmdStr.includes(intent)) score += 4;
           if (tagsStr.includes(intent)) score += 2;
           if (descStr.includes(intent)) score += 1;
@@ -436,22 +481,24 @@ function App() {
 
       // Filter and sort
       filtered = scoredCommands
-        .filter(item => item.score > 0)
+        .filter((item) => item.score > 0)
         .sort((a, b) => b.score - a.score)
-        .map(item => item.cmd);
+        .map((item) => item.cmd);
     }
 
     setFilteredCommands(filtered);
   }
 
   function loadDataFallback() {
-    setCategories(categoriesData.map((cat, idx) => ({
-      id: idx + 1,
-      name: cat.name,
-      icon: cat.icon,
-      description: cat.description,
-      order: cat.order,
-    })));
+    setCategories(
+      categoriesData.map((cat, idx) => ({
+        id: idx + 1,
+        name: cat.name,
+        icon: cat.icon,
+        description: cat.description,
+        order: cat.order,
+      })),
+    );
 
     const allCommands = [
       ...k8sCommandsData,
@@ -484,25 +531,31 @@ function App() {
     ];
 
     const seen = new Set<string>();
-    const unique = allCommands.filter((c: any) => {
-      if (!c || !c.command) return false;
-      const cmd = c.command.trim();
-      if (seen.has(cmd)) return false;
-      seen.add(cmd);
-      return true;
-    }).map((c: any, idx) => ({
-      id: idx + 1,
-      category: c.category || 'Uncategorized',
-      subcategory: c.subcategory || '',
-      command: c.command,
-      description: c.description,
-      example: c.example,
-      versionIntroduced: c.versionIntroduced,
-      difficultyLevel: c.difficultyLevel as 'beginner' | 'intermediate' | 'advanced' | 'expert',
-      tags: c.tags,
-      flags: c.flags || '',
-      output: c.output || '',
-    }));
+    const unique = allCommands
+      .filter((c: any) => {
+        if (!c || !c.command) return false;
+        const cmd = c.command.trim();
+        if (seen.has(cmd)) return false;
+        seen.add(cmd);
+        return true;
+      })
+      .map((c: any, idx) => ({
+        id: idx + 1,
+        category: c.category || "Uncategorized",
+        subcategory: c.subcategory || "",
+        command: c.command,
+        description: c.description,
+        example: c.example,
+        versionIntroduced: c.versionIntroduced,
+        difficultyLevel: c.difficultyLevel as
+          | "beginner"
+          | "intermediate"
+          | "advanced"
+          | "expert",
+        tags: c.tags,
+        flags: c.flags || "",
+        output: c.output || "",
+      }));
 
     setCommands(unique);
 
@@ -511,45 +564,51 @@ function App() {
       version: v.version,
       releaseDate: v.releaseDate,
       majorFeatures: v.majorFeatures,
-      deprecated: (v as any).deprecated || '',
-      breaking: (v as any).breaking || '',
+      deprecated: (v as any).deprecated || "",
+      breaking: (v as any).breaking || "",
     }));
     vers.sort((a, b) => {
-      const vA = a.version.split('.').map(Number);
-      const vB = b.version.split('.').map(Number);
+      const vA = a.version.split(".").map(Number);
+      const vB = b.version.split(".").map(Number);
       if (vA[0] !== vB[0]) return vB[0] - vA[0];
       return vB[1] - vA[1];
     });
     setVersions(vers);
 
-    setTemplates(yamlTemplatesData.map((y, idx) => ({
-      id: idx + 1,
-      name: y.name,
-      category: y.category,
-      description: y.description,
-      yaml: y.yaml,
-    })));
+    setTemplates(
+      yamlTemplatesData.map((y, idx) => ({
+        id: idx + 1,
+        name: y.name,
+        category: y.category,
+        description: y.description,
+        yaml: y.yaml,
+      })),
+    );
 
-    setTroubleshootingGuides(troubleshootingGuidesData.map((t, idx) => ({
-      id: idx + 1,
-      issue: t.issue,
-      category: t.category,
-      description: t.description,
-      symptoms: t.symptoms,
-      causes: t.causes,
-      diagnosis: t.diagnosis,
-      solutions: t.solutions,
-    })));
+    setTroubleshootingGuides(
+      troubleshootingGuidesData.map((t, idx) => ({
+        id: idx + 1,
+        issue: t.issue,
+        category: t.category,
+        description: t.description,
+        symptoms: t.symptoms,
+        causes: t.causes,
+        diagnosis: t.diagnosis,
+        solutions: t.solutions,
+      })),
+    );
 
-    setBestPractices(bestPracticesData.map((b, idx) => ({
-      id: idx + 1,
-      category: b.category,
-      title: b.title,
-      description: b.description,
-      example: b.example,
-      impact: b.impact,
-      tags: b.tags,
-    })));
+    setBestPractices(
+      bestPracticesData.map((b, idx) => ({
+        id: idx + 1,
+        category: b.category,
+        title: b.title,
+        description: b.description,
+        example: b.example,
+        impact: b.impact,
+        tags: b.tags,
+      })),
+    );
   }
 
   const isDataEmpty =
@@ -564,14 +623,16 @@ function App() {
       <div className="min-h-screen bg-slate-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 animate-spin text-brand-500 mx-auto mb-4" />
-          <p className="text-slate-600 dark:text-slate-400 font-medium">Loading Kubernetes Cheat Sheet...</p>
+          <p className="text-slate-600 dark:text-slate-400 font-medium">
+            Loading Kubernetes Cheat Sheet...
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'dark' : ''}`}>
+    <div className={`min-h-screen ${darkMode ? "dark" : ""}`}>
       <div className="min-h-screen bg-slate-50 dark:bg-gray-900 transition-colors">
         <Header
           searchQuery={searchQuery}
@@ -590,24 +651,32 @@ function App() {
             categories={categories}
             selectedCategory={selectedCategory}
             onCategorySelect={handleCategorySelect}
-            commandCounts={commands.reduce((acc, cmd) => {
-              acc[cmd.category] = (acc[cmd.category] || 0) + 1;
-              return acc;
-            }, {} as Record<string, number>)}
+            commandCounts={commands.reduce(
+              (acc, cmd) => {
+                acc[cmd.category] = (acc[cmd.category] || 0) + 1;
+                return acc;
+              },
+              {} as Record<string, number>,
+            )}
             currentView={viewMode}
             onViewChange={setViewMode}
           />
 
           <main className="flex-1 ml-64 mt-16 p-8 pb-32">
-            {viewMode === 'quick-ref' && (
+            {viewMode === "quick-ref" && (
               <>
                 {isDataEmpty && (
                   <div className="mb-4 p-4 rounded-lg border border-yellow-300 bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-700 flex items-start justify-between">
                     <div className="flex items-start gap-3">
                       <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-300 mt-0.5" />
                       <div>
-                        <div className="text-sm font-semibold text-yellow-800 dark:text-yellow-200">No data loaded</div>
-                        <div className="text-xs text-yellow-700 dark:text-yellow-300">Rebuild the database or load offline data to populate the dashboard.</div>
+                        <div className="text-sm font-semibold text-yellow-800 dark:text-yellow-200">
+                          No data loaded
+                        </div>
+                        <div className="text-xs text-yellow-700 dark:text-yellow-300">
+                          Rebuild the database or load offline data to populate
+                          the dashboard.
+                        </div>
                       </div>
                     </div>
                     <div className="flex gap-2">
@@ -626,19 +695,19 @@ function App() {
                     </div>
                   </div>
                 )}
-                
+
                 <div className="flex justify-end gap-3 mb-4">
                   <button
                     onClick={() => setShowStats(!showStats)}
                     className="text-xs font-medium text-slate-500 hover:text-brand-600 dark:text-slate-400 dark:hover:text-brand-400 flex items-center gap-1 transition-colors"
                   >
-                    {showStats ? 'Hide Stats' : 'Show Stats'}
+                    {showStats ? "Hide Stats" : "Show Stats"}
                   </button>
                   <button
                     onClick={() => setShowQuickRef(!showQuickRef)}
                     className="text-xs font-medium text-slate-500 hover:text-brand-600 dark:text-slate-400 dark:hover:text-brand-400 flex items-center gap-1 transition-colors"
                   >
-                    {showQuickRef ? 'Hide Quick Ref' : 'Show Quick Ref'}
+                    {showQuickRef ? "Hide Quick Ref" : "Show Quick Ref"}
                   </button>
                 </div>
 
@@ -654,13 +723,13 @@ function App() {
                     onViewChange={setViewMode}
                   />
                 )}
-                
+
                 {showQuickRef && (
                   <div className="mb-8">
                     <QuickReferenceCard />
                   </div>
                 )}
-                
+
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <CommandList
                     commands={filteredCommands}
@@ -674,14 +743,14 @@ function App() {
                 </div>
               </>
             )}
-            {viewMode === 'commands' && (
+            {viewMode === "commands" && (
               <>
                 <div className="flex justify-end gap-3 mb-4">
                   <button
                     onClick={() => setShowStats(!showStats)}
                     className="text-xs font-medium text-slate-500 hover:text-brand-600 dark:text-slate-400 dark:hover:text-brand-400 flex items-center gap-1 transition-colors"
                   >
-                    {showStats ? 'Hide Stats' : 'Show Stats'}
+                    {showStats ? "Hide Stats" : "Show Stats"}
                   </button>
                 </div>
 
@@ -710,10 +779,10 @@ function App() {
                 </div>
               </>
             )}
-            {viewMode === 'favorites' && (
+            {viewMode === "favorites" && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-8rem)]">
                 <div className="overflow-hidden">
-                  <Favorites 
+                  <Favorites
                     allCommands={commands}
                     selectedCommand={selectedCommand}
                     onSelectCommand={setSelectedCommand}
@@ -722,33 +791,39 @@ function App() {
                 <CommandDetails command={selectedCommand} />
               </div>
             )}
-            {viewMode === 'versions' && <VersionHistory versions={versions} />}
-            {viewMode === 'templates' && <YamlTemplates templates={templates} />}
-            {viewMode === 'troubleshooting' && <TroubleshootingGuideComponent guides={troubleshootingGuides} />}
-            {viewMode === 'best-practices' && <BestPractices practices={bestPractices} />}
-            {viewMode === 'aliases' && <AliasesReference />}
-            {viewMode === 'scenarios' && <Scenarios />}
-            {viewMode === 'quiz' && (
-              <QuizMode 
-                commands={commands} 
-                guides={troubleshootingGuides} 
-                practices={bestPractices} 
+            {viewMode === "versions" && <VersionHistory versions={versions} />}
+            {viewMode === "templates" && (
+              <YamlTemplates templates={templates} />
+            )}
+            {viewMode === "troubleshooting" && (
+              <TroubleshootingGuideComponent guides={troubleshootingGuides} />
+            )}
+            {viewMode === "best-practices" && (
+              <BestPractices practices={bestPractices} />
+            )}
+            {viewMode === "aliases" && <AliasesReference />}
+            {viewMode === "scenarios" && <Scenarios />}
+            {viewMode === "quiz" && (
+              <QuizMode
+                commands={commands}
+                guides={troubleshootingGuides}
+                practices={bestPractices}
               />
             )}
-            {viewMode === 'console-practice' && <ConsolePractice />}
-            {viewMode === 'yaml-builder' && <YamlBuilder />}
-            {viewMode === 'exam' && (
-              <ExamMode 
-                commands={commands} 
-                guides={troubleshootingGuides} 
-              />
+            {viewMode === "console-practice" && <ConsolePractice />}
+            {viewMode === "yaml-builder" && <YamlBuilder />}
+            {viewMode === "exam" && (
+              <ExamMode commands={commands} guides={troubleshootingGuides} />
             )}
-            {viewMode === 'settings' && <Settings />}
-            {viewMode === 'about' && <About />}
+            {viewMode === "settings" && <Settings />}
+            {viewMode === "about" && <About />}
           </main>
           <Footer onShowShortcuts={() => setShowShortcuts(true)} />
         </div>
-        <KeyboardShortcuts isOpen={showShortcuts} onClose={() => setShowShortcuts(false)} />
+        <KeyboardShortcuts
+          isOpen={showShortcuts}
+          onClose={() => setShowShortcuts(false)}
+        />
       </div>
     </div>
   );

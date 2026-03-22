@@ -1,4 +1,4 @@
-import { Keyboard, Heart } from 'lucide-react';
+import { Keyboard, Heart } from "lucide-react";
 
 interface FooterProps {
   onShowShortcuts: () => void;
@@ -18,7 +18,11 @@ export function Footer({ onShowShortcuts }: FooterProps) {
           </button>
           <span className="text-gray-400 dark:text-gray-600">|</span>
           <span className="text-gray-600 dark:text-gray-400">
-            Press <kbd className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-xs">Ctrl+K</kbd> to search
+            Press{" "}
+            <kbd className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-xs">
+              Ctrl+K
+            </kbd>{" "}
+            to search
           </span>
         </div>
         <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">

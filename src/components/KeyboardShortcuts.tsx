@@ -1,4 +1,4 @@
-import { X, Keyboard } from 'lucide-react';
+import { X, Keyboard } from "lucide-react";
 
 interface KeyboardShortcutsProps {
   isOpen: boolean;
@@ -9,17 +9,25 @@ export function KeyboardShortcuts({ isOpen, onClose }: KeyboardShortcutsProps) {
   if (!isOpen) return null;
 
   const shortcuts = [
-    { keys: ['Ctrl', 'K'], description: 'Focus search bar', mac: ['⌘', 'K'] },
-    { keys: ['Ctrl', '1'], description: 'Go to Commands', mac: ['⌘', '1'] },
-    { keys: ['Ctrl', '2'], description: 'Go to Favorites', mac: ['⌘', '2'] },
-    { keys: ['Ctrl', '3'], description: 'Go to Templates', mac: ['⌘', '3'] },
-    { keys: ['Ctrl', '4'], description: 'Go to Troubleshooting', mac: ['⌘', '4'] },
-    { keys: ['Ctrl', '5'], description: 'Go to Best Practices', mac: ['⌘', '5'] },
-    { keys: ['Ctrl', '6'], description: 'Go to Versions', mac: ['⌘', '6'] },
-    { keys: ['Ctrl', 'D'], description: 'Toggle dark mode', mac: ['⌘', 'D'] },
+    { keys: ["Ctrl", "K"], description: "Focus search bar", mac: ["⌘", "K"] },
+    { keys: ["Ctrl", "1"], description: "Go to Commands", mac: ["⌘", "1"] },
+    { keys: ["Ctrl", "2"], description: "Go to Favorites", mac: ["⌘", "2"] },
+    { keys: ["Ctrl", "3"], description: "Go to Templates", mac: ["⌘", "3"] },
+    {
+      keys: ["Ctrl", "4"],
+      description: "Go to Troubleshooting",
+      mac: ["⌘", "4"],
+    },
+    {
+      keys: ["Ctrl", "5"],
+      description: "Go to Best Practices",
+      mac: ["⌘", "5"],
+    },
+    { keys: ["Ctrl", "6"], description: "Go to Versions", mac: ["⌘", "6"] },
+    { keys: ["Ctrl", "D"], description: "Toggle dark mode", mac: ["⌘", "D"] },
   ];
 
-  const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+  const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -50,14 +58,16 @@ export function KeyboardShortcuts({ isOpen, onClose }: KeyboardShortcutsProps) {
                   {shortcut.description}
                 </span>
                 <div className="flex items-center gap-1">
-                  {(isMac ? shortcut.mac : shortcut.keys).map((key, keyIndex) => (
-                    <kbd
-                      key={keyIndex}
-                      className="px-3 py-1.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded shadow-sm text-sm font-semibold text-gray-800 dark:text-gray-200"
-                    >
-                      {key}
-                    </kbd>
-                  ))}
+                  {(isMac ? shortcut.mac : shortcut.keys).map(
+                    (key, keyIndex) => (
+                      <kbd
+                        key={keyIndex}
+                        className="px-3 py-1.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded shadow-sm text-sm font-semibold text-gray-800 dark:text-gray-200"
+                      >
+                        {key}
+                      </kbd>
+                    ),
+                  )}
                 </div>
               </div>
             ))}
@@ -65,8 +75,8 @@ export function KeyboardShortcuts({ isOpen, onClose }: KeyboardShortcutsProps) {
 
           <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
             <p className="text-sm text-blue-800 dark:text-blue-300">
-              <strong>Pro Tip:</strong> Press the shortcut keys while focused on any part of the
-              application to quickly navigate between sections.
+              <strong>Pro Tip:</strong> Press the shortcut keys while focused on
+              any part of the application to quickly navigate between sections.
             </p>
           </div>
         </div>

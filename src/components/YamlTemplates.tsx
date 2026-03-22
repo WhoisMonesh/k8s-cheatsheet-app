@@ -1,24 +1,28 @@
-import { useState } from 'react';
-import { YamlTemplate } from '../types';
-import { FileCode, Copy, Check, Search } from 'lucide-react';
+import { useState } from "react";
+import { YamlTemplate } from "../types";
+import { FileCode, Copy, Check, Search } from "lucide-react";
 
 interface YamlTemplatesProps {
   templates: YamlTemplate[];
 }
 
 export function YamlTemplates({ templates }: YamlTemplatesProps) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [copiedId, setCopiedId] = useState<number | null>(null);
 
-  const categories = ['all', ...Array.from(new Set(templates.map((t) => t.category)))];
+  const categories = [
+    "all",
+    ...Array.from(new Set(templates.map((t) => t.category))),
+  ];
 
   const filteredTemplates = templates.filter((template) => {
     const matchesSearch =
       template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       template.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       template.yaml.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || template.category === selectedCategory;
+    const matchesCategory =
+      selectedCategory === "all" || template.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -57,7 +61,7 @@ export function YamlTemplates({ templates }: YamlTemplatesProps) {
         >
           {categories.map((cat) => (
             <option key={cat} value={cat}>
-              {cat === 'all' ? 'All Categories' : cat}
+              {cat === "all" ? "All Categories" : cat}
             </option>
           ))}
         </select>
@@ -106,7 +110,9 @@ export function YamlTemplates({ templates }: YamlTemplatesProps) {
               </div>
 
               <div className="bg-gray-900 dark:bg-black rounded-lg p-4 overflow-x-auto">
-                <pre className="text-sm text-gray-300 font-mono">{template.yaml}</pre>
+                <pre className="text-sm text-gray-300 font-mono">
+                  {template.yaml}
+                </pre>
               </div>
             </div>
           </div>

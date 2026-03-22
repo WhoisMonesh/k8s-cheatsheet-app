@@ -1,6 +1,18 @@
-import { useState, useEffect } from 'react';
-import { K8sCommand } from '../types';
-import { Copy, Check, Terminal, Flag, FileText, Play, AlertTriangle, HelpCircle, Settings, X, RefreshCw } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { K8sCommand } from "../types";
+import {
+  Copy,
+  Check,
+  Terminal,
+  Flag,
+  FileText,
+  Play,
+  AlertTriangle,
+  HelpCircle,
+  Settings,
+  X,
+  RefreshCw,
+} from "lucide-react";
 
 interface CommandDetailsProps {
   command: K8sCommand | null;
@@ -12,12 +24,12 @@ export function CommandDetails({ command }: CommandDetailsProps) {
   const [activeFlags, setActiveFlags] = useState<string[]>([]);
   const [showTerminal, setShowTerminal] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  const [displayedOutput, setDisplayedOutput] = useState('');
+  const [displayedOutput, setDisplayedOutput] = useState("");
 
   useEffect(() => {
     setActiveFlags([]);
     setShowTerminal(false);
-    setDisplayedOutput('');
+    setDisplayedOutput("");
     setIsTyping(false);
   }, [command]);
 
@@ -31,15 +43,16 @@ export function CommandDetails({ command }: CommandDetailsProps) {
           Select a Command
         </h3>
         <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto">
-          Choose a command from the list to view detailed information, examples, and usage scenarios.
+          Choose a command from the list to view detailed information, examples,
+          and usage scenarios.
         </p>
       </div>
     );
   }
 
-  const copyToClipboard = (text: string, type: 'command' | 'example') => {
+  const copyToClipboard = (text: string, type: "command" | "example") => {
     navigator.clipboard.writeText(text);
-    if (type === 'command') {
+    if (type === "command") {
       setCopiedCommand(true);
       setTimeout(() => setCopiedCommand(false), 2000);
     } else {
@@ -49,45 +62,62 @@ export function CommandDetails({ command }: CommandDetailsProps) {
   };
 
   const difficultyColors = {
-    beginner: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300',
-    intermediate: 'bg-brand-100 text-brand-800 dark:bg-brand-900/50 dark:text-brand-300',
-    advanced: 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300',
-    expert: 'bg-rose-100 text-rose-800 dark:bg-rose-900/50 dark:text-rose-300',
+    beginner:
+      "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300",
+    intermediate:
+      "bg-brand-100 text-brand-800 dark:bg-brand-900/50 dark:text-brand-300",
+    advanced:
+      "bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300",
+    expert: "bg-rose-100 text-rose-800 dark:bg-rose-900/50 dark:text-rose-300",
   };
 
   const deriveWarning = (c: K8sCommand): string => {
     const cmd = c.command.toLowerCase();
-    if (cmd.includes(' delete ')) return 'Deletes resources; ensure backups and correct target.';
-    if (cmd.includes(' apply ')) return 'Changes cluster state; preview with dry-run or diff.';
-    if (cmd.includes(' rollout restart') || cmd.includes(' rollout undo')) return 'May disrupt traffic; validate health checks.';
-    if (cmd.includes(' patch ')) return 'Patches are immediate; verify JSON/YAML paths carefully.';
-    if (cmd.includes(' pvc') && cmd.includes(' delete')) return 'Deleting PVC may cause data loss depending on reclaim policy.';
-    if (cmd.includes(' pv') && cmd.includes(' release')) return 'Released PV can be reclaimed; confirm binding before reuse.';
-    if (cmd.includes(' helm upgrade') && c.flags?.includes('cleanup-on-fail')) return 'Cleanup on fail removes created resources.';
-    if (c.difficultyLevel === 'advanced' || c.difficultyLevel === 'expert') return 'Requires caution; may impact workloads or nodes.';
-    return 'No special warning.';
+    if (cmd.includes(" delete "))
+      return "Deletes resources; ensure backups and correct target.";
+    if (cmd.includes(" apply "))
+      return "Changes cluster state; preview with dry-run or diff.";
+    if (cmd.includes(" rollout restart") || cmd.includes(" rollout undo"))
+      return "May disrupt traffic; validate health checks.";
+    if (cmd.includes(" patch "))
+      return "Patches are immediate; verify JSON/YAML paths carefully.";
+    if (cmd.includes(" pvc") && cmd.includes(" delete"))
+      return "Deleting PVC may cause data loss depending on reclaim policy.";
+    if (cmd.includes(" pv") && cmd.includes(" release"))
+      return "Released PV can be reclaimed; confirm binding before reuse.";
+    if (cmd.includes(" helm upgrade") && c.flags?.includes("cleanup-on-fail"))
+      return "Cleanup on fail removes created resources.";
+    if (c.difficultyLevel === "advanced" || c.difficultyLevel === "expert")
+      return "Requires caution; may impact workloads or nodes.";
+    return "No special warning.";
   };
 
-  const flagsList = command.flags 
-    ? command.flags.split(',').map(f => f.trim()).filter(f => f.length > 0) 
+  const flagsList = command.flags
+    ? command.flags
+        .split(",")
+        .map((f) => f.trim())
+        .filter((f) => f.length > 0)
     : [];
 
-  const builtCommand = `${command.command} ${activeFlags.join(' ')}`.trim();
+  const builtCommand = `${command.command} ${activeFlags.join(" ")}`.trim();
 
   const runSimulation = () => {
     setShowTerminal(true);
     setIsTyping(true);
-    setDisplayedOutput('');
-    
+    setDisplayedOutput("");
+
     setTimeout(() => {
       setIsTyping(false);
-      setDisplayedOutput(command.output || 'No specific output preview available for this command.');
+      setDisplayedOutput(
+        command.output ||
+          "No specific output preview available for this command.",
+      );
     }, 1000);
   };
 
   const toggleFlag = (flag: string) => {
-    setActiveFlags(prev => 
-      prev.includes(flag) ? prev.filter(f => f !== flag) : [...prev, flag]
+    setActiveFlags((prev) =>
+      prev.includes(flag) ? prev.filter((f) => f !== flag) : [...prev, flag],
     );
   };
 
@@ -108,7 +138,9 @@ export function CommandDetails({ command }: CommandDetailsProps) {
             </span>
           </div>
         </div>
-        <h2 className="text-2xl font-bold mb-1 tracking-tight">{command.subcategory}</h2>
+        <h2 className="text-2xl font-bold mb-1 tracking-tight">
+          {command.subcategory}
+        </h2>
         <p className="text-brand-100 font-medium">{command.category}</p>
       </div>
 
@@ -117,7 +149,9 @@ export function CommandDetails({ command }: CommandDetailsProps) {
         <div>
           <div className="flex items-center gap-2 mb-3">
             <FileText className="w-5 h-5 text-brand-600 dark:text-brand-400" />
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Description</h3>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+              Description
+            </h3>
           </div>
           <p className="text-slate-700 dark:text-slate-300 leading-relaxed text-sm">
             {command.description}
@@ -129,10 +163,12 @@ export function CommandDetails({ command }: CommandDetailsProps) {
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Terminal className="w-5 h-5 text-brand-600 dark:text-brand-400" />
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">Command</h3>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                Command
+              </h3>
             </div>
             <button
-              onClick={() => copyToClipboard(command.command, 'command')}
+              onClick={() => copyToClipboard(command.command, "command")}
               className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-md hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
             >
               {copiedCommand ? (
@@ -161,26 +197,30 @@ export function CommandDetails({ command }: CommandDetailsProps) {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <Settings className="w-5 h-5 text-brand-600 dark:text-brand-400" />
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">Command Builder</h3>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                Command Builder
+              </h3>
             </div>
             <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
-              <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">Toggle flags to customize the command:</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+                Toggle flags to customize the command:
+              </p>
               <div className="flex flex-wrap gap-2 mb-4">
-                {flagsList.map(flag => (
+                {flagsList.map((flag) => (
                   <button
                     key={flag}
                     onClick={() => toggleFlag(flag)}
                     className={`px-3 py-1.5 rounded-md text-xs font-mono transition-colors border ${
                       activeFlags.includes(flag)
-                        ? 'bg-brand-100 text-brand-700 border-brand-200 dark:bg-brand-900/30 dark:text-brand-300 dark:border-brand-700'
-                        : 'bg-white text-slate-600 border-slate-200 hover:border-brand-300 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-600 dark:hover:border-brand-500'
+                        ? "bg-brand-100 text-brand-700 border-brand-200 dark:bg-brand-900/30 dark:text-brand-300 dark:border-brand-700"
+                        : "bg-white text-slate-600 border-slate-200 hover:border-brand-300 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-600 dark:hover:border-brand-500"
                     }`}
                   >
                     {flag}
                   </button>
                 ))}
               </div>
-              
+
               <div className="relative">
                 <div className="bg-slate-900 rounded-lg p-4 pr-24">
                   <code className="block font-mono text-sm text-white break-all">
@@ -189,11 +229,15 @@ export function CommandDetails({ command }: CommandDetailsProps) {
                 </div>
                 <div className="absolute right-2 top-2 flex gap-1">
                   <button
-                    onClick={() => copyToClipboard(builtCommand, 'command')}
+                    onClick={() => copyToClipboard(builtCommand, "command")}
                     className="p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-md transition-colors"
                     title="Copy Command"
                   >
-                    {copiedCommand ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                    {copiedCommand ? (
+                      <Check className="w-4 h-4 text-emerald-500" />
+                    ) : (
+                      <Copy className="w-4 h-4" />
+                    )}
                   </button>
                   <button
                     onClick={runSimulation}
@@ -214,7 +258,9 @@ export function CommandDetails({ command }: CommandDetailsProps) {
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <Terminal className="w-5 h-5 text-brand-600 dark:text-brand-400" />
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Terminal Simulator</h3>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                  Terminal Simulator
+                </h3>
               </div>
               <button
                 onClick={() => setShowTerminal(false)}
@@ -228,7 +274,9 @@ export function CommandDetails({ command }: CommandDetailsProps) {
                 <div className="w-3 h-3 rounded-full bg-red-500"></div>
                 <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
                 <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-                <span className="ml-2 text-xs text-slate-500">bash — 80x24</span>
+                <span className="ml-2 text-xs text-slate-500">
+                  bash — 80x24
+                </span>
               </div>
               <div className="p-4 text-slate-300 min-h-[160px]">
                 <div className="flex gap-2 text-emerald-400 mb-2">
@@ -263,10 +311,12 @@ export function CommandDetails({ command }: CommandDetailsProps) {
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Play className="w-5 h-5 text-brand-600 dark:text-brand-400" />
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">Example</h3>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                Example
+              </h3>
             </div>
             <button
-              onClick={() => copyToClipboard(command.example, 'example')}
+              onClick={() => copyToClipboard(command.example, "example")}
               className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-md hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
             >
               {copiedExample ? (
@@ -294,7 +344,9 @@ export function CommandDetails({ command }: CommandDetailsProps) {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <Terminal className="w-5 h-5 text-brand-600 dark:text-brand-400" />
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">Expected Output</h3>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                Expected Output
+              </h3>
             </div>
             <div className="bg-slate-900 rounded-lg p-4 group relative overflow-hidden">
               <code className="block font-mono text-xs text-slate-300 whitespace-pre-wrap font-fira">
@@ -309,7 +361,9 @@ export function CommandDetails({ command }: CommandDetailsProps) {
           <div className="flex items-start gap-3">
             <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-500 flex-shrink-0 mt-0.5" />
             <div>
-              <h4 className="font-bold text-amber-900 dark:text-amber-100 text-sm mb-1">Warning</h4>
+              <h4 className="font-bold text-amber-900 dark:text-amber-100 text-sm mb-1">
+                Warning
+              </h4>
               <p className="text-sm text-amber-800 dark:text-amber-200">
                 {deriveWarning(command)}
               </p>
@@ -322,19 +376,23 @@ export function CommandDetails({ command }: CommandDetailsProps) {
           <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-2 mb-2">
               <Flag className="w-4 h-4 text-brand-500" />
-              <h4 className="font-bold text-slate-900 dark:text-white text-sm">Flags</h4>
+              <h4 className="font-bold text-slate-900 dark:text-white text-sm">
+                Flags
+              </h4>
             </div>
             <p className="text-xs text-slate-600 dark:text-slate-400 font-mono">
-              {command.flags || 'No specific flags listed'}
+              {command.flags || "No specific flags listed"}
             </p>
           </div>
           <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-2 mb-2">
               <HelpCircle className="w-4 h-4 text-brand-500" />
-              <h4 className="font-bold text-slate-900 dark:text-white text-sm">Tags</h4>
+              <h4 className="font-bold text-slate-900 dark:text-white text-sm">
+                Tags
+              </h4>
             </div>
             <div className="flex flex-wrap gap-2">
-              {command.tags.split(',').map((tag) => (
+              {command.tags.split(",").map((tag) => (
                 <span
                   key={tag}
                   className="px-2 py-0.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded text-[10px] font-medium text-slate-600 dark:text-slate-300"

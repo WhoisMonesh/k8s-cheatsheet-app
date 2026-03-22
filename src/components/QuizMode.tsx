@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import { K8sCommand, TroubleshootingGuide, BestPractice } from '../types';
-import { Brain, Check, X as XIcon, ArrowRight } from 'lucide-react';
-import { staticQuizQuestions } from '../db/data/staticQuizQuestions';
+import { useState, useEffect } from "react";
+import { K8sCommand, TroubleshootingGuide, BestPractice } from "../types";
+import { Brain, Check, X as XIcon, ArrowRight } from "lucide-react";
+import { staticQuizQuestions } from "../db/data/staticQuizQuestions";
 
 interface QuizModeProps {
   commands: K8sCommand[];
@@ -10,7 +10,12 @@ interface QuizModeProps {
 }
 
 interface Question {
-  type: 'command-to-desc' | 'desc-to-command' | 'concept' | 'diagnosis' | 'best-practice';
+  type:
+    | "command-to-desc"
+    | "desc-to-command"
+    | "concept"
+    | "diagnosis"
+    | "best-practice";
   question: string;
   correctAnswer: string;
   options: string[];
@@ -32,79 +37,83 @@ export function QuizMode({ commands, guides, practices }: QuizModeProps) {
 
     // 20% chance: Static Concept
     if (rand < 0.2) {
-        const qIndex = Math.floor(Math.random() * staticQuizQuestions.length);
-        const q = staticQuizQuestions[qIndex];
-        const options = [...q.options].sort(() => Math.random() - 0.5);
-        setCurrentQuestion({ ...q, type: 'concept', options });
-        setSelectedAnswer(null);
-        setIsCorrect(null);
-        return;
+      const qIndex = Math.floor(Math.random() * staticQuizQuestions.length);
+      const q = staticQuizQuestions[qIndex];
+      const options = [...q.options].sort(() => Math.random() - 0.5);
+      setCurrentQuestion({ ...q, type: "concept", options });
+      setSelectedAnswer(null);
+      setIsCorrect(null);
+      return;
     }
 
     // 20% chance: Troubleshooting Diagnosis (if guides exist)
     if (rand < 0.4 && guides.length >= 4) {
-        const targetIndex = Math.floor(Math.random() * guides.length);
-        const target = guides[targetIndex];
-        
-        // Distractors
-        const distractors: string[] = [];
-        while (distractors.length < 3) {
-            const idx = Math.floor(Math.random() * guides.length);
-            if (idx !== targetIndex) {
-                const d = guides[idx];
-                if (!distractors.includes(d.diagnosis) && d.diagnosis) {
-                    distractors.push(d.diagnosis);
-                }
-            }
+      const targetIndex = Math.floor(Math.random() * guides.length);
+      const target = guides[targetIndex];
+
+      // Distractors
+      const distractors: string[] = [];
+      while (distractors.length < 3) {
+        const idx = Math.floor(Math.random() * guides.length);
+        if (idx !== targetIndex) {
+          const d = guides[idx];
+          if (!distractors.includes(d.diagnosis) && d.diagnosis) {
+            distractors.push(d.diagnosis);
+          }
         }
-        
-        const options = [...distractors, target.diagnosis].sort(() => Math.random() - 0.5);
-        
-        setCurrentQuestion({
-            type: 'diagnosis',
-            question: `Scenario: ${target.issue}\n\nSymptoms: ${target.symptoms}\n\nWhat is the likely diagnosis?`,
-            correctAnswer: target.diagnosis,
-            options,
-            explanation: `Diagnosis: ${target.diagnosis}\nSolution: ${target.solutions}`
-        });
-        setSelectedAnswer(null);
-        setIsCorrect(null);
-        return;
+      }
+
+      const options = [...distractors, target.diagnosis].sort(
+        () => Math.random() - 0.5,
+      );
+
+      setCurrentQuestion({
+        type: "diagnosis",
+        question: `Scenario: ${target.issue}\n\nSymptoms: ${target.symptoms}\n\nWhat is the likely diagnosis?`,
+        correctAnswer: target.diagnosis,
+        options,
+        explanation: `Diagnosis: ${target.diagnosis}\nSolution: ${target.solutions}`,
+      });
+      setSelectedAnswer(null);
+      setIsCorrect(null);
+      return;
     }
 
     // 20% chance: Best Practice (if practices exist)
     if (rand < 0.6 && practices.length >= 4) {
-        const targetIndex = Math.floor(Math.random() * practices.length);
-        const target = practices[targetIndex];
-        
-        // Distractors (titles of other practices)
-        const distractors: string[] = [];
-        while (distractors.length < 3) {
-            const idx = Math.floor(Math.random() * practices.length);
-            if (idx !== targetIndex) {
-                const d = practices[idx];
-                if (!distractors.includes(d.title) && d.title) {
-                    distractors.push(d.title);
-                }
-            }
+      const targetIndex = Math.floor(Math.random() * practices.length);
+      const target = practices[targetIndex];
+
+      // Distractors (titles of other practices)
+      const distractors: string[] = [];
+      while (distractors.length < 3) {
+        const idx = Math.floor(Math.random() * practices.length);
+        if (idx !== targetIndex) {
+          const d = practices[idx];
+          if (!distractors.includes(d.title) && d.title) {
+            distractors.push(d.title);
+          }
         }
-        
-        const options = [...distractors, target.title].sort(() => Math.random() - 0.5);
-        
-        setCurrentQuestion({
-            type: 'best-practice',
-            question: `Which best practice addresses the following?\n\n"${target.description}"`,
-            correctAnswer: target.title,
-            options,
-            explanation: `Title: ${target.title}\nImpact: ${target.impact}`
-        });
-        setSelectedAnswer(null);
-        setIsCorrect(null);
-        return;
+      }
+
+      const options = [...distractors, target.title].sort(
+        () => Math.random() - 0.5,
+      );
+
+      setCurrentQuestion({
+        type: "best-practice",
+        question: `Which best practice addresses the following?\n\n"${target.description}"`,
+        correctAnswer: target.title,
+        options,
+        explanation: `Title: ${target.title}\nImpact: ${target.impact}`,
+      });
+      setSelectedAnswer(null);
+      setIsCorrect(null);
+      return;
     }
 
     // 40% chance (or fallback): Command Quiz
-    const type = Math.random() > 0.5 ? 'command-to-desc' : 'desc-to-command';
+    const type = Math.random() > 0.5 ? "command-to-desc" : "desc-to-command";
     const targetIndex = Math.floor(Math.random() * commands.length);
     const target = commands[targetIndex];
 
@@ -113,26 +122,30 @@ export function QuizMode({ commands, guides, practices }: QuizModeProps) {
       const idx = Math.floor(Math.random() * commands.length);
       if (idx !== targetIndex) {
         const d = commands[idx];
-        const val = type === 'command-to-desc' ? d.description : d.command;
-        if (!distractors.includes(val) && val) { 
+        const val = type === "command-to-desc" ? d.description : d.command;
+        if (!distractors.includes(val) && val) {
           distractors.push(val);
         }
       }
     }
 
-    const correctAnswer = type === 'command-to-desc' ? target.description : target.command;
-    const options = [...distractors, correctAnswer].sort(() => Math.random() - 0.5);
+    const correctAnswer =
+      type === "command-to-desc" ? target.description : target.command;
+    const options = [...distractors, correctAnswer].sort(
+      () => Math.random() - 0.5,
+    );
 
     setCurrentQuestion({
       type,
-      question: type === 'command-to-desc' 
-        ? `What does this command do?\n${target.command}` 
-        : `Which command performs this action?\n${target.description}`,
+      question:
+        type === "command-to-desc"
+          ? `What does this command do?\n${target.command}`
+          : `Which command performs this action?\n${target.description}`,
       correctAnswer,
       options,
-      explanation: `The command '${target.command}' is used to ${target.description.toLowerCase()}.`
+      explanation: `The command '${target.command}' is used to ${target.description.toLowerCase()}.`,
     });
-    
+
     setSelectedAnswer(null);
     setIsCorrect(null);
   };
@@ -143,18 +156,18 @@ export function QuizMode({ commands, guides, practices }: QuizModeProps) {
 
   const handleAnswer = (answer: string) => {
     if (selectedAnswer) return; // Prevent multiple answers
-    
+
     setSelectedAnswer(answer);
     const correct = answer === currentQuestion?.correctAnswer;
     setIsCorrect(correct);
-    
+
     if (correct) {
-      setScore(s => s + 10 + (streak * 2));
-      setStreak(s => s + 1);
+      setScore((s) => s + 10 + streak * 2);
+      setStreak((s) => s + 1);
     } else {
       setStreak(0);
     }
-    setTotalAnswered(t => t + 1);
+    setTotalAnswered((t) => t + 1);
   };
 
   if (!currentQuestion) return <div>Loading quiz...</div>;
@@ -167,16 +180,26 @@ export function QuizMode({ commands, guides, practices }: QuizModeProps) {
             <Brain className="w-6 h-6 text-brand-500" />
             Knowledge Check
           </h2>
-          <p className="text-slate-500 dark:text-slate-400">Test your Kubernetes command mastery</p>
+          <p className="text-slate-500 dark:text-slate-400">
+            Test your Kubernetes command mastery
+          </p>
         </div>
         <div className="flex gap-6 text-right">
           <div>
-            <div className="text-xs text-slate-500 uppercase font-bold tracking-wider">Score</div>
-            <div className="text-2xl font-black text-brand-600 dark:text-brand-400">{score}</div>
+            <div className="text-xs text-slate-500 uppercase font-bold tracking-wider">
+              Score
+            </div>
+            <div className="text-2xl font-black text-brand-600 dark:text-brand-400">
+              {score}
+            </div>
           </div>
           <div>
-            <div className="text-xs text-slate-500 uppercase font-bold tracking-wider">Streak</div>
-            <div className="text-2xl font-black text-amber-500">{streak} 🔥</div>
+            <div className="text-xs text-slate-500 uppercase font-bold tracking-wider">
+              Streak
+            </div>
+            <div className="text-2xl font-black text-amber-500">
+              {streak} 🔥
+            </div>
           </div>
         </div>
       </div>
@@ -193,15 +216,19 @@ export function QuizMode({ commands, guides, practices }: QuizModeProps) {
 
         <div className="p-8 space-y-3">
           {currentQuestion.options.map((option, idx) => {
-            let stateClass = "border-slate-200 dark:border-slate-600 hover:border-brand-300 dark:hover:border-brand-500 hover:bg-slate-50 dark:hover:bg-slate-700/50";
-            
+            let stateClass =
+              "border-slate-200 dark:border-slate-600 hover:border-brand-300 dark:hover:border-brand-500 hover:bg-slate-50 dark:hover:bg-slate-700/50";
+
             if (selectedAnswer) {
               if (option === currentQuestion.correctAnswer) {
-                stateClass = "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 ring-1 ring-emerald-500";
+                stateClass =
+                  "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 ring-1 ring-emerald-500";
               } else if (option === selectedAnswer) {
-                stateClass = "border-rose-500 bg-rose-50 dark:bg-rose-900/20 ring-1 ring-rose-500";
+                stateClass =
+                  "border-rose-500 bg-rose-50 dark:bg-rose-900/20 ring-1 ring-rose-500";
               } else {
-                stateClass = "opacity-50 border-slate-200 dark:border-slate-700";
+                stateClass =
+                  "opacity-50 border-slate-200 dark:border-slate-700";
               }
             }
 
@@ -212,15 +239,19 @@ export function QuizMode({ commands, guides, practices }: QuizModeProps) {
                 disabled={!!selectedAnswer}
                 className={`w-full p-4 text-left rounded-lg border-2 transition-all duration-200 flex items-center justify-between group ${stateClass}`}
               >
-                <span className={`font-medium ${currentQuestion.type === 'desc-to-command' ? 'font-mono text-sm' : 'text-base'} ${selectedAnswer ? 'text-slate-800 dark:text-slate-200' : 'text-slate-700 dark:text-slate-300'}`}>
+                <span
+                  className={`font-medium ${currentQuestion.type === "desc-to-command" ? "font-mono text-sm" : "text-base"} ${selectedAnswer ? "text-slate-800 dark:text-slate-200" : "text-slate-700 dark:text-slate-300"}`}
+                >
                   {option}
                 </span>
                 {selectedAnswer && option === currentQuestion.correctAnswer && (
                   <Check className="w-5 h-5 text-emerald-500" />
                 )}
-                {selectedAnswer && option === selectedAnswer && option !== currentQuestion.correctAnswer && (
-                  <XIcon className="w-5 h-5 text-rose-500" />
-                )}
+                {selectedAnswer &&
+                  option === selectedAnswer &&
+                  option !== currentQuestion.correctAnswer && (
+                    <XIcon className="w-5 h-5 text-rose-500" />
+                  )}
               </button>
             );
           })}
@@ -229,8 +260,10 @@ export function QuizMode({ commands, guides, practices }: QuizModeProps) {
         {selectedAnswer && (
           <div className="p-6 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between animate-in slide-in-from-bottom-2">
             <div className="max-w-lg">
-              <p className={`font-bold mb-1 ${isCorrect ? 'text-emerald-600' : 'text-rose-600'}`}>
-                {isCorrect ? 'Correct! 🎉' : 'Incorrect'}
+              <p
+                className={`font-bold mb-1 ${isCorrect ? "text-emerald-600" : "text-rose-600"}`}
+              >
+                {isCorrect ? "Correct! 🎉" : "Incorrect"}
               </p>
               <p className="text-sm text-slate-600 dark:text-slate-400">
                 {currentQuestion.explanation}

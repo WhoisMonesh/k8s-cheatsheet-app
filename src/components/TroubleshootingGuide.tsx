@@ -1,24 +1,28 @@
-import { useState } from 'react';
-import { TroubleshootingGuide as TroubleshootingGuideType } from '../types';
-import { AlertCircle, Search, ChevronDown, ChevronUp } from 'lucide-react';
+import { useState } from "react";
+import { TroubleshootingGuide as TroubleshootingGuideType } from "../types";
+import { AlertCircle, Search, ChevronDown, ChevronUp } from "lucide-react";
 
 interface TroubleshootingGuideProps {
   guides: TroubleshootingGuideType[];
 }
 
 export function TroubleshootingGuide({ guides }: TroubleshootingGuideProps) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
-  const categories = ['all', ...Array.from(new Set(guides.map((g) => g.category)))];
+  const categories = [
+    "all",
+    ...Array.from(new Set(guides.map((g) => g.category))),
+  ];
 
   const filteredGuides = guides.filter((guide) => {
     const matchesSearch =
       guide.issue.toLowerCase().includes(searchQuery.toLowerCase()) ||
       guide.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       guide.symptoms.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || guide.category === selectedCategory;
+    const matchesCategory =
+      selectedCategory === "all" || guide.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -51,7 +55,7 @@ export function TroubleshootingGuide({ guides }: TroubleshootingGuideProps) {
         >
           {categories.map((cat) => (
             <option key={cat} value={cat}>
-              {cat === 'all' ? 'All Categories' : cat}
+              {cat === "all" ? "All Categories" : cat}
             </option>
           ))}
         </select>
@@ -99,14 +103,18 @@ export function TroubleshootingGuide({ guides }: TroubleshootingGuideProps) {
                     <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
                       Symptoms
                     </h4>
-                    <p className="text-gray-600 dark:text-gray-400">{guide.symptoms}</p>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      {guide.symptoms}
+                    </p>
                   </div>
 
                   <div>
                     <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
                       Common Causes
                     </h4>
-                    <p className="text-gray-600 dark:text-gray-400">{guide.causes}</p>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      {guide.causes}
+                    </p>
                   </div>
 
                   <div>

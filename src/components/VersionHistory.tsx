@@ -1,23 +1,42 @@
-import { K8sVersion } from '../types';
-import { Calendar, GitBranch, AlertTriangle, XCircle, Search, TrendingUp, Package, Shield, Info, Clock } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { K8sVersion } from "../types";
+import {
+  Calendar,
+  GitBranch,
+  AlertTriangle,
+  XCircle,
+  Search,
+  TrendingUp,
+  Package,
+  Shield,
+  Info,
+  Clock,
+} from "lucide-react";
+import { useState, useMemo } from "react";
 
 interface VersionHistoryProps {
   versions: K8sVersion[];
 }
 
 export function VersionHistory({ versions }: VersionHistoryProps) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState<'all' | 'breaking' | 'deprecated'>('all');
-  const [expandedVersions, setExpandedVersions] = useState<Set<number>>(new Set([0]));
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState<
+    "all" | "breaking" | "deprecated"
+  >("all");
+  const [expandedVersions, setExpandedVersions] = useState<Set<number>>(
+    new Set([0]),
+  );
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
   };
 
   const getVersionMajor = (version: string) => {
-    const parts = version.split('.');
+    const parts = version.split(".");
     return `${parts[0]}.${parts[1]}`;
   };
 
@@ -32,16 +51,28 @@ export function VersionHistory({ versions }: VersionHistoryProps) {
   };
 
   const filteredVersions = useMemo(() => {
-    return versions.filter(version => {
-      const matchesSearch = searchTerm === '' ||
+    return versions.filter((version) => {
+      const matchesSearch =
+        searchTerm === "" ||
         version.version.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        version.majorFeatures.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (version.deprecated && version.deprecated.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (version.breaking && version.breaking.toLowerCase().includes(searchTerm.toLowerCase()));
+        version.majorFeatures
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        (version.deprecated &&
+          version.deprecated
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())) ||
+        (version.breaking &&
+          version.breaking.toLowerCase().includes(searchTerm.toLowerCase()));
 
-      const matchesFilter = filterType === 'all' ||
-        (filterType === 'breaking' && version.breaking && version.breaking.trim() !== '') ||
-        (filterType === 'deprecated' && version.deprecated && version.deprecated.trim() !== '');
+      const matchesFilter =
+        filterType === "all" ||
+        (filterType === "breaking" &&
+          version.breaking &&
+          version.breaking.trim() !== "") ||
+        (filterType === "deprecated" &&
+          version.deprecated &&
+          version.deprecated.trim() !== "");
 
       return matchesSearch && matchesFilter;
     });
@@ -56,7 +87,8 @@ export function VersionHistory({ versions }: VersionHistoryProps) {
               Kubernetes Version History
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Complete timeline of Kubernetes releases from v1.0 to v{versions[0]?.version || '1.35'} ({versions.length} releases)
+              Complete timeline of Kubernetes releases from v1.0 to v
+              {versions[0]?.version || "1.35"} ({versions.length} releases)
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -69,31 +101,49 @@ export function VersionHistory({ versions }: VersionHistoryProps) {
             <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
               v{versions[0]?.version}
             </div>
-            <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">Latest Version</div>
+            <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              Latest Version
+            </div>
           </div>
           <div className="text-center p-3 bg-white dark:bg-slate-700 rounded-lg">
             <div className="text-xl font-bold text-gray-900 dark:text-white">
-              {formatDate(versions[0]?.releaseDate || '').split(' ')[0]} {formatDate(versions[0]?.releaseDate || '').split(' ')[2]}
+              {formatDate(versions[0]?.releaseDate || "").split(" ")[0]}{" "}
+              {formatDate(versions[0]?.releaseDate || "").split(" ")[2]}
             </div>
-            <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">Latest Release</div>
+            <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              Latest Release
+            </div>
           </div>
           <div className="text-center p-3 bg-white dark:bg-slate-700 rounded-lg">
             <div className="text-3xl font-bold text-green-600 dark:text-green-400">
               {new Date().getFullYear() - 2015}
             </div>
-            <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">Years of K8s</div>
+            <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              Years of K8s
+            </div>
           </div>
           <div className="text-center p-3 bg-white dark:bg-slate-700 rounded-lg">
             <div className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
-              {versions.filter(v => v.deprecated && v.deprecated.trim() !== '').length}
+              {
+                versions.filter(
+                  (v) => v.deprecated && v.deprecated.trim() !== "",
+                ).length
+              }
             </div>
-            <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">Deprecations</div>
+            <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              Deprecations
+            </div>
           </div>
           <div className="text-center p-3 bg-white dark:bg-slate-700 rounded-lg">
             <div className="text-3xl font-bold text-red-600 dark:text-red-400">
-              {versions.filter(v => v.breaking && v.breaking.trim() !== '').length}
+              {
+                versions.filter((v) => v.breaking && v.breaking.trim() !== "")
+                  .length
+              }
             </div>
-            <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">Breaking Changes</div>
+            <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              Breaking Changes
+            </div>
           </div>
         </div>
 
@@ -110,36 +160,47 @@ export function VersionHistory({ versions }: VersionHistoryProps) {
           </div>
           <div className="flex gap-2">
             <button
-              onClick={() => setFilterType('all')}
+              onClick={() => setFilterType("all")}
               className={`px-4 py-3 rounded-lg font-medium transition-colors ${
-                filterType === 'all'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                filterType === "all"
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
               }`}
             >
               All ({versions.length})
             </button>
             <button
-              onClick={() => setFilterType('breaking')}
+              onClick={() => setFilterType("breaking")}
               className={`px-4 py-3 rounded-lg font-medium transition-colors flex items-center gap-2 ${
-                filterType === 'breaking'
-                  ? 'bg-red-600 text-white'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                filterType === "breaking"
+                  ? "bg-red-600 text-white"
+                  : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
               }`}
             >
               <XCircle className="w-4 h-4" />
-              Breaking ({versions.filter(v => v.breaking && v.breaking.trim() !== '').length})
+              Breaking (
+              {
+                versions.filter((v) => v.breaking && v.breaking.trim() !== "")
+                  .length
+              }
+              )
             </button>
             <button
-              onClick={() => setFilterType('deprecated')}
+              onClick={() => setFilterType("deprecated")}
               className={`px-4 py-3 rounded-lg font-medium transition-colors flex items-center gap-2 ${
-                filterType === 'deprecated'
-                  ? 'bg-yellow-600 text-white'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                filterType === "deprecated"
+                  ? "bg-yellow-600 text-white"
+                  : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
               }`}
             >
               <AlertTriangle className="w-4 h-4" />
-              Deprecated ({versions.filter(v => v.deprecated && v.deprecated.trim() !== '').length})
+              Deprecated (
+              {
+                versions.filter(
+                  (v) => v.deprecated && v.deprecated.trim() !== "",
+                ).length
+              }
+              )
             </button>
           </div>
         </div>
@@ -150,15 +211,19 @@ export function VersionHistory({ versions }: VersionHistoryProps) {
           const originalIndex = versions.indexOf(version);
           const isExpanded = expandedVersions.has(originalIndex);
           const isLatest = originalIndex === 0;
-          const hasDeprecations = version.deprecated && version.deprecated.trim() !== '';
-          const hasBreaking = version.breaking && version.breaking.trim() !== '';
+          const hasDeprecations =
+            version.deprecated && version.deprecated.trim() !== "";
+          const hasBreaking =
+            version.breaking && version.breaking.trim() !== "";
 
           return (
             <div
               key={version.id}
               className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden transition-all hover:shadow-xl ${
-                isLatest ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-gray-900' : ''
-              } ${isExpanded ? 'border-l-4 border-blue-500' : ''}`}
+                isLatest
+                  ? "ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-gray-900"
+                  : ""
+              } ${isExpanded ? "border-l-4 border-blue-500" : ""}`}
             >
               <button
                 onClick={() => toggleVersion(originalIndex)}
@@ -211,9 +276,21 @@ export function VersionHistory({ versions }: VersionHistoryProps) {
                     </div>
                   </div>
                   <div className="text-right ml-4">
-                    <div className={`transform transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
-                      <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    <div
+                      className={`transform transition-transform ${isExpanded ? "rotate-180" : ""}`}
+                    >
+                      <svg
+                        className="w-6 h-6 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
                       </svg>
                     </div>
                   </div>
@@ -239,12 +316,17 @@ export function VersionHistory({ versions }: VersionHistoryProps) {
                     </div>
                     <div className="ml-7">
                       <ul className="space-y-2">
-                        {version.majorFeatures.split(',').map((feature, idx) => (
-                          <li key={idx} className="flex items-start gap-2 text-gray-700 dark:text-gray-300">
-                            <span className="text-green-500 mt-1">●</span>
-                            <span>{feature.trim()}</span>
-                          </li>
-                        ))}
+                        {version.majorFeatures
+                          .split(",")
+                          .map((feature, idx) => (
+                            <li
+                              key={idx}
+                              className="flex items-start gap-2 text-gray-700 dark:text-gray-300"
+                            >
+                              <span className="text-green-500 mt-1">●</span>
+                              <span>{feature.trim()}</span>
+                            </li>
+                          ))}
                       </ul>
                     </div>
                   </div>
@@ -271,7 +353,9 @@ export function VersionHistory({ versions }: VersionHistoryProps) {
                           Breaking Changes
                         </h3>
                       </div>
-                      <p className="text-red-800 dark:text-red-200 ml-7 leading-relaxed">{version.breaking}</p>
+                      <p className="text-red-800 dark:text-red-200 ml-7 leading-relaxed">
+                        {version.breaking}
+                      </p>
                     </div>
                   )}
 
@@ -285,7 +369,10 @@ export function VersionHistory({ versions }: VersionHistoryProps) {
                       </div>
                       <div className="ml-7 flex flex-wrap gap-2">
                         {version.cves.map((cve, idx) => (
-                          <span key={idx} className="px-2 py-1 bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded text-sm font-mono">
+                          <span
+                            key={idx}
+                            className="px-2 py-1 bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded text-sm font-mono"
+                          >
                             {cve}
                           </span>
                         ))}
@@ -307,16 +394,21 @@ export function VersionHistory({ versions }: VersionHistoryProps) {
           </h3>
           <div className="space-y-2 text-blue-800 dark:text-blue-200 text-sm">
             <p>
-              <strong>Support Window:</strong> Kubernetes maintains support for the three most recent minor versions (approximately 14 months per version).
+              <strong>Support Window:</strong> Kubernetes maintains support for
+              the three most recent minor versions (approximately 14 months per
+              version).
             </p>
             <p>
-              <strong>Release Cadence:</strong> New minor versions are released approximately every 4 months (3 releases per year).
+              <strong>Release Cadence:</strong> New minor versions are released
+              approximately every 4 months (3 releases per year).
             </p>
             <p>
-              <strong>Current Supported Versions:</strong> v1.35, v1.34, v1.33 (as of {formatDate(versions[0]?.releaseDate || '')})
+              <strong>Current Supported Versions:</strong> v1.35, v1.34, v1.33
+              (as of {formatDate(versions[0]?.releaseDate || "")})
             </p>
             <p className="text-xs pt-2 border-t border-blue-300 dark:border-blue-700">
-              Always verify current support status at the official Kubernetes documentation before planning upgrades.
+              Always verify current support status at the official Kubernetes
+              documentation before planning upgrades.
             </p>
           </div>
         </div>

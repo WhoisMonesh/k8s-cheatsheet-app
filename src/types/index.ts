@@ -1,4 +1,19 @@
-export type ViewMode = 'commands' | 'versions' | 'favorites' | 'templates' | 'troubleshooting' | 'best-practices' | 'quick-ref' | 'aliases' | 'scenarios' | 'quiz' | 'console-practice' | 'yaml-builder' | 'exam' | 'about' | 'settings';
+export type ViewMode =
+  | "commands"
+  | "versions"
+  | "favorites"
+  | "templates"
+  | "troubleshooting"
+  | "best-practices"
+  | "quick-ref"
+  | "aliases"
+  | "scenarios"
+  | "quiz"
+  | "console-practice"
+  | "yaml-builder"
+  | "exam"
+  | "about"
+  | "settings";
 
 export interface K8sCommand {
   id: number;
@@ -8,7 +23,7 @@ export interface K8sCommand {
   description: string;
   example: string;
   versionIntroduced: string;
-  difficultyLevel: 'beginner' | 'intermediate' | 'advanced' | 'expert';
+  difficultyLevel: "beginner" | "intermediate" | "advanced" | "expert";
   tags: string;
   flags?: string;
   output?: string;

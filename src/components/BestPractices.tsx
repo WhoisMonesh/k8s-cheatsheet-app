@@ -1,36 +1,41 @@
-import { useState } from 'react';
-import { BestPractice } from '../types';
-import { Lightbulb, Search, Shield, AlertTriangle, Info } from 'lucide-react';
+import { useState } from "react";
+import { BestPractice } from "../types";
+import { Lightbulb, Search, Shield, AlertTriangle, Info } from "lucide-react";
 
 interface BestPracticesProps {
   practices: BestPractice[];
 }
 
 export function BestPractices({ practices }: BestPracticesProps) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedImpact, setSelectedImpact] = useState('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedImpact, setSelectedImpact] = useState("all");
 
-  const categories = ['all', ...Array.from(new Set(practices.map((p) => p.category)))];
-  const impacts = ['all', 'Critical', 'High', 'Medium'];
+  const categories = [
+    "all",
+    ...Array.from(new Set(practices.map((p) => p.category))),
+  ];
+  const impacts = ["all", "Critical", "High", "Medium"];
 
   const filteredPractices = practices.filter((practice) => {
     const matchesSearch =
       practice.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       practice.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       practice.tags.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || practice.category === selectedCategory;
-    const matchesImpact = selectedImpact === 'all' || practice.impact === selectedImpact;
+    const matchesCategory =
+      selectedCategory === "all" || practice.category === selectedCategory;
+    const matchesImpact =
+      selectedImpact === "all" || practice.impact === selectedImpact;
     return matchesSearch && matchesCategory && matchesImpact;
   });
 
   const getImpactIcon = (impact: string) => {
     switch (impact) {
-      case 'Critical':
+      case "Critical":
         return <Shield className="w-5 h-5 text-red-500" />;
-      case 'High':
+      case "High":
         return <AlertTriangle className="w-5 h-5 text-orange-500" />;
-      case 'Medium':
+      case "Medium":
         return <Info className="w-5 h-5 text-blue-500" />;
       default:
         return <Info className="w-5 h-5 text-gray-500" />;
@@ -39,14 +44,14 @@ export function BestPractices({ practices }: BestPracticesProps) {
 
   const getImpactColor = (impact: string) => {
     switch (impact) {
-      case 'Critical':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
-      case 'High':
-        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300';
-      case 'Medium':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
+      case "Critical":
+        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
+      case "High":
+        return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300";
+      case "Medium":
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300";
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
+        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300";
     }
   };
 
@@ -79,7 +84,7 @@ export function BestPractices({ practices }: BestPracticesProps) {
         >
           {categories.map((cat) => (
             <option key={cat} value={cat}>
-              {cat === 'all' ? 'All Categories' : cat}
+              {cat === "all" ? "All Categories" : cat}
             </option>
           ))}
         </select>
@@ -90,7 +95,7 @@ export function BestPractices({ practices }: BestPracticesProps) {
         >
           {impacts.map((impact) => (
             <option key={impact} value={impact}>
-              {impact === 'all' ? 'All Impact Levels' : impact}
+              {impact === "all" ? "All Impact Levels" : impact}
             </option>
           ))}
         </select>
@@ -114,7 +119,9 @@ export function BestPractices({ practices }: BestPracticesProps) {
                     </h3>
                     <div className="flex items-center gap-2">
                       {getImpactIcon(practice.impact)}
-                      <span className={`px-3 py-1 text-xs font-semibold rounded-full ${getImpactColor(practice.impact)}`}>
+                      <span
+                        className={`px-3 py-1 text-xs font-semibold rounded-full ${getImpactColor(practice.impact)}`}
+                      >
                         {practice.impact} Impact
                       </span>
                     </div>
@@ -129,7 +136,9 @@ export function BestPractices({ practices }: BestPracticesProps) {
               </div>
 
               <div>
-                <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Example</h4>
+                <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
+                  Example
+                </h4>
                 <div className="bg-gray-900 dark:bg-black rounded-lg p-4 overflow-x-auto">
                   <pre className="text-sm text-gray-300 font-mono whitespace-pre-wrap">
                     {practice.example}
@@ -140,7 +149,7 @@ export function BestPractices({ practices }: BestPracticesProps) {
               {practice.tags && (
                 <div className="mt-4">
                   <div className="flex flex-wrap gap-2">
-                    {practice.tags.split(',').map((tag, index) => (
+                    {practice.tags.split(",").map((tag, index) => (
                       <span
                         key={index}
                         className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs"

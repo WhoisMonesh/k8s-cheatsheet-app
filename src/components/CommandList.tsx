@@ -1,6 +1,6 @@
-import { K8sCommand } from '../types';
-import { Star, Terminal, Copy, Check } from 'lucide-react';
-import { useState } from 'react';
+import { K8sCommand } from "../types";
+import { Star, Terminal, Copy, Check } from "lucide-react";
+import { useState } from "react";
 
 interface CommandListProps {
   commands: K8sCommand[];
@@ -12,10 +12,14 @@ interface CommandListProps {
 }
 
 const difficultyColors = {
-  beginner: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
-  intermediate: 'bg-brand-100 text-brand-800 dark:bg-brand-900/30 dark:text-brand-300 border-brand-200 dark:border-brand-800',
-  advanced: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 border-amber-200 dark:border-amber-800',
-  expert: 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300 border-rose-200 dark:border-rose-800',
+  beginner:
+    "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800",
+  intermediate:
+    "bg-brand-100 text-brand-800 dark:bg-brand-900/30 dark:text-brand-300 border-brand-200 dark:border-brand-800",
+  advanced:
+    "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 border-amber-200 dark:border-amber-800",
+  expert:
+    "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300 border-rose-200 dark:border-rose-800",
 };
 
 export function CommandList({
@@ -43,7 +47,10 @@ export function CommandList({
         </div>
         <div className="overflow-y-auto flex-1 p-3 space-y-3 scrollbar-thin">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="p-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800">
+            <div
+              key={i}
+              className="p-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800"
+            >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex gap-2 mb-3">
@@ -99,8 +106,8 @@ export function CommandList({
               key={command.id}
               className={`p-4 rounded-lg border transition-all duration-200 cursor-pointer group relative ${
                 isSelected
-                  ? 'bg-brand-50 dark:bg-brand-900/10 border-brand-500 ring-1 ring-brand-500 shadow-md'
-                  : 'bg-white dark:bg-gray-800 border-slate-200 dark:border-slate-700 hover:border-brand-300 dark:hover:border-brand-700 hover:shadow-md'
+                  ? "bg-brand-50 dark:bg-brand-900/10 border-brand-500 ring-1 ring-brand-500 shadow-md"
+                  : "bg-white dark:bg-gray-800 border-slate-200 dark:border-slate-700 hover:border-brand-300 dark:hover:border-brand-700 hover:shadow-md"
               }`}
               onClick={() => onSelectCommand(command)}
             >
@@ -125,7 +132,7 @@ export function CommandList({
                     {command.description}
                   </p>
                 </div>
-                
+
                 <div className="flex flex-col gap-2">
                   <button
                     onClick={(e) => {
@@ -134,11 +141,13 @@ export function CommandList({
                     }}
                     className={`p-2 rounded-md transition-colors ${
                       isFavorite
-                        ? 'text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20'
-                        : 'text-slate-300 hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-slate-700'
+                        ? "text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20"
+                        : "text-slate-300 hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-slate-700"
                     }`}
                   >
-                    <Star className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
+                    <Star
+                      className={`w-4 h-4 ${isFavorite ? "fill-current" : ""}`}
+                    />
                   </button>
                   <button
                     onClick={(e) => handleCopy(e, command)}

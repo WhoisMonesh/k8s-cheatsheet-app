@@ -1,8 +1,8 @@
 export const yamlTemplatesData = [
   {
-    name: 'Basic Pod',
-    category: 'Pods',
-    description: 'Simple pod with a single container',
+    name: "Basic Pod",
+    category: "Pods",
+    description: "Simple pod with a single container",
     yaml: `apiVersion: v1
 kind: Pod
 metadata:
@@ -17,9 +17,9 @@ spec:
     - containerPort: 80`,
   },
   {
-    name: 'Pod with Multiple Containers',
-    category: 'Pods',
-    description: 'Pod with main container and sidecar',
+    name: "Pod with Multiple Containers",
+    category: "Pods",
+    description: "Pod with main container and sidecar",
     yaml: `apiVersion: v1
 kind: Pod
 metadata:
@@ -40,9 +40,9 @@ spec:
     emptyDir: {}`,
   },
   {
-    name: 'Pod with Resources',
-    category: 'Pods',
-    description: 'Pod with resource requests and limits',
+    name: "Pod with Resources",
+    category: "Pods",
+    description: "Pod with resource requests and limits",
     yaml: `apiVersion: v1
 kind: Pod
 metadata:
@@ -60,9 +60,9 @@ spec:
         cpu: "500m"`,
   },
   {
-    name: 'Basic Deployment',
-    category: 'Deployments',
-    description: 'Deployment with 3 replicas',
+    name: "Basic Deployment",
+    category: "Deployments",
+    description: "Deployment with 3 replicas",
     yaml: `apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -86,9 +86,9 @@ spec:
         - containerPort: 80`,
   },
   {
-    name: 'Deployment with Rolling Update',
-    category: 'Deployments',
-    description: 'Deployment with controlled rolling update strategy',
+    name: "Deployment with Rolling Update",
+    category: "Deployments",
+    description: "Deployment with controlled rolling update strategy",
     yaml: `apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -125,9 +125,9 @@ spec:
           periodSeconds: 20`,
   },
   {
-    name: 'ClusterIP Service',
-    category: 'Services',
-    description: 'Internal service accessible within cluster',
+    name: "ClusterIP Service",
+    category: "Services",
+    description: "Internal service accessible within cluster",
     yaml: `apiVersion: v1
 kind: Service
 metadata:
@@ -142,9 +142,9 @@ spec:
     targetPort: 8080`,
   },
   {
-    name: 'NodePort Service',
-    category: 'Services',
-    description: 'Service accessible from outside via node port',
+    name: "NodePort Service",
+    category: "Services",
+    description: "Service accessible from outside via node port",
     yaml: `apiVersion: v1
 kind: Service
 metadata:
@@ -160,9 +160,9 @@ spec:
     nodePort: 30080`,
   },
   {
-    name: 'LoadBalancer Service',
-    category: 'Services',
-    description: 'Service with external load balancer',
+    name: "LoadBalancer Service",
+    category: "Services",
+    description: "Service with external load balancer",
     yaml: `apiVersion: v1
 kind: Service
 metadata:
@@ -177,9 +177,9 @@ spec:
     targetPort: 8080`,
   },
   {
-    name: 'Basic Ingress',
-    category: 'Networking',
-    description: 'Ingress for HTTP routing',
+    name: "Basic Ingress",
+    category: "Networking",
+    description: "Ingress for HTTP routing",
     yaml: `apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -200,9 +200,9 @@ spec:
               number: 80`,
   },
   {
-    name: 'Ingress with TLS',
-    category: 'Networking',
-    description: 'Ingress with HTTPS/TLS configuration',
+    name: "Ingress with TLS",
+    category: "Networking",
+    description: "Ingress with HTTPS/TLS configuration",
     yaml: `apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -225,9 +225,9 @@ spec:
               number: 443`,
   },
   {
-    name: 'ConfigMap',
-    category: 'Configuration',
-    description: 'ConfigMap with application configuration',
+    name: "ConfigMap",
+    category: "Configuration",
+    description: "ConfigMap with application configuration",
     yaml: `apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -241,9 +241,9 @@ data:
       host: 0.0.0.0`,
   },
   {
-    name: 'Secret',
-    category: 'Configuration',
-    description: 'Secret for sensitive data',
+    name: "Secret",
+    category: "Configuration",
+    description: "Secret for sensitive data",
     yaml: `apiVersion: v1
 kind: Secret
 metadata:
@@ -254,9 +254,9 @@ data:
   password: cGFzc3dvcmQxMjM=`,
   },
   {
-    name: 'PersistentVolumeClaim',
-    category: 'Storage',
-    description: 'PVC for requesting storage',
+    name: "PersistentVolumeClaim",
+    category: "Storage",
+    description: "PVC for requesting storage",
     yaml: `apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -270,9 +270,9 @@ spec:
   storageClassName: standard`,
   },
   {
-    name: 'StatefulSet',
-    category: 'Workloads',
-    description: 'StatefulSet for stateful applications',
+    name: "StatefulSet",
+    category: "Workloads",
+    description: "StatefulSet for stateful applications",
     yaml: `apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -306,9 +306,9 @@ spec:
           storage: 10Gi`,
   },
   {
-    name: 'DaemonSet',
-    category: 'Workloads',
-    description: 'DaemonSet for running on all nodes',
+    name: "DaemonSet",
+    category: "Workloads",
+    description: "DaemonSet for running on all nodes",
     yaml: `apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -335,9 +335,9 @@ spec:
           path: /var/log`,
   },
   {
-    name: 'Job',
-    category: 'Workloads',
-    description: 'One-time job execution',
+    name: "Job",
+    category: "Workloads",
+    description: "One-time job execution",
     yaml: `apiVersion: batch/v1
 kind: Job
 metadata:
@@ -353,9 +353,9 @@ spec:
   backoffLimit: 4`,
   },
   {
-    name: 'CronJob',
-    category: 'Workloads',
-    description: 'Scheduled job execution',
+    name: "CronJob",
+    category: "Workloads",
+    description: "Scheduled job execution",
     yaml: `apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -373,9 +373,9 @@ spec:
           restartPolicy: OnFailure`,
   },
   {
-    name: 'HorizontalPodAutoscaler',
-    category: 'Autoscaling',
-    description: 'HPA for automatic scaling based on metrics',
+    name: "HorizontalPodAutoscaler",
+    category: "Autoscaling",
+    description: "HPA for automatic scaling based on metrics",
     yaml: `apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -396,9 +396,9 @@ spec:
         averageUtilization: 80`,
   },
   {
-    name: 'NetworkPolicy - Deny All',
-    category: 'Security',
-    description: 'Deny all ingress and egress traffic',
+    name: "NetworkPolicy - Deny All",
+    category: "Security",
+    description: "Deny all ingress and egress traffic",
     yaml: `apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -410,9 +410,9 @@ spec:
   - Egress`,
   },
   {
-    name: 'NetworkPolicy - Allow Specific',
-    category: 'Security',
-    description: 'Allow traffic from specific pods',
+    name: "NetworkPolicy - Allow Specific",
+    category: "Security",
+    description: "Allow traffic from specific pods",
     yaml: `apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -433,9 +433,9 @@ spec:
       port: 8080`,
   },
   {
-    name: 'ServiceAccount',
-    category: 'Security',
-    description: 'Service account for pod authentication',
+    name: "ServiceAccount",
+    category: "Security",
+    description: "Service account for pod authentication",
     yaml: `apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -443,9 +443,9 @@ metadata:
   namespace: production`,
   },
   {
-    name: 'Role',
-    category: 'RBAC',
-    description: 'Role with specific permissions',
+    name: "Role",
+    category: "RBAC",
+    description: "Role with specific permissions",
     yaml: `apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -457,9 +457,9 @@ rules:
   verbs: ["get", "watch", "list"]`,
   },
   {
-    name: 'RoleBinding',
-    category: 'RBAC',
-    description: 'Bind role to service account',
+    name: "RoleBinding",
+    category: "RBAC",
+    description: "Bind role to service account",
     yaml: `apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -475,9 +475,9 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io`,
   },
   {
-    name: 'ResourceQuota',
-    category: 'Resource Management',
-    description: 'Limit resources in a namespace',
+    name: "ResourceQuota",
+    category: "Resource Management",
+    description: "Limit resources in a namespace",
     yaml: `apiVersion: v1
 kind: ResourceQuota
 metadata:
@@ -492,9 +492,9 @@ spec:
     pods: "50"`,
   },
   {
-    name: 'LimitRange',
-    category: 'Resource Management',
-    description: 'Default limits for containers',
+    name: "LimitRange",
+    category: "Resource Management",
+    description: "Default limits for containers",
     yaml: `apiVersion: v1
 kind: LimitRange
 metadata:
