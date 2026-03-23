@@ -49,7 +49,7 @@
     ]
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.99.1",
+    "@supabase/supabase-js": "^2.99.3",
     "jimp": "^1.6.0",
     "lucide-react": "^0.577.0",
     "png-to-ico": "^3.0.1",
@@ -65,17 +65,17 @@
     "autoprefixer": "^10.4.27",
     "concurrently": "^9.2.1",
     "cross-env": "^10.1.0",
-    "electron": "^40.8.2",
+    "electron": "^40.8.3",
     "electron-builder": "^26.8.1",
-    "eslint": "^10.0.3",
+    "eslint": "^10.1.0",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.4.0",
     "postcss": "^8.5.8",
-    "tailwindcss": "^4.2.1",
+    "tailwindcss": "^4.2.2",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.57.0",
-    "vite": "^8.0.0",
+    "typescript-eslint": "^8.57.1",
+    "vite": "^8.0.1",
     "wait-on": "^9.0.4"
   }
 }
