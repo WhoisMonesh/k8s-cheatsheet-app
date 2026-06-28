@@ -261,10 +261,7 @@ function App() {
         example: row[5] as string,
         versionIntroduced: row[6] as string,
         difficultyLevel: row[7] as
-          | "beginner"
-          | "intermediate"
-          | "advanced"
-          | "expert",
+          "beginner" | "intermediate" | "advanced" | "expert",
         tags: row[8] as string,
         flags: row[9] as string,
         output: row[10] as string,
@@ -548,10 +545,7 @@ function App() {
         example: c.example,
         versionIntroduced: c.versionIntroduced,
         difficultyLevel: c.difficultyLevel as
-          | "beginner"
-          | "intermediate"
-          | "advanced"
-          | "expert",
+          "beginner" | "intermediate" | "advanced" | "expert",
         tags: c.tags,
         flags: c.flags || "",
         output: c.output || "",

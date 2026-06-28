@@ -17,11 +17,7 @@ interface ExamModeProps {
 interface ExamQuestion {
   id: number;
   domain:
-    | "Architecture"
-    | "Workloads"
-    | "Networking"
-    | "Storage"
-    | "Troubleshooting";
+    "Architecture" | "Workloads" | "Networking" | "Storage" | "Troubleshooting";
   question: string;
   options: string[];
   correctAnswer: string;
